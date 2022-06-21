@@ -11,7 +11,6 @@ library(rnoaa)
 #   devtools::install_github('Chrisjb/basemapR')
 # }
 library(stantargets)
-source("scratch_code/report_generator.R") #this should be moved
 source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
 # source all files in R folder
 lapply(list.files("R",pattern="[.]R",full.names = T)[-4], source)
