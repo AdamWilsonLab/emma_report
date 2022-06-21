@@ -119,7 +119,5 @@ list(
             command = generate_reports(output_directory = "reports/",
                                        temp_directory = "data/temp/",
                                        report_location = "report_prototype.rmd",
-                                       model_results = model_results,
-                                       model_prediction = model_prediction,
-                                       spatial_outputs = spatial_outputs))
+                                       time_window_days = 30))
 )
