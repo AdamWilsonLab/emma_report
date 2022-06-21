@@ -24,7 +24,7 @@ library(sf)
 library(rnoaa)
 
 # load data saved in the pipeline
-  tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
+  #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
 ```
 
 # Model Overview
@@ -45,7 +45,7 @@ An additional level models the parameters of the negative exponential curve as a
 This repository was developed using the Targets framework as follows.
 
 
-```{r make_workfow, echo=F, eval = TRUE, message = F, include=FALSE}
+```{r make_workfow, echo=F, eval = FALSE, message = F, include=FALSE}
 
 #This code chunk makes the targets visualization but does not call it (see next chunk for that)
 
@@ -59,7 +59,7 @@ This repository was developed using the Targets framework as follows.
 
 ```
 
-```{r plot_workflow, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
+```{r plot_workflow, echo=F, eval = FALSE, message = F, fig.width = 10, fig.height = 6}
 
   #This code chunk plots the targets visualization.
   # I do this in two steps to avoid errors that otherwise can occur

@@ -10,9 +10,6 @@ source("R/get_park_polygons.R")
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/",
                              report_location = "report_prototype.rmd",
-                             model_results = model_results,
-                             model_prediction = model_prediction,
-                             spatial_outputs = spatial_outputs,
                              time_window_days = 120
 ){
 
@@ -40,22 +37,43 @@ generate_reports <- function(output_directory = "reports/",
 
     }
 
+  # Get outputs from model
+    model_releases <- pb_list(repo = "AdamWilsonLab/emma_model")
+
+    if(!all(c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds") %in% model_releases$file_name)){
+      stop("Missing files from emma_model release")
+    }
+
+    robust_pb_download(file = c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds"),
+                dest =  file.path(temp_directory),
+                repo = "AdamWilsonLab/emma_model",
+                tag = "current",
+                max_attempts = 10,
+                sleep_time = 5)
+
+    model_results <- readRDS(file.path(temp_directory,"model_results.rds"))
+
+    model_prediction <- readRDS(file.path(temp_directory,"model_prediction.rds"))
+
+    spatial_outputs <- readRDS(file.path(temp_directory,"spatial_outputs.rds"))
+
+
   # Get list of available env data files
 
     env_files <- pb_list(repo = "AdamWilsonLab/emma_envdata")
 
   #get most recent fire data
 
-  env_files %>%
-    filter(tag == "processed_most_recent_burn_dates") %>%
-    mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
-    mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
-    slice(which.max(as_date(file_date))) -> most_recent_fire_file
+    env_files %>%
+      filter(tag == "processed_most_recent_burn_dates") %>%
+      mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
+      mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
+      slice(which.max(as_date(file_date))) -> most_recent_fire_file
 
-  pb_download(file = most_recent_fire_file$file_name,
-              dest = file.path(temp_directory),
-              repo = "AdamWilsonLab/emma_envdata",
-              tag = most_recent_fire_file$tag)
+    pb_download(file = most_recent_fire_file$file_name,
+                dest = file.path(temp_directory),
+                repo = "AdamWilsonLab/emma_envdata",
+                tag = most_recent_fire_file$tag)
 
   most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
   most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
