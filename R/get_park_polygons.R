@@ -40,10 +40,12 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
 
   # Download domain
 
-    pb_download(file = "domain.gpkg",
+    robust_pb_download(file = "domain.gpkg",
                 tag = "raw_static",
                 repo = "AdamWilsonLab/emma_envdata",
-                dest = temp_directory)
+                dest = file.path(temp_directory),
+                max_attempts = 10,
+                sleep_time = 10)
 
   # Read domain
 
@@ -73,14 +75,19 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
     #   dplyr::select(-domain)
 
     #Use this if you just want intersecting parks, even the bits outside our domain
-    all_pas <- all_pas[which(as.logical(st_intersects(x = all_pas, y = domain))),]
-    cn <- cn[which(as.logical(st_intersects(x = cn, y = domain))),]
+    all_pas <- all_pas[which(as.logical(st_intersects(x = all_pas, y = domain))),] %>%
+                  st_make_valid()
+
+    cn <- cn[which(as.logical(st_intersects(x = cn, y = domain))),]%>%
+              st_make_valid()
 
   # update projection
-    pb_download(file = "template.tif",
-                dest = temp_directory,
+    robust_pb_download(file = "template.tif",
+                dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_envdata",
-                tag = "processed_static")
+                tag = "processed_static",
+                max_attempts = 10,
+                sleep_time = 10)
 
     template <- terra::rast(file.path(temp_directory,"template.tif"))
 
@@ -93,7 +100,9 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
                    crs = st_crs(template))
 
   # cleanup
-    unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    unlink(file.path(temp_directory),
+           recursive = TRUE,
+           force = TRUE)
 
 
   # make output

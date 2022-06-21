@@ -1286,6 +1286,9 @@ data/envdata/-dynamic_parquet-time_since_fire-19009.gz.parquet
 data/envdata/stable_data.gz.parquet
 data/temp/2022_01_17.tif
 data/temp/2022_02_01.tif
+data/temp/model_prediction.rds
+data/temp/model_results.rds
+data/temp/spatial_outputs.rds
 index.html
 reports/report.Addo-Elephant_National_Park.html
 reports/report.Agulhas_National_Park.html

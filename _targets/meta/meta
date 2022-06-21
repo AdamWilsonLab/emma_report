@@ -1,20 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
-create_stan_data|function|7c6e224a02e15f45||||||||||||||
-summarize_predictions|function|561550e942ee3728||||||||||||||
-tidy_dynamic_data|function|3ec9d16fbf3cb1b7||||||||||||||
-robust_pb_download_solo|function|d44089898bbdda39||||||||||||||
-release_posteriors|function|e85e8a50366c3522||||||||||||||
 training_window|object|8e7f2acd96dbcecf||||||||||||||
-.Random.seed|object|fd2e2a10524c7c75||||||||||||||
-get_park_polygons|function|b51ddd202f536ef6||||||||||||||
-tidy_static_data|function|43f7289642705070||||||||||||||
-summarize_model_output|function|50f2b753a815b00e||||||||||||||
 testing_window|object|0f098a910bfc6e25||||||||||||||
-filter_training_data|function|332014cfa3cb8341||||||||||||||
-create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
-robust_pb_download|function|6feaa7b59ae05f87||||||||||||||
-generate_reports|function|f9212e9d82f329b9||||||||||||||
-sync_envdata|function|0593aa59bbd1bd55||||||||||||||
 model_file_postfire_season|stem|5da5e866c9954818|03ead3f32234b56f|ef46db3751d8e999|1561732577|postfire_season.stan|t19152.7385236191s|f6bdd4bf180d7d58|2674|file|vector|||0.001||
 envdata_files|stem|ceb5942924c3eeab|c119f28deb8a0aa8|626a326919153b31|-1206656041|data/envdata/|t19152.7421469104s|15caea60777a26c3|3089069375|file|vector|||294.763||
 envdata|stem|63a5fd1e17341004|ddd04bd3d673b48f|6b9cafc568638868|736623833||t19152.7428713093s|865a8cab00c249d1|157576448|rds|vector|||2.356||
@@ -30,4 +16,18 @@ model_results|stem|d7e099d4363f0eea|dd14532a621c25be|20977b2f327536bc|-139314175
 model_prediction|stem|30fbc23b1e49fbdc|af3cd1ac69bacb77|e38e4e80972231ad|1564443633||t19152.7498617326s|36061498ee3eb824|719394|rds|vector|||0.153||
 spatial_outputs|stem|5fcacc989c82bd00|330f5f4e3ddb6ad9|d88cf1e700b19814|-1659775273||t19152.7498702511s|8f1609308eb3a189|12532|rds|vector|||0.729|Discarded datum unknown in Proj4 definition|
 report|stem|e9e63bbec3fdced0|5e01f99a6889ed5f|7d17cb6b218e7f09|-237041703|index.html*index.Rmd|t19152.7386863509s|293c0d65a916412f|5874425|file|vector|||14.548|input and ouput crs are the same|
-reports|stem|2ba2286ddb57a2d6|3db9ffba23d9d640|dfb9bb453e8a93d3|-653841556||t19152.7648766004s|a1c456b03adbfbf8|44|rds|vector|||1296.527|input and ouput crs are the same|
+create_stan_data|function|7c6e224a02e15f45||||||||||||||
+summarize_predictions|function|561550e942ee3728||||||||||||||
+tidy_dynamic_data|function|3ec9d16fbf3cb1b7||||||||||||||
+robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
+release_posteriors|function|e85e8a50366c3522||||||||||||||
+.Random.seed|object|964e665944657e82||||||||||||||
+tidy_static_data|function|43f7289642705070||||||||||||||
+summarize_model_output|function|50f2b753a815b00e||||||||||||||
+filter_training_data|function|332014cfa3cb8341||||||||||||||
+create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
+robust_pb_download|function|c9145002d00cc12e||||||||||||||
+get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
+sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
+generate_reports|function|7518018c983aef3d||||||||||||||
+reports|stem|2ba2286ddb57a2d6|c274dc0c86ea4c30|6025738a89049346|-653841556||t19164.8294011125s|a1c456b03adbfbf8|44|rds|vector|||2129.978|attribute variables are assumed to be spatially constant throughout all geometries|
