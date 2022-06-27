@@ -72,6 +72,13 @@ update_climate_data <- function(parks,
       filter(!(out_name %in% stations_in_releases$station_name)|
                end_year ==  format(Sys.Date(), "%Y")) -> stations_to_update
 
+    #to save time, we'll only download full information for stations that are missing.  for ones that just need an update, we can just pull the newest data
+
+      stations_to_update %>%
+        mutate(action = case_when(!out_name %in% stations_in_releases$station_name ~ "add",
+                                  out_name %in% stations_in_releases$station_name ~ "update"
+               )) -> stations_to_update
+
 
 
 
@@ -89,18 +96,81 @@ update_climate_data <- function(parks,
         gsub(pattern = "(",replacement = "_",fixed = TRUE)
 
 
+      action_i <- stations_to_update$action[which(stations_to_update$usaf==usaf_i)]
 
-      start_i <- stations$start_year[which(stations$usaf==usaf_i)] #note, will need to update the code in  ~ 8000 years
+      if(action_i=="update"){
 
-      end_i <- stations$end_year[which(stations$usaf==usaf_i)] #note, will need to update the code in  ~ 8000 years
 
-      data_i <-lapply(start_i:end_i,
+
+        pb_download(file = paste(name_i,".gz.parquet",sep = ""),
+                    repo = "AdamWilsonLab/emma_report",
+                    tag = "NOAA",
+                    dest = file.path(temp_directory))
+
+        old_i <- arrow::read_parquet(file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")))
+
+
+        # should start with the previous year (in case there is any lag time)
+
+        start_i <-
+        max(old_i$date)%>%
+          substr(start = 1,stop = 4)%>%
+          as.numeric()-1
+
+        end_i <- stations$end_year[which(stations$usaf==usaf_i)] #note, will need to update the code in  ~ 8000 years
+
+
+
+        data_i <-lapply(start_i:end_i,
                         FUN = function(x){
                           tryCatch(expr = isd(usaf = usaf_i,
                                               wban = wban_i,
                                               year = x),
                                    error = function(e) message("missing year"))}) %>%
-        bind_rows()
+          bind_rows()
+
+        old_i %>%
+          filter(!date %in% unique(data_i$date)) -> old_i
+
+
+        if("AA1_depth" %in% colnames(data_i)){
+          data_i$AA1_depth <- as.numeric(data_i$AA1_depth)
+
+        }
+        if("AA2_depth" %in% colnames(data_i)){
+          data_i$AA2_depth <- as.numeric(data_i$AA2_depth)
+
+        }
+        if("AA3_depth" %in% colnames(data_i)){
+          data_i$AA3_depth <- as.numeric(data_i$AA3_depth)
+
+        }
+
+        data_i <-
+        old_i%>%
+          bind_rows(data_i)
+
+
+
+
+
+      }else{
+
+        start_i <- stations$start_year[which(stations$usaf==usaf_i)] #note, will need to update the code in  ~ 8000 years
+
+        end_i <- stations$end_year[which(stations$usaf==usaf_i)] #note, will need to update the code in  ~ 8000 years
+
+        data_i <-lapply(start_i:end_i,
+                        FUN = function(x){
+                          tryCatch(expr = isd(usaf = usaf_i,
+                                              wban = wban_i,
+                                              year = x),
+                                   error = function(e) message("missing year"))}) %>%
+          bind_rows()
+
+
+      }
+
 
 
       cols_i <- intersect(x = colnames(data_i),
@@ -115,22 +185,19 @@ update_climate_data <- function(parks,
 
         if("AA1_depth" %in% colnames(data_i)){
 
-          data_i$AA1_depth[which(data_i$AA1_depth==9999)] <- 0000
-          data_i$AA1_depth[which(is.na(data_i$AA1_depth))] <- 0000
+          data_i$AA1_depth[which(data_i$AA1_depth==9999)] <- NA
 
         }else{data_i$AA1_depth <- NA}
 
         if("AA2_depth" %in% colnames(data_i)){
 
-          data_i$AA2_depth[which(data_i$AA2_depth==9999)] <- 0000
-          data_i$AA2_depth[which(is.na(data_i$AA2_depth))] <- 0000
+          data_i$AA2_depth[which(data_i$AA2_depth==9999)] <- NA
 
         }else{data_i$AA2_depth <- NA}
 
         if("AA3_depth" %in% colnames(data_i)){
 
-          data_i$AA3_depth[which(data_i$AA3_depth==9999)] <- 0000
-          data_i$AA3_depth[which(is.na(data_i$AA3_depth))] <- 0000
+          data_i$AA3_depth[which(data_i$AA3_depth==9999)] <- NA
 
         }else{data_i$AA3_depth <- NA}
 
