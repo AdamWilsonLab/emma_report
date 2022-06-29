@@ -4,13 +4,32 @@ library(arrow)
 
 # Metadata at: https://www.ncei.noaa.gov/pub/data/noaa/isd-format-document.pdf
 
+#helper function for extracting means.  a bit faster than normal method
+
+good_max <- function(x){
+
+  if(all(is.na(x))){NA}else{
+    base::max(x,na.rm = TRUE)
+  }
+
+}
+
+good_mean <- function(x){
+
+  if(all(is.na(x))){NA}else{
+    base::mean(x,na.rm = TRUE)
+  }
+
+}
+
+
 update_climate_data <- function(parks,
                              temp_directory = "data/temp/noaa",
                              sleep_time = 1){
 
   #clean dir if needed
     if(dir.exists(temp_directory)){
-      unlink(temp_directory)
+      unlink(temp_directory,recursive = TRUE,force = TRUE)
 
     }
 
@@ -78,8 +97,6 @@ update_climate_data <- function(parks,
         mutate(action = case_when(!out_name %in% stations_in_releases$station_name ~ "add",
                                   out_name %in% stations_in_releases$station_name ~ "update"
                )) -> stations_to_update
-
-
 
 
 
@@ -210,20 +227,24 @@ update_climate_data <- function(parks,
       #convert temp to C
         data_i %>%
           mutate(temp_c = as.numeric(temperature)/10) %>%
-          mutate(temp_c = case_when(temp_c != 999.9 ~ temp_c))->data_i
+          mutate(temp_c = case_when(temp_c != 999.9 ~ temp_c)) -> data_i
+
+      #convert depth to mm
 
 
       # Calculate max and mean values ( if there is any data)
 
         if(!all(is.na(data_i$AA1_depth),is.na(data_i$AA2_depth),is.na(data_i$AA3_depth))){
 
-          data_i %>%
-            rowwise()%>%
-            mutate(max_precip_mm  = max(AA1_depth, AA2_depth, AA3_depth, na.rm = TRUE)) %>%
-            mutate(max_precip_mm = max_precip_mm/10) %>%
-            mutate(mean_precip_mm  = base::mean(c(AA1_depth,AA2_depth,AA3_depth),na.rm = TRUE)) %>%
-            mutate(mean_precip_mm = mean_precip_mm/10) -> data_i
+          #data_i_og <-data_i
+          #data_i <- data_i_og
 
+      data_i %>%
+        #rowwise()%>%
+        mutate(max_precip_mm = good_max(c(AA1_depth, AA2_depth, AA3_depth)))%>%
+        mutate(max_precip_mm = max_precip_mm/10)%>%
+        mutate(mean_precip_mm  = good_mean(c(AA1_depth,AA2_depth,AA3_depth))) %>%
+        mutate(mean_precip_mm = mean_precip_mm/10) -> data_i
 
         }else{
 
@@ -256,7 +277,9 @@ update_climate_data <- function(parks,
     rnoaa::isd_cache$delete_all()
 
   # clean up temp files
-    unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    unlink(file.path(temp_directory),
+           recursive = TRUE,
+           force = TRUE)
 
   # clean up garbage
     gc()
