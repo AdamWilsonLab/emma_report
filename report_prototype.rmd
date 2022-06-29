@@ -509,6 +509,7 @@ st_intersection(x = focal_arc,
 ```{r weather-dyplot, echo = FALSE, message = FALSE, warning = FALSE}
 
 library(dygraphs)
+# see: https://rstudio.github.io/dygraphs/
 
   # Get data for closest weather stations
   
