@@ -164,5 +164,9 @@ generate_reports <- function(output_directory = "reports/",
     }# end for loop
 
 
+    #clean up temp directory
+      unlink(file.path(temp_directory), recursive = TRUE, force = TRUE)
+
+
 }#end fx
 
