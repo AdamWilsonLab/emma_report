@@ -158,9 +158,6 @@ leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>%
     st_transform(crs = st_crs(4326)) -> focal_wgs
 
 
-
-library(leaflet)
-
 #Note that the "addLegend_decreasing" isn't quite right, but might be close enough if you feel strongly about the ordering
 
 addLegend_decreasing <- function (map, position = c("topright", "bottomright", "bottomleft", 
@@ -323,8 +320,8 @@ bbox <- st_bbox(focal_wgs) %>%
             pal = pal,
             values = ~fires_wgs$Years,
     title = "Years<br/>Since<br/>Fire",
-    opacity = 1)%>%
-  addLegend(position = "bottomright",
+    opacity = 1) %>%
+  leaflet::addLegend(position = "bottomright",
             pal = ndvi_pal,          
             values = ~values(raster::raster(most_recent_ndvi_raster)),
             opacity = 1,
