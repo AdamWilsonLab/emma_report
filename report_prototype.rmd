@@ -531,10 +531,11 @@ library(dygraphs)
           gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
           paste(.,".gz.parquet",sep = "")-> closest_stations
     
-    pb_download(file = closest_stations,
+    robust_pb_download(file = closest_stations,
                 dest = temp_directory,
                 repo = "AdamWilsonLab/emma_report",
-                tag = "NOAA")
+                tag = "NOAA",
+                max_attempts = 10)
     
   focal_weather  <- open_dataset(file.path(temp_directory,closest_stations))
   
