@@ -129,5 +129,6 @@ list(
             command = generate_reports(output_directory = "reports/",
                                        temp_directory = "data/temp/",
                                        report_location = "report_prototype.rmd",
-                                       time_window_days = 30))
+                                       time_window_days = 30,
+                                       ... = noaa_data))
 )

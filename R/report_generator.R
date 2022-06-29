@@ -2,6 +2,7 @@ library(rmarkdown)
 library(stars)
 library(tidyverse)
 library(lubridate)
+library(arrow)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
 source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
@@ -12,7 +13,10 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/",
                              report_location = "report_prototype.rmd",
-                             time_window_days = 120
+                             time_window_days = 120,
+                             n_stations = 3,
+                             parks,
+                             ...
 ){
 
   #create directories if needed
@@ -22,14 +26,6 @@ generate_reports <- function(output_directory = "reports/",
       dir.create(file.path(output_directory), recursive = TRUE)
 
     }
-
-
-  # Load Park Polygons
-
-    parks <- get_park_polygons(temp_directory = temp_directory,
-                               sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
-                               sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
-                               cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
 
   #Create temp directory (needs to come after get_park_polygons if using the same temp_directory, since the temp folder is deleted)
 
@@ -114,8 +110,22 @@ generate_reports <- function(output_directory = "reports/",
   #Fix the NDVI values
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
 
+
+  # Get the weather station metadata
+
+    pb_download(file = "noaa_stations.gz.parquet",
+                dest = file.path(temp_directory),
+                repo = "AdamWilsonLab/emma_report",
+                tag = "NOAA")
+
+    stations <- arrow::read_parquet(file.path(temp_directory,"noaa_stations.gz.parquet"))
+    stations_sf <- st_as_sf(stations,coords = c("lon","lat"))
+    st_crs(stations_sf) <- st_crs("EPSG:4326")
+    stations_sf <- st_transform(stations_sf, crs = st_crs(parks$cape_nature))
+
   # Generate the National Park reports via a for loop
 
+    #park_name <- unique(parks$national_parks$CUR_NME)[1]
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
 

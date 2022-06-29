@@ -25,7 +25,8 @@ good_mean <- function(x){
 
 update_climate_data <- function(parks,
                              temp_directory = "data/temp/noaa",
-                             sleep_time = 1){
+                             sleep_time = 1,
+                             reset_all=FALSE){
 
   #clean dir if needed
     if(dir.exists(temp_directory)){
@@ -42,7 +43,7 @@ update_climate_data <- function(parks,
   #get content
     noaa_rel <- pb_list(repo = "AdamWilsonLab/emma_report",
                         tag = "NOAA") %>%
-      filter(file_name != "")
+      dplyr::filter(file_name != "")
 
   #construct needed bounding box
 
@@ -80,7 +81,7 @@ update_climate_data <- function(parks,
 
     noaa_rel %>%
       mutate(station_name = gsub(pattern = ".gz.parquet",replacement = "",x = file_name)) %>%
-      filter(station_name != "noaa_stations") ->
+      dplyr::filter(station_name != "noaa_stations") ->
       stations_in_releases
 
     stations %>%
@@ -88,15 +89,29 @@ update_climate_data <- function(parks,
       mutate(out_name = gsub(x = out_name, pattern = " ",replacement = "_")) %>%
       mutate(out_name = gsub(x = out_name, pattern = ")",replacement = "_",fixed = TRUE)) %>%
       mutate(out_name = gsub(x = out_name, pattern = "(",replacement = "_",fixed = TRUE) )%>%
-      filter(!(out_name %in% stations_in_releases$station_name)|
+      dplyr::filter(!(out_name %in% stations_in_releases$station_name)|
                end_year ==  format(Sys.Date(), "%Y")) -> stations_to_update
 
     #to save time, we'll only download full information for stations that are missing.  for ones that just need an update, we can just pull the newest data
 
+
+    if(reset_all){
+
+      stations_to_update %>%
+        mutate(action = "add") -> stations_to_update
+
+
+    }else{
+
       stations_to_update %>%
         mutate(action = case_when(!out_name %in% stations_in_releases$station_name ~ "add",
                                   out_name %in% stations_in_releases$station_name ~ "update"
-               )) -> stations_to_update
+        )) -> stations_to_update
+
+
+
+    }
+
 
 
 
@@ -183,7 +198,8 @@ update_climate_data <- function(parks,
                                               wban = wban_i,
                                               year = x),
                                    error = function(e) message("missing year"))}) %>%
-          bind_rows()
+          bind_rows() %>%
+          mutate(station_name = name_i)
 
 
       }
@@ -191,7 +207,7 @@ update_climate_data <- function(parks,
 
 
       cols_i <- intersect(x = colnames(data_i),
-                          y = c("usaf_station","wban_station","date","time","date_flag","latitude","longitude","type_code","elevation","call_letter",
+                          y = c("station_name","usaf_station","wban_station","date","time","date_flag","latitude","longitude","type_code","elevation","call_letter",
                                 "quality","temperature","temperature_quality","AA1_depth","AA2_depth","AA3_depth"))
 
       data_i %>%
@@ -240,7 +256,7 @@ update_climate_data <- function(parks,
           #data_i <- data_i_og
 
       data_i %>%
-        #rowwise()%>%
+        rowwise()%>%
         mutate(max_precip_mm = good_max(c(AA1_depth, AA2_depth, AA3_depth)))%>%
         mutate(max_precip_mm = max_precip_mm/10)%>%
         mutate(mean_precip_mm  = good_mean(c(AA1_depth,AA2_depth,AA3_depth))) %>%

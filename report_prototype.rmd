@@ -22,6 +22,9 @@ library(raster)
 library(lubridate)
 library(sf)
 library(rnoaa)
+library(xts)
+library(plotly)
+library(leaflet)
 
 # load data saved in the pipeline
   #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
@@ -394,10 +397,10 @@ Figure X. Leaflet map showing NDVI and the number of years since the most recent
 
 ### Climate Data
 
-```{r precip, fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
+```{r precip, eval = FALSE,fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
 
 #construct needed bounding box
-  bb1 <- focal_wgs %>%st_bbox()
+  bb1 <- focal_wgs %>% st_bbox()
   class(bb1) <- "numeric"
 
 # get climate data.  Currently set to grab climate data starting from one day before, using 2 days if that fails.
@@ -501,10 +504,115 @@ st_intersection(x = focal_arc,
 
 ```
 
+### Weather Data
+
+```{r weather-dyplot, echo = FALSE, message = FALSE, warning = FALSE}
+
+library(dygraphs)
+
+  # Get data for closest weather stations
+  
+    cent <- st_centroid(focal_park)
+    
+    #st_crs(focal_park)==st_crs(stations_sf)
+    
+    
+    closest_stations <- 
+      data.frame(station = stations_sf$station_name,
+               distance = as.numeric(st_distance(cent,stations_sf)))
+    
+    closest_stations <- closest_stations[order(closest_stations$distance),]
+    
+    closest_stations <- closest_stations$station[1:n_stations]
+    
+    closest_stations %>%
+          gsub(pattern = "/",replacement = "",fixed = TRUE)%>% #what kind of sadist puts a slash in a name?
+          gsub(pattern = " ",replacement = "_") %>%
+          gsub(pattern = ")",replacement = "_",fixed = TRUE) %>%
+          gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
+          paste(.,".gz.parquet",sep = "")-> closest_stations
+    
+    pb_download(file = closest_stations,
+                dest = temp_directory,
+                repo = "AdamWilsonLab/emma_report",
+                tag = "NOAA")
+    
+  focal_weather  <- open_dataset(file.path(temp_directory,closest_stations))
+  
+  focal_weather %>% collect() -> focal_weather
+  
+  #with dygraphs, first element should be x axis, or else do it as an xts
+  
+    #probably easiest to do xts, since its a time series anyway
+
+  focal_weather %>%
+    mutate(year = substr(x = date,1,4),
+           month = substr(x = date,5,6),
+           day = substr(x=date,7,8),
+           hour= substr(x=time,1,2),
+           minute = substr(x=time,3,4))%>%
+    mutate(date_time = paste(year,month,day,hour,minute,sep = "-"))%>%
+    mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
+    dplyr::filter(!is.na(date_time)) -> focal_weather
+
+  #Generate precip dataset
+  
+  focal_weather %>%
+    dplyr::select(date_time, usaf_station, mean_precip_mm) %>%
+  pivot_wider(values_from = mean_precip_mm,
+                names_from = usaf_station,
+              values_fn = mean) %>%
+    xts::xts(order.by = .$date_time) -> focal_precip
+  
+
+  focal_weather%>%
+    dplyr::select(date_time, usaf_station, temp_c) %>%
+    pivot_wider(values_from = temp_c,
+                names_from = usaf_station,
+                values_fn = mean) %>%
+    xts::xts(order.by = .$date_time) -> focal_temp
+  
+  
+
+  dygraph(data = focal_precip[,colnames(focal_precip)[which(colnames(focal_precip)!="date_time")]],
+          main = "Precipitation",
+          xlab = "Date",
+          ylab = "Precip. (mm)") %>%
+    dySeries()%>%
+    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> precip_graph
+  
+
+  dygraph(data = focal_temp[,colnames(focal_temp)[which(colnames(focal_precip)!="date_time")]],
+          main = "Temperature",
+          xlab = "Date",
+          ylab = "Temp. (C)") %>%
+    dySeries()%>%
+    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
+  
+  
+
+```
 
 
 
+```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
 
+  #This code chunk plots the targets visualization.
+  # I do this in two steps to avoid errors that otherwise can occur
+
+  precip_graph
+
+```
+
+
+```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
+
+  #This code chunk plots the targets visualization.
+  # I do this in two steps to avoid errors that otherwise can occur
+
+  temp_graph
+
+```
 
 
 
