@@ -132,7 +132,7 @@ update_climate_data <- function(parks,
 
       action_i <- stations_to_update$action[which(stations_to_update$usaf==usaf_i)]
 
-      if(action_i=="update"){
+      if(action_i == "update"){
 
 
 
@@ -183,9 +183,6 @@ update_climate_data <- function(parks,
         data_i <-
         old_i%>%
           bind_rows(data_i)
-
-
-
 
 
       }else{
