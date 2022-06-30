@@ -504,14 +504,14 @@ st_intersection(x = focal_arc,
 
 ### Weather Data
 
-```{r weather-dyplot, echo = FALSE, message = FALSE, warning = FALSE}
+```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(dygraphs)
 # see: https://rstudio.github.io/dygraphs/
 
   # Get data for closest weather stations
   
-    cent <- st_centroid(focal_park)
+    cent <- suppressWarnings(st_centroid(focal_park))
     
     #st_crs(focal_park)==st_crs(stations_sf)
     
@@ -531,11 +531,15 @@ library(dygraphs)
           gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
           paste(.,".gz.parquet",sep = "")-> closest_stations
     
+
     robust_pb_download(file = closest_stations,
                 dest = temp_directory,
                 repo = "AdamWilsonLab/emma_report",
                 tag = "NOAA",
-                max_attempts = 10)
+                max_attempts = 10,
+                show_progress=FALSE) -> to_rm
+    rm(to_rm)
+    
     
   focal_weather  <- open_dataset(file.path(temp_directory,closest_stations))
   
@@ -544,17 +548,18 @@ library(dygraphs)
   #with dygraphs, first element should be x axis, or else do it as an xts
   
     #probably easiest to do xts, since its a time series anyway
-
+  
   focal_weather %>%
+    as.data.frame() %>% #for some reason, this code throws an error without this line.  no idea why.
     mutate(year = substr(x = date,1,4),
            month = substr(x = date,5,6),
            day = substr(x=date,7,8),
            hour= substr(x=time,1,2),
-           minute = substr(x=time,3,4))%>%
+           minute = substr(x=time,3,4)) %>%
     mutate(date_time = paste(year,month,day,hour,minute,sep = "-"))%>%
     mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
     dplyr::filter(!is.na(date_time)) -> focal_weather
-
+  
   #Generate precip dataset
   
   focal_weather %>%

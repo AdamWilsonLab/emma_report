@@ -45,7 +45,7 @@ list(
 
  tar_target(name = reports,
             command = generate_reports(output_directory = "reports/",
-                                       temp_directory = "data/temp/",
+                                       temp_directory = "data/temp/reports/",
                                        report_location = "report_prototype.rmd",
                                        time_window_days = 365,
                                        n_stations = 3,
