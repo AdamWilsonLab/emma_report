@@ -37,11 +37,12 @@ list(
                                          cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
              ),
 
-  # tar_target(name = noaa_data,
-  #            command = update_climate_data(parks = parks,
-  #                                          temp_directory = "data/temp/noaa",
-  #                                          sleep_time = 30)
-  #            ),
+  tar_target(name = noaa_data,
+             command = update_climate_data(parks = parks,
+                                           temp_directory = "data/temp/noaa",
+                                           sleep_time = 30,
+                                           reset_all = FALSE) #set this to TRUE to re-download everything, rather than only updating
+             ),
 
  tar_target(name = reports,
             command = generate_reports(output_directory = "reports/",
