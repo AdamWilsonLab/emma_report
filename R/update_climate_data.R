@@ -136,10 +136,12 @@ update_climate_data <- function(parks,
 
 
 
-        pb_download(file = paste(name_i,".gz.parquet",sep = ""),
+        robust_pb_download(file = paste(name_i,".gz.parquet",sep = ""),
                     repo = "AdamWilsonLab/emma_report",
                     tag = "NOAA",
-                    dest = file.path(temp_directory))
+                    dest = file.path(temp_directory),
+                    max_attempts = 100,
+                    sleep_time = 10)
 
         old_i <- arrow::read_parquet(file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")))
 
