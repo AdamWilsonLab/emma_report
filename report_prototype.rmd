@@ -536,7 +536,8 @@ library(dygraphs)
                 dest = temp_directory,
                 repo = "AdamWilsonLab/emma_report",
                 tag = "NOAA",
-                max_attempts = 10,
+                max_attempts = 100,
+                sleep_time = 10,
                 show_progress=FALSE) -> to_rm
     rm(to_rm)
     

@@ -69,10 +69,10 @@ generate_reports <- function(output_directory = "reports/",
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
       slice(which.max(as_date(file_date))) -> most_recent_fire_file
 
-    pb_download(file = most_recent_fire_file$file_name,
-                dest = file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_envdata",
-                tag = most_recent_fire_file$tag)
+    robust_pb_download(file = most_recent_fire_file$file_name,
+                  dest = file.path(temp_directory),
+                  repo = "AdamWilsonLab/emma_envdata",
+                  tag = most_recent_fire_file$tag)
 
   most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
   most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
@@ -99,7 +99,7 @@ generate_reports <- function(output_directory = "reports/",
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
       slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
 
-    pb_download(file = most_recent_ndvi_file$file_name,
+    robust_pb_download(file = most_recent_ndvi_file$file_name,
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_envdata",
                 tag = most_recent_ndvi_file$tag)
@@ -114,7 +114,7 @@ generate_reports <- function(output_directory = "reports/",
 
   # Get the weather station metadata
 
-    pb_download(file = "noaa_stations.gz.parquet",
+    robust_pb_download(file = "noaa_stations.gz.parquet",
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_report",
                 tag = "NOAA")
