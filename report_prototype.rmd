@@ -546,9 +546,17 @@ library(dygraphs)
   
   focal_weather %>% collect() -> focal_weather
   
+  #fix station names in focal weather (missing in many case)
+  
+    stations %>%
+    select(usaf,wban,station_name)%>%
+    inner_join(y = focal_weather,
+               by = c("usaf"="usaf_station","wban"="wban_station"))%>%
+    dplyr::rename(station_name = station_name.x)-> focal_weather
+
   #with dygraphs, first element should be x axis, or else do it as an xts
   
-    #probably easiest to do xts, since its a time series anyway
+  # probably easiest to do xts, since its a time series anyway
   
   focal_weather %>%
     as.data.frame() %>% #for some reason, this code throws an error without this line.  no idea why.
@@ -563,18 +571,34 @@ library(dygraphs)
   
   #Generate precip dataset
   
-  focal_weather %>%
-    dplyr::select(date_time, usaf_station, mean_precip_mm) %>%
-  pivot_wider(values_from = mean_precip_mm,
-                names_from = usaf_station,
-              values_fn = mean) %>%
-    xts::xts(order.by = .$date_time) -> focal_precip
-  
-
   focal_weather%>%
-    dplyr::select(date_time, usaf_station, temp_c) %>%
+  group_by(station_name,year,month)%>%
+  summarise(monthly_precip_mm = sum(na.omit(mean_precip_mm)))%>%
+  ungroup() %>%
+mutate(date_time = paste(year,month,01,sep = "-"))%>%
+  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+  mutate(date_time = lubridate::floor_date(date_time)-1)%>%
+  dplyr::filter(!is.na(date_time))%>%
+  dplyr::select(date_time,station_name, monthly_precip_mm) %>%
+  pivot_wider(values_from = monthly_precip_mm,
+              names_from = station_name,
+              values_fn = mean) %>%
+  xts::xts(order.by = .$date_time) -> focal_precip
+
+  
+  # focal_weather %>%
+  #   dplyr::select(date_time, usaf_station, mean_precip_mm) %>%
+  # pivot_wider(values_from = mean_precip_mm,
+  #               names_from = usaf_station,
+  #             values_fn = mean) %>%
+  #   xts::xts(order.by = .$date_time) -> focal_precip
+  
+#Generate temp dataset
+  
+  focal_weather%>%
+    dplyr::select(date_time, station_name, temp_c) %>%
     pivot_wider(values_from = temp_c,
-                names_from = usaf_station,
+                names_from = station_name,
                 values_fn = mean) %>%
     xts::xts(order.by = .$date_time) -> focal_temp
   
@@ -594,7 +618,6 @@ library(dygraphs)
           ylab = "Temp. (C)") %>%
     dySeries()%>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
-  
   
 
 ```
