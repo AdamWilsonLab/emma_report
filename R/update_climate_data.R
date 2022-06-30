@@ -27,7 +27,8 @@ good_mean <- function(x){
 
 update_climate_data <- function(parks,
                              temp_directory = "data/temp/noaa",
-                             sleep_time = 1,
+                             sleep_time = 30,
+                             max_attempts = 100,
                              reset_all=FALSE){
 
   #clean dir if needed
@@ -140,8 +141,8 @@ update_climate_data <- function(parks,
                     repo = "AdamWilsonLab/emma_report",
                     tag = "NOAA",
                     dest = file.path(temp_directory),
-                    max_attempts = 100,
-                    sleep_time = 10)
+                    max_attempts = max_attempts,
+                    sleep_time = sleep_time)
 
         old_i <- arrow::read_parquet(file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")))
 
