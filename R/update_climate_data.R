@@ -27,7 +27,7 @@ good_mean <- function(x){
 
 update_climate_data <- function(parks,
                              temp_directory = "data/temp/noaa",
-                             sleep_time = 30,
+                             sleep_time = 1,
                              max_attempts = 100,
                              reset_all=FALSE){
 
@@ -81,10 +81,9 @@ update_climate_data <- function(parks,
       #any which aren't present OR
       #any which are still sampling
 
-
     noaa_rel %>%
-      mutate(station_name = gsub(pattern = ".gz.parquet",replacement = "",x = file_name)) %>%
-      dplyr::filter(station_name != "noaa_stations") ->
+      mutate(station_id = gsub(pattern = ".gz.parquet",replacement = "",x = file_name)) %>%
+      dplyr::filter(station_id != "noaa_stations") ->
       stations_in_releases
 
     stations %>%
@@ -92,7 +91,7 @@ update_climate_data <- function(parks,
       mutate(out_name = gsub(x = out_name, pattern = " ",replacement = "_")) %>%
       mutate(out_name = gsub(x = out_name, pattern = ")",replacement = "_",fixed = TRUE)) %>%
       mutate(out_name = gsub(x = out_name, pattern = "(",replacement = "_",fixed = TRUE) )%>%
-      dplyr::filter(!(out_name %in% stations_in_releases$station_name)|
+      dplyr::filter(!(usaf %in% stations_in_releases$station_id)|
                end_year ==  format(Sys.Date(), "%Y")) -> stations_to_update
 
     #to save time, we'll only download full information for stations that are missing.  for ones that just need an update, we can just pull the newest data
@@ -107,10 +106,9 @@ update_climate_data <- function(parks,
     }else{
 
       stations_to_update %>%
-        mutate(action = case_when(!out_name %in% stations_in_releases$station_name ~ "add",
-                                  out_name %in% stations_in_releases$station_name ~ "update"
+        mutate(action = case_when(!usaf %in% stations_in_releases$station_id ~ "add",
+                                  usaf %in% stations_in_releases$station_id ~ "update"
         )) -> stations_to_update
-
 
 
     }
@@ -137,14 +135,14 @@ update_climate_data <- function(parks,
 
 
 
-        robust_pb_download(file = paste(name_i,".gz.parquet",sep = ""),
+        robust_pb_download(file = paste(usaf_i,".gz.parquet",sep = ""),
                     repo = "AdamWilsonLab/emma_report",
                     tag = "NOAA",
                     dest = file.path(temp_directory),
                     max_attempts = max_attempts,
-                    sleep_time = sleep_time)
+                    sleep_time = sleep_time)->to_rm
 
-        old_i <- arrow::read_parquet(file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")))
+        old_i <- arrow::read_parquet(file.path(temp_directory,paste(usaf_i,".gz.parquet",sep = "")))
 
 
         # should start with the previous year (in case there is any lag time)
@@ -276,14 +274,13 @@ update_climate_data <- function(parks,
       # write data as a parquet file
 
         data_i %>%
-          write_parquet(sink = file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")),
+          write_parquet(sink = file.path(temp_directory,paste(usaf_i,".gz.parquet",sep = "")),
                         compression = "gzip")
 
       #upload as a release
-        pb_upload(file = file.path(temp_directory,paste(name_i,".gz.parquet",sep = "")),
+        pb_upload(file = file.path(temp_directory,paste(usaf_i,".gz.parquet",sep = "")),
                   repo = "AdamWilsonLab/emma_report",
-                  tag = "NOAA",
-                  overwrite = TRUE)
+                  tag = "NOAA")
 
       #pause to keep github happy
         Sys.sleep(sleep_time)
@@ -292,6 +289,7 @@ update_climate_data <- function(parks,
     }# i loop
 
   # clean up cache
+
     rnoaa::isd_cache$delete_all()
 
   # clean up temp files

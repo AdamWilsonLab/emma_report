@@ -4,6 +4,7 @@ library(tidyverse)
 library(lubridate)
 library(arrow)
 library(dygraphs)
+library(rgee)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
 source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
@@ -17,6 +18,8 @@ generate_reports <- function(output_directory = "reports/",
                              time_window_days = 120,
                              n_stations = 3,
                              parks,
+                             sleep_time = 10,
+                             max_attemps = 10,
                              ...
 ){
 
@@ -47,8 +50,8 @@ generate_reports <- function(output_directory = "reports/",
                 dest =  file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_model",
                 tag = "current",
-                max_attempts = 10,
-                sleep_time = 5)
+                max_attempts = max_attempts,
+                sleep_time = sleep_time)
 
     model_results <- readRDS(file.path(temp_directory,"model_results.rds"))
 
@@ -72,25 +75,27 @@ generate_reports <- function(output_directory = "reports/",
     robust_pb_download(file = most_recent_fire_file$file_name,
                   dest = file.path(temp_directory),
                   repo = "AdamWilsonLab/emma_envdata",
-                  tag = most_recent_fire_file$tag)
+                  tag = most_recent_fire_file$tag,
+                  max_attempts = max_attempts,
+                  sleep_time = sleep_time)
 
-  most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
-  most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
+    most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
+    most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
 
-  #convert from date of fire to years since fire
+  # convert from date of fire to years since fire
 
     years_since_fire_raster <-
       terra::app(x = most_recent_fire_raster,
                  fun = function(x){
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
-  #make a polygon version and convert to WGS84 (for plotting ease)
+  # make a polygon version and convert to WGS84 (for plotting ease)
 
-  fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
-    st_as_sf() %>% rename(Years = lyr.1) %>%
-    st_transform(crs = st_crs(4326))
+    fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
+      st_as_sf() %>% rename(Years = lyr.1) %>%
+      st_transform(crs = st_crs(4326))
 
-  #get most recent NDVI data
+  # get most recent NDVI data
 
     env_files %>%
       filter(tag == "raw_ndvi_modis") %>%
@@ -102,14 +107,67 @@ generate_reports <- function(output_directory = "reports/",
     robust_pb_download(file = most_recent_ndvi_file$file_name,
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_envdata",
-                tag = most_recent_ndvi_file$tag)
+                tag = most_recent_ndvi_file$tag,
+                max_attempts = max_attempts,
+                sleep_time = sleep_time)
 
-  #Load the NDVI raster
+  # Load the NDVI raster
     most_recent_ndvi_raster <- terra::rast(file.path(temp_directory,
                                                      most_recent_ndvi_file$file_name))
 
-  #Fix the NDVI values
+  # Fix the NDVI values
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
+
+  # Start earth engine
+
+    ee_Initialize()
+
+
+  # Get Domain
+      robust_pb_download(file = "domain.gpkg",
+                         tag = "raw_static",
+                         repo = "AdamWilsonLab/emma_envdata",
+                         dest = file.path(temp_directory),
+                         max_attempts = max_attempts,
+                         sleep_time = sleep_time)
+
+  # Read domain
+
+      domain <- st_read(file.path(temp_directory, "domain.gpkg"))
+
+  # MODIS NDWI
+
+      ndwi <- ee$ImageCollection("MODIS/MCD43A4_006_NDWI")
+
+      ndwi_info<-
+        ndwi$filterDate(start = as.character(as.Date(Sys.Date()-365)),
+                        opt_end = as.character(as.Date(Sys.Date())))$
+        getInfo()
+
+      ndwi_info <-
+        ndwi_info$features[[length(ndwi_info$features)]]$properties$`system:index`
+
+
+      recent_ndwi <- ndwi$filterMetadata("system:index","equals", ndwi_info)$first()
+
+
+      ndwi_rast <-  ee_as_raster(image = recent_ndwi,
+                                 region = sf_as_ee(domain)$geometry(),
+                                 dsn = file.path(temp_directory,"ndwi.tif"))
+
+      #need to fix the ndwi projection
+
+
+        nasa_proj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +R=6371007.181 +units=m +no_defs"
+
+        if(!identical(crs(nasa_proj),crs(ndwi_rast))){
+          crs(ndwi_rast) <- nasa_proj
+          }
+
+
+  # Other drought layers?
+
+
 
 
   # Get the weather station metadata
@@ -117,7 +175,9 @@ generate_reports <- function(output_directory = "reports/",
     robust_pb_download(file = "noaa_stations.gz.parquet",
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_report",
-                tag = "NOAA")
+                tag = "NOAA",
+                max_attempts = max_attempts,
+                sleep_time = sleep_time)
 
     stations <- arrow::read_parquet(file.path(temp_directory,"noaa_stations.gz.parquet"))
     stations_sf <- st_as_sf(stations,coords = c("lon","lat"))
@@ -129,9 +189,6 @@ generate_reports <- function(output_directory = "reports/",
     #park_name <- unique(parks$national_parks$CUR_NME)[1]
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
-
-  #for (park_name in unique(parks$CUR_NME)[1]){
-
 
     focal_park <- parks$national_parks %>%
       filter(CUR_NME == park_name)

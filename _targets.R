@@ -10,7 +10,7 @@ library(rnoaa)
 # if(!"basemapR" %in% rownames(installed.packages())){
 #   devtools::install_github('Chrisjb/basemapR')
 # }
-library(stantargets)
+#library(stantargets)
 source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
 # source all files in R folder
 lapply(list.files("R",pattern="[.]R",full.names = T)[-4], source)
@@ -37,19 +37,27 @@ list(
                                          cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
              ),
 
+  tar_target(name = ndwi,
+             command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
+                                              tag = "current"))
+  ,
+
+
   tar_target(name = noaa_data,
              command = update_climate_data(parks = parks,
                                            temp_directory = "data/temp/noaa",
                                            sleep_time = 30,
+                                           max_attempts = 100,
                                            reset_all = FALSE) #set this to TRUE to re-download everything, rather than only updating
-             ),
+             )
+  #,
 
- tar_target(name = reports,
-            command = generate_reports(output_directory = "reports/",
-                                       temp_directory = "data/temp/reports/",
-                                       report_location = "report_prototype.rmd",
-                                       time_window_days = 365,
-                                       n_stations = 3,
-                                       parks = parks,
-                                       ... = noaa_data))
+ # tar_target(name = reports,
+ #            command = generate_reports(output_directory = "reports/",
+ #                                       temp_directory = "data/temp/reports/",
+ #                                       report_location = "report_prototype.rmd",
+ #                                       time_window_days = 365,
+ #                                       n_stations = 3,
+ #                                       parks = parks,
+ #                                       ... = noaa_data))
 )

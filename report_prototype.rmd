@@ -26,6 +26,7 @@ library(xts)
 library(plotly)
 library(leaflet)
 library(dygraphs)
+library(rgee)
 
 # load data saved in the pipeline
   #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
@@ -517,7 +518,7 @@ library(dygraphs)
     
     
     closest_stations <- 
-      data.frame(station = stations_sf$station_name,
+      data.frame(station = stations_sf$usaf,
                distance = as.numeric(st_distance(cent,stations_sf)))
     
     closest_stations <- closest_stations[order(closest_stations$distance),]
@@ -536,8 +537,8 @@ library(dygraphs)
                 dest = temp_directory,
                 repo = "AdamWilsonLab/emma_report",
                 tag = "NOAA",
-                max_attempts = 100,
-                sleep_time = 10,
+                max_attempts = max_attempts,
+                sleep_time = sleep_time,
                 show_progress=FALSE) -> to_rm
     rm(to_rm)
     
@@ -643,6 +644,44 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
 
 ```
 
+## Drought Indices
 
 
+```{r NDWI_plot, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+library(raster)
+library(mapview)
+library(leaflet)
+library(leafem)
+
+  leaflet(data = focal_wgs) %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addPolygons(color = "black",
+              stroke = TRUE,
+              fill = FALSE,
+              group = "Park") %>%
+  addRasterImage(x = ndwi_rast[[1]],
+                 group = "NDWI")%>% 
+  addMouseCoordinates() %>%
+  addImageQuery(ndwi_rast, type="mousemove", layerId = "NDWI") %>%
+  leaflet::addLegend(position = "bottomright",
+            pal = ndvi_pal,          
+            values = ~values(raster::raster(most_recent_ndvi_raster)),
+            opacity = 1,
+            title = "NDWI") %>%
+    addLayersControl(
+    baseGroups = c("NatGeo","World Imagery"),
+    overlayGroups = c("NDWI", "Park"),
+    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+
+```
+
+
+  * 0.2 – 1 = Water surface,
+  * 0.0 – 0.2 = Flooding, humidity,
+  * -0.3 – 0.0 = Moderate drought, non-aqueous surfaces,
+  * -1 – -0.3 = Drought, non-aqueous surface
 
