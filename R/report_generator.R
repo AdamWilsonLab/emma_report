@@ -21,6 +21,7 @@ generate_reports <- function(output_directory = "reports/",
                              sleep_time = 10,
                              max_attemps = 10,
                              tag = "current",
+                             min_date = "1900-01-01",
                              ...
 ){
 
@@ -119,9 +120,9 @@ generate_reports <- function(output_directory = "reports/",
                          max_attempts = max_attempts,
                          sleep_time = sleep_time)
 
-      ndwi_rast <- rast(file.path(temp_directory,"ndwi.tif"))
+      #ndwi_rast <- terra::rast(file.path(temp_directory,"ndwi.tif"))
 
-      ndwi_rast <- raster(rast(file.path(temp_directory,"ndwi.tif")))
+      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))
 
 
   # Other drought layers?
@@ -149,6 +150,8 @@ generate_reports <- function(output_directory = "reports/",
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
 
+    gc()
+
     focal_park <- parks$national_parks %>%
       filter(CUR_NME == park_name)
 
@@ -166,6 +169,7 @@ generate_reports <- function(output_directory = "reports/",
 
     for (park_name in unique(parks$cape_nature$COMPLEX)){
 
+      gc()
 
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)

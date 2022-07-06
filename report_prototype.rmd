@@ -11,7 +11,7 @@ output:
       toc_depth: 2
 ---
 
-Model last updated at `r now()`.
+Model last updated at `r lubridate::now()`.
 
 
 ```{r, echo=F, message = F, results = "hide"}
@@ -28,129 +28,12 @@ library(leaflet)
 library(dygraphs)
 library(rgee)
 
-# load data saved in the pipeline
-  #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-```
-
-# Model Overview
-The details are given in [@slingsby_near-real_2020;@wilson_climatic_2015], but in short what we do is estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. For this we use a negative exponential curve with the following form:
-
-$$\mu_{i,t}=\alpha_i+\gamma_i\Big(1-e^{-\frac{age_{i,t}}{\lambda_i}}\Big)$$
-
-where $\mu_{i,t}$ is the expected NDVI for site $i$ at time $t$
-
-The observed greenness $NDVI_{i,t}$  is assumed to follow a normal distribution with mean $\mu_{i,t}$
-$$NDVI_{i,t}\sim\mathcal{N}(\mu_{i,t},\sigma_)$$
-
-An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. The full model also includes a sinusoidal term to capture seasonal variation, but lets keep it simple here.  
-
-
-## Workflow
-
-This repository was developed using the Targets framework as follows.
-
-
-```{r make_workfow, echo=F, eval = FALSE, message = F, include=FALSE}
-
-#This code chunk makes the targets visualization but does not call it (see next chunk for that)
-
-#tfile=paste0(tempfile(),".html")
-  targets_workflow_plot  <-targets::tar_visnetwork(reporter = "silent",
-                            targets_only = TRUE,) #%>% 
-#  htmlwidgets::saveWidget(file = tfile)
-#webshot::install_phantomjs()
-#webshot::webshot(tfile, "network.png")
-#![targets_network](network.png)
-
-```
-
-```{r plot_workflow, echo=F, eval = FALSE, message = F, fig.width = 10, fig.height = 6}
-
-  #This code chunk plots the targets visualization.
-  # I do this in two steps to avoid errors that otherwise can occur
-
-  targets_workflow_plot
-
-```
-
-## Results
-
-### Environmental Controls on Ecosystem Recovery
-
-These parameters represent the relationship of the following environmental variables to the recovery trajectory.
-
-```{r p1, echo=F, eval=T, warning=F, message=FALSE}
-
-betas <- model_results %>% 
-  filter(type=="beta")
-
-
-p1 <- ggplot(betas,aes(y=xname, xmin=q5,x=median,xmax=q95))+
-  geom_pointrange(fill="grey")+
-  facet_wrap(~parameter,nrow=1)+
-  geom_vline(xintercept=0,col="grey")+
-  xlab("Beta (regression coefficient +/- 95% CI)")+
-  ylab("Environmental Variable")
-
-ggplotly(p1)
-
-```
-
-
-## Recovery Trajectories
-
-The plot below illustrates some example recovery trajectories. It currently just shows the top 20 cells with the most observations.
-
-```{r plot, echo = F, eval = TRUE, message = FALSE, fig.height = 12}
-
-cells_with_long_records<-
-  model_prediction %>% 
-  group_by(cellID) %>% 
-  summarize(n=n()) %>% 
-  arrange(desc(n)) %>% 
-  slice(1:20) # top 20 cells with the most observations
-
-model_prediction %>% 
-  filter(cellID%in%cells_with_long_records$cellID) %>% 
-  ggplot(aes(x=age)) +
- geom_line(aes(y=median),colour="blue") +
-  geom_line(aes(y=y_obs),colour="black",lwd=0.5,alpha=0.3) +
-  geom_ribbon(aes(ymin=q5,ymax=q95),alpha=0.5)+
-  facet_wrap(~cellID) +
-  labs(x="time since fire (years)",y="NDVI") +
-  theme_bw()
-
-```
-
-
-## Spatial Predictions
-
-Maps of spatial parameters in the model.  
-
-```{r compare_data2, echo = F, eval = TRUE, warning = F, message = FALSE}
-
-rast <- projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
-
-leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>% 
-  addProviderTiles(providers$Esri.WorldImagery) %>% 
-  addRasterImage(rast[[1]],group=names(rast)[1]) %>% #, color = ~pal(values(rast)[,1]) 
-  addRasterImage(rast[[2]],group=names(rast)[2]) %>% 
-  addRasterImage(rast[[3]],group=names(rast)[3]) %>% 
-  addRasterImage(rast[[4]],group=names(rast)[4]) %>% 
-  addLayersControl(
-    baseGroups = names(rast),
-    options = layersControlOptions(collapsed = FALSE)) #%>% 
-#  addLegend("bottomright", pal = pal, values = ~,
-#    title = "Est. GDP (2010)",
-#    labFormat = labelFormat(prefix = "$"),
-#    opacity = 1
-#  )
 ```
 
 
 # Park-specific Information
 
-### NDVI and Time Since Fire
+## NDVI and Time Since Fire
 
 ```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE}
 
@@ -339,63 +222,6 @@ bbox <- st_bbox(focal_wgs) %>%
 Figure X. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NA values in the fire layer indicate that no fires have been recorded for that area.
 
 
-
-```{r basemap1, eval=FALSE, fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
-
-# Time since fire
-  #library(ggmmap) # doesn't play well with ggplot
-  #library(basemaps) # doesn't play well with ggplot
-
-  #Trying with basemapR
-  #library(basemapR)
-
-
-  suppressMessages(
-  ggplot()+
-    base_map(bbox = st_bbox(focal_wgs), basemap = "google-terrain",nolabels = TRUE,increase_zoom = 2)+
-    geom_sf(data = focal_wgs, fill=NA)+
-    geom_sf(data = fires_wgs,
-            mapping = aes(fill = Years),alpha=0.5)+
-    coord_sf(xlim = st_bbox(focal_wgs)[c(1,3)],
-           ylim = st_bbox(focal_wgs)[c(2,4)])+
-    scale_fill_gradient(low="white", high="red",name = "Years \nSince \nBurn")
-  )
-  
-  
-
-```
-
-```{r basemap2, eval=FALSE, fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
-
-# Time since fire
-  #library(ggmmap) # doesn't play well with ggplot
-  #library(basemaps) # doesn't play well with ggplot
-
-  #Trying with basemapR
-  ##devtools::install_github('Chrisjb/basemapR')
-  #library(basemapR)
-
-    focal_park %>% 
-    st_transform(crs = st_crs(4326)) -> focal_wgs
-
-  suppressMessages(
-  ggplot()+
-    base_map(bbox = st_bbox(focal_wgs), basemap = "google-satellite",increase_zoom = 2)+
-    geom_sf(data = focal_wgs, fill=NA)+
-    geom_sf(data = fires_wgs,
-            mapping = aes(fill = Years),alpha=0.5)+
-    coord_sf(xlim = st_bbox(focal_wgs)[c(1,3)],
-           ylim = st_bbox(focal_wgs)[c(2,4)])+
-    scale_fill_gradient(low="white", high="red",name = "Years \nSince \nBurn")
-  )
-  
-  
-  
-```
-
-
-### Climate Data
-
 ```{r precip, eval = FALSE,fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
 
 #construct needed bounding box
@@ -503,7 +329,7 @@ st_intersection(x = focal_arc,
 
 ```
 
-### Weather Data
+## Weather Data
 
 ```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -570,6 +396,15 @@ library(dygraphs)
     mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
     dplyr::filter(!is.na(date_time)) -> focal_weather
   
+  #Filter out oldest data
+  
+  focal_weather <- 
+    focal_weather%>%
+      filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
+  
+
+    
+  
   #Generate precip dataset
   
   focal_weather%>%
@@ -604,6 +439,8 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
     xts::xts(order.by = .$date_time) -> focal_temp
   
   
+  
+  
 
   dygraph(data = focal_precip[,colnames(focal_precip)[which(colnames(focal_precip)!="date_time")]],
           main = "Precipitation",
@@ -619,7 +456,56 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
           ylab = "Temp. (C)") %>%
     dySeries()%>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
+
   
+    #mean daily temp dataset
+    focal_weather%>%
+  group_by(station_name,year,month,day)%>%
+  summarise(daily_temp_C = mean(na.omit(temp_c)))%>%
+  ungroup() %>%
+mutate(date_time = paste(year,month,day,sep = "-"))%>%
+  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+  dplyr::filter(!is.na(date_time))%>%
+  dplyr::select(date_time,station_name, daily_temp_C) %>%
+  pivot_wider(values_from = daily_temp_C,
+              names_from = station_name,
+              values_fn = mean)%>%
+    xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
+
+
+      dygraph(data = focal_mean_daily_temp[,colnames(focal_mean_daily_temp)[which(colnames(focal_mean_daily_temp)!="date_time")]],
+          main = "Temperature",
+          xlab = "Date",
+          ylab = "Temp. (C)") %>%
+    dySeries()%>%
+    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
+
+  
+  
+  #mean temp dataset
+#     focal_weather%>%
+#   group_by(station_name,year,month)%>%
+#   summarise(monthly_temp_C = mean(na.omit(temp_c)))%>%
+#   ungroup() %>%
+# mutate(date_time = paste(year,month,01,sep = "-"))%>%
+#   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+#   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
+#   dplyr::filter(!is.na(date_time))%>%
+#   dplyr::select(date_time,station_name, monthly_temp_C) %>%
+#   pivot_wider(values_from = monthly_temp_C,
+#               names_from = station_name,
+#               values_fn = mean)%>%
+#     xts::xts(order.by = .$date_time) -> focal_mean_temp
+#   
+#     
+#       dygraph(data = focal_mean_temp[,colnames(focal_mean_temp)[which(colnames(focal_mean_temp)!="date_time")]],
+#           main = "Temperature",
+#           xlab = "Date",
+#           ylab = "Temp. (C)") %>%
+#     dySeries()%>%
+#     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
+# 
+
 
 ```
 
@@ -640,7 +526,8 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
   #This code chunk plots the targets visualization.
   # I do this in two steps to avoid errors that otherwise can occur
 
-  temp_graph
+  #temp_graph
+  mean_temp_graph
 
 ```
 
@@ -654,6 +541,8 @@ library(mapview)
 library(leaflet)
 library(leafem)
 
+
+  
   leaflet(data = focal_wgs) %>%
   addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
     #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
@@ -662,10 +551,10 @@ library(leafem)
               stroke = TRUE,
               fill = FALSE,
               group = "Park") %>%
-  addRasterImage(x = ndwi_rast[[1]],
+  addRasterImage(x = ndwi_rast,
                  group = "NDWI")%>% 
   addMouseCoordinates() %>%
-  addImageQuery(ndwi_rast, type="mousemove", layerId = "NDWI") %>%
+      addImageQuery(ndwi_rast, type="mousemove", layerId = "NDWI") %>%
   leaflet::addLegend(position = "bottomright",
             pal = ndvi_pal,          
             values = ~values(raster::raster(most_recent_ndvi_raster)),
@@ -677,11 +566,13 @@ library(leafem)
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
+
 ```
 
+Interpreting NDWI:
 
-  * 0.2 – 1 = Water surface,
-  * 0.0 – 0.2 = Flooding, humidity,
-  * -0.3 – 0.0 = Moderate drought, non-aqueous surfaces,
-  * -1 – -0.3 = Drought, non-aqueous surface
-
+  * 1 - 0.2 = Water surface,
+  * 0.2 – 0.0 = Flooding, humidity,
+  * 0.0 – -0.3 = Moderate drought, non-aqueous surfaces,
+  * -0.3 – -1 = Drought, non-aqueous surface
+  
