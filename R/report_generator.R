@@ -41,24 +41,12 @@ generate_reports <- function(output_directory = "reports/",
     }
 
   # Get outputs from model
-    model_releases <- pb_list(repo = "AdamWilsonLab/emma_model")
 
-    if(!all(c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds") %in% model_releases$file_name)){
-      stop("Missing files from emma_model release")
-    }
+    model_results <- tar_load(model_results)
 
-    robust_pb_download(file = c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds"),
-                dest =  file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_model",
-                tag = "current",
-                max_attempts = max_attempts,
-                sleep_time = sleep_time)
+    model_prediction <- tar_load(model_prediction)
 
-    model_results <- readRDS(file.path(temp_directory,"model_results.rds"))
-
-    model_prediction <- readRDS(file.path(temp_directory,"model_prediction.rds"))
-
-    spatial_outputs <- readRDS(file.path(temp_directory,"spatial_outputs.rds"))
+    spatial_outputs <- tar_load(spatial_outputs)
 
 
   # Get list of available env data files
@@ -124,14 +112,16 @@ generate_reports <- function(output_directory = "reports/",
 
   # MODIS NDWI
 
-      robust_pb_download(file = "nasadem.tif",
+      robust_pb_download(file = "ndwi.tif",
                          tag = tag,
                          dest = file.path(temp_directory),
                          repo = "AdamWilsonLab/emma_report",
                          max_attempts = max_attempts,
                          sleep_time = sleep_time)
 
-      ndwi_rast <- rast(file.path(temp_directory,"nasadem.tif"))
+      ndwi_rast <- rast(file.path(temp_directory,"ndwi.tif"))
+
+      ndwi_rast <- raster(rast(file.path(temp_directory,"ndwi.tif")))
 
 
   # Other drought layers?

@@ -99,8 +99,7 @@ get_release_ndwi_modis <- function(temp_directory = "data/temp/raw_data/NDWI_MOD
 
     pb_upload(repo = "AdamWilsonLab/emma_report",
               file = file.path(temp_directory,"ndwi.tif"),
-              tag = tag,
-              name = "nasadem.tif")
+              tag = tag)
 
   #Remove files
     unlink(temp_directory,recursive = TRUE, force = TRUE)
