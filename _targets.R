@@ -30,6 +30,21 @@ Sys.setenv(HOME="/home/rstudio")
 
 list(
 
+  # Load the model data
+
+    tar_target(name = model_results,
+               command = get_model_data(file = "model_results.rds")
+    ),
+
+    tar_target(name = spatial_outputs,
+                 command = get_model_data(file = "spatial_outputs.rds")
+    ),
+
+    tar_target(name = model_prediction,
+                 command = get_model_data(file = "model_prediction.rds")
+    ),
+
+
   tar_target(name = parks,
              command = get_park_polygons(temp_directory = "data/temp/",
                                          sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
@@ -49,15 +64,15 @@ list(
                                            sleep_time = 30,
                                            max_attempts = 100,
                                            reset_all = FALSE) #set this to TRUE to re-download everything, rather than only updating
-             )
-  #,
+             ),
 
- # tar_target(name = reports,
- #            command = generate_reports(output_directory = "reports/",
- #                                       temp_directory = "data/temp/reports/",
- #                                       report_location = "report_prototype.rmd",
- #                                       time_window_days = 365,
- #                                       n_stations = 3,
- #                                       parks = parks,
- #                                       ... = noaa_data))
+ tar_target(name = reports,
+            command = generate_reports(output_directory = "reports/",
+                                       temp_directory = "data/temp/reports/",
+                                       report_location = "report_prototype.rmd",
+                                       time_window_days = 365,
+                                       n_stations = 3,
+                                       parks = parks,
+                                       ... = noaa_data,
+                                       ... = ndwi))
 )

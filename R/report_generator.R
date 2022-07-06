@@ -20,6 +20,7 @@ generate_reports <- function(output_directory = "reports/",
                              parks,
                              sleep_time = 10,
                              max_attemps = 10,
+                             tag = "current",
                              ...
 ){
 
@@ -112,57 +113,25 @@ generate_reports <- function(output_directory = "reports/",
                 sleep_time = sleep_time)
 
   # Load the NDVI raster
+
     most_recent_ndvi_raster <- terra::rast(file.path(temp_directory,
                                                      most_recent_ndvi_file$file_name))
 
   # Fix the NDVI values
+
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
 
-  # Start earth engine
-
-    ee_Initialize()
-
-
-  # Get Domain
-      robust_pb_download(file = "domain.gpkg",
-                         tag = "raw_static",
-                         repo = "AdamWilsonLab/emma_envdata",
-                         dest = file.path(temp_directory),
-                         max_attempts = max_attempts,
-                         sleep_time = sleep_time)
-
-  # Read domain
-
-      domain <- st_read(file.path(temp_directory, "domain.gpkg"))
 
   # MODIS NDWI
 
-      ndwi <- ee$ImageCollection("MODIS/MCD43A4_006_NDWI")
+      robust_pb_download(file = "nasadem.tif",
+                         tag = tag,
+                         dest = file.path(temp_directory),
+                         repo = "AdamWilsonLab/emma_report",
+                         max_attempts = max_attempts,
+                         sleep_time = sleep_time)
 
-      ndwi_info<-
-        ndwi$filterDate(start = as.character(as.Date(Sys.Date()-365)),
-                        opt_end = as.character(as.Date(Sys.Date())))$
-        getInfo()
-
-      ndwi_info <-
-        ndwi_info$features[[length(ndwi_info$features)]]$properties$`system:index`
-
-
-      recent_ndwi <- ndwi$filterMetadata("system:index","equals", ndwi_info)$first()
-
-
-      ndwi_rast <-  ee_as_raster(image = recent_ndwi,
-                                 region = sf_as_ee(domain)$geometry(),
-                                 dsn = file.path(temp_directory,"ndwi.tif"))
-
-      #need to fix the ndwi projection
-
-
-        nasa_proj <- "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +R=6371007.181 +units=m +no_defs"
-
-        if(!identical(crs(nasa_proj),crs(ndwi_rast))){
-          crs(ndwi_rast) <- nasa_proj
-          }
+      ndwi_rast <- rast(file.path(temp_directory,"nasadem.tif"))
 
 
   # Other drought layers?

@@ -550,7 +550,7 @@ library(dygraphs)
   #fix station names in focal weather (missing in many case)
   
     stations %>%
-    select(usaf,wban,station_name)%>%
+    dplyr::select(usaf,wban,station_name)%>%
     inner_join(y = focal_weather,
                by = c("usaf"="usaf_station","wban"="wban_station"))%>%
     dplyr::rename(station_name = station_name.x)-> focal_weather
