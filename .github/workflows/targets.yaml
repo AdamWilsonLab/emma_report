@@ -129,28 +129,6 @@ jobs:
           RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
         continue-on-error: true
 
-      - name: Verify credentials2
-        run: |
-          pwd
-          ls
-          emma_report/.github/decrypt_secret.sh
-          ls ~/.config/earthengine
-          earthengine -h
-        env:
-          RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
-        continue-on-error: true
-
-      - name: Verify credentials3
-        run: |
-          pwd
-          ls
-          ./emma_report/.github/decrypt_secret.sh
-          ls ~/.config/earthengine
-          earthengine -h
-        env:
-          RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
-        continue-on-error: true
-
 #      - name: check on files
 #        run: |
 #          file data/raw_data/ndvi_modis/2021_12_19.tif
