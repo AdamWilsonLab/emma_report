@@ -1,5 +1,12 @@
 #!/bin/sh
 
+#Check out where you are
+pwd
+
+#See whats around
+ls
+
+
 # Decrypt the file
 
 mkdir -p $HOME/.config/earthengine/ndef/
