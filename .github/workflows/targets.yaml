@@ -104,11 +104,39 @@ jobs:
           }
         shell: Rscript {0}
 
-      - name: Run targets pipeline
-        run: targets::tar_make(callr_function = NULL)
+#      - name: Run targets pipeline
+#        run: targets::tar_make(callr_function = NULL)
+#        shell: Rscript {0}
+#      - name: Identify files that the targets pipeline produced
+#        run: git ls-files -mo --exclude=renv > .targets-files
+
+      - name: Run targets pt 1
+        run: |
+          Sys.setenv(HOME="/home/rstudio")
+          cmdstanr::set_cmdstan_path("/home/rstudio/.cmdstanr/cmdstan-2.28.1")
+          cmdstanr::check_cmdstan_toolchain()
+          #cmdstanr::install_cmdstan()
         shell: Rscript {0}
-      - name: Identify files that the targets pipeline produced
-        run: git ls-files -mo --exclude=renv > .targets-files
+        
+      - name: Verify credentials
+        run: |
+          ./.github/decrypt_secret.sh
+          ls ~/.config/earthengine
+          earthengine -h
+        env:
+          RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
+        continue-on-error: true
+
+#      - name: check on files
+#        run: |
+#          file data/raw_data/ndvi_modis/2021_12_19.tif
+#          file data/raw_data/ndvi_modis/2022_01_01.tif
+#        continue-on-error: true
+
+      - name: Run targets pt 2
+        run: |
+          targets::tar_make()
+        shell: Rscript {0}
 
       - name: Create the runs branch if it does not already exist
         if: steps.runs-exist.outcome != 'success'
