@@ -133,14 +133,34 @@ update_climate_data <- function(parks,
 
       if(action_i == "update"){
 
+        message("updating ",usaf_i)
+
+        #sometimes there are temporary issues with downloading previous uploads.  to prevent this from breaking the full workflow, I use a tryCatch and next
+
+        to_rm <-  tryCatch(expr = robust_pb_download(file = paste(usaf_i,".gz.parquet",sep = ""),
+                                             repo = "AdamWilsonLab/emma_report",
+                                             tag = "NOAA",
+                                             dest = file.path(temp_directory),
+                                             max_attempts = max_attempts,
+                                             sleep_time = sleep_time),
+                   error = function(e){e}
+                   )
+
+        if(inherits(x = to_rm, what = "error")){
 
 
-        robust_pb_download(file = paste(usaf_i,".gz.parquet",sep = ""),
-                    repo = "AdamWilsonLab/emma_report",
-                    tag = "NOAA",
-                    dest = file.path(temp_directory),
-                    max_attempts = max_attempts,
-                    sleep_time = sleep_time)->to_rm
+          message("errors with downloading ",usaf_i,", skipping")
+          rm(to_rm)
+          next
+
+        }
+
+        # robust_pb_download(file = paste(usaf_i,".gz.parquet",sep = ""),
+        #             repo = "AdamWilsonLab/emma_report",
+        #             tag = "NOAA",
+        #             dest = file.path(temp_directory),
+        #             max_attempts = max_attempts,
+        #             sleep_time = sleep_time)->to_rm
 
         old_i <- arrow::read_parquet(file.path(temp_directory,paste(usaf_i,".gz.parquet",sep = "")))
 
