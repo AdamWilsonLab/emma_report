@@ -62,7 +62,7 @@ list(
              command = update_climate_data(parks = parks,
                                            temp_directory = "data/temp/noaa",
                                            sleep_time = 30,
-                                           max_attempts = 100,
+                                           max_attempts = 10,
                                            reset_all = FALSE) #set this to TRUE to re-download everything, rather than only updating
              ),
 
