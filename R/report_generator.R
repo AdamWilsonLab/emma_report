@@ -19,7 +19,7 @@ generate_reports <- function(output_directory = "reports/",
                              n_stations = 3,
                              parks,
                              sleep_time = 10,
-                             max_attemps = 10,
+                             max_attempts = 10,
                              tag = "current",
                              min_date = "1900-01-01",
                              ...
