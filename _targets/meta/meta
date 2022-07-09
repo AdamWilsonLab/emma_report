@@ -1,16 +1,29 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
+filter_training_data|function|332014cfa3cb8341||||||||||||||
 create_stan_data|function|7c6e224a02e15f45||||||||||||||
 summarize_predictions|function|561550e942ee3728||||||||||||||
 tidy_dynamic_data|function|3ec9d16fbf3cb1b7||||||||||||||
 robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
+clean_up|function|08bcf9ecea369349||||||||||||||
+get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|7dfc2c60a0f85aee||||||||||||||
+.Random.seed|object|aaf77e5762494681||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
-filter_training_data|function|332014cfa3cb8341||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
+find_long_records|function|4daf399e64ddd46b||||||||||||||
+good_max|function|d93feaf4abe9f8eb||||||||||||||
+good_mean|function|37479be04005688b||||||||||||||
 robust_pb_download|function|c9145002d00cc12e||||||||||||||
+get_model_data|function|08fec7d94781ace7||||||||||||||
+generate_reports|function|e85ebd06572fcfce||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
+update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-generate_reports|function|7518018c983aef3d||||||||||||||
-reports|stem|2ba2286ddb57a2d6|c274dc0c86ea4c30|6025738a89049346|-653841556||t19170.8272497328s|a1c456b03adbfbf8|44|rds|vector|||1681.319|attribute variables are assumed to be spatially constant throughout all geometries|
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19181.9070891791s|36061498ee3eb824|719394|rds|vector|||13.74||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19181.9077948741s|38b8505555688739|717610|rds|vector|||60.848||
+ndwi|stem|a0618bc6ea01740b|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19181.9110499229s|e655bbbdcbba1d63|81|rds|vector|||281.226||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19181.9111765434s|8f1609308eb3a189|12532|rds|vector|||10.937||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19181.9113089509s|41b3f5f621214bdd|3666614|rds|vector|||10.978||
+noaa_data|stem|f08671fc390178f3|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19182.0259458979s|e655bbbdcbba1d63|81|rds|vector|||9904.621|attribute variables are assumed to be spatially constant throughout all geometries|
+reports|stem|35712d0e479112ad|6f1a63e166f080ab|3f0729f00698b76f|-653841556||t19182.0623887169s|44989414465ff33d|49|rds|vector|||3148.654|Discarded datum World Geodetic System 1984 in Proj4 definition|

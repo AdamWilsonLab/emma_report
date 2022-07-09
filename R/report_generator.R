@@ -2,15 +2,27 @@ library(rmarkdown)
 library(stars)
 library(tidyverse)
 library(lubridate)
+library(arrow)
+library(dygraphs)
+library(rgee)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
+source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
+
 #tar_load(model_results)
 #tar_load(model_prediction)
 #tar_load(spatial_outputs)
 generate_reports <- function(output_directory = "reports/",
-                             temp_directory = "data/temp/",
+                             temp_directory = "data/temp/reports",
                              report_location = "report_prototype.rmd",
-                             time_window_days = 120
+                             time_window_days = 120,
+                             n_stations = 3,
+                             parks,
+                             sleep_time = 10,
+                             max_attempts = 10,
+                             tag = "current",
+                             min_date = "1900-01-01",
+                             ...
 ){
 
   #create directories if needed
@@ -21,14 +33,6 @@ generate_reports <- function(output_directory = "reports/",
 
     }
 
-
-  # Load Park Polygons
-
-    parks <- get_park_polygons(temp_directory = temp_directory,
-                               sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
-                               sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
-                               cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
-
   #Create temp directory (needs to come after get_park_polygons if using the same temp_directory, since the temp folder is deleted)
 
     if(!dir.exists(file.path(temp_directory))){
@@ -38,24 +42,12 @@ generate_reports <- function(output_directory = "reports/",
     }
 
   # Get outputs from model
-    model_releases <- pb_list(repo = "AdamWilsonLab/emma_model")
 
-    if(!all(c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds") %in% model_releases$file_name)){
-      stop("Missing files from emma_model release")
-    }
+    model_results <- tar_load(model_results)
 
-    robust_pb_download(file = c("model_prediction.rds", "model_results.rds", "spatial_outputs.rds"),
-                dest =  file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_model",
-                tag = "current",
-                max_attempts = 10,
-                sleep_time = 5)
+    model_prediction <- tar_load(model_prediction)
 
-    model_results <- readRDS(file.path(temp_directory,"model_results.rds"))
-
-    model_prediction <- readRDS(file.path(temp_directory,"model_prediction.rds"))
-
-    spatial_outputs <- readRDS(file.path(temp_directory,"spatial_outputs.rds"))
+    spatial_outputs <- tar_load(spatial_outputs)
 
 
   # Get list of available env data files
@@ -70,28 +62,30 @@ generate_reports <- function(output_directory = "reports/",
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
       slice(which.max(as_date(file_date))) -> most_recent_fire_file
 
-    pb_download(file = most_recent_fire_file$file_name,
-                dest = file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_envdata",
-                tag = most_recent_fire_file$tag)
+    robust_pb_download(file = most_recent_fire_file$file_name,
+                  dest = file.path(temp_directory),
+                  repo = "AdamWilsonLab/emma_envdata",
+                  tag = most_recent_fire_file$tag,
+                  max_attempts = max_attempts,
+                  sleep_time = sleep_time)
 
-  most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
-  most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
+    most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
+    most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
 
-  #convert from date of fire to years since fire
+  # convert from date of fire to years since fire
 
     years_since_fire_raster <-
       terra::app(x = most_recent_fire_raster,
                  fun = function(x){
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
-  #make a polygon version and convert to WGS84 (for plotting ease)
+  # make a polygon version and convert to WGS84 (for plotting ease)
 
-  fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
-    st_as_sf() %>% rename(Years = lyr.1) %>%
-    st_transform(crs = st_crs(4326))
+    fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
+      st_as_sf() %>% rename(Years = lyr.1) %>%
+      st_transform(crs = st_crs(4326))
 
-  #get most recent NDVI data
+  # get most recent NDVI data
 
     env_files %>%
       filter(tag == "raw_ndvi_modis") %>%
@@ -100,25 +94,63 @@ generate_reports <- function(output_directory = "reports/",
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
       slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
 
-    pb_download(file = most_recent_ndvi_file$file_name,
+    robust_pb_download(file = most_recent_ndvi_file$file_name,
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_envdata",
-                tag = most_recent_ndvi_file$tag)
+                tag = most_recent_ndvi_file$tag,
+                max_attempts = max_attempts,
+                sleep_time = sleep_time)
 
-  #Load the NDVI raster
+  # Load the NDVI raster
+
     most_recent_ndvi_raster <- terra::rast(file.path(temp_directory,
                                                      most_recent_ndvi_file$file_name))
 
-  #Fix the NDVI values
+  # Fix the NDVI values
+
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
+
+
+  # MODIS NDWI
+
+      robust_pb_download(file = "ndwi.tif",
+                         tag = tag,
+                         dest = file.path(temp_directory),
+                         repo = "AdamWilsonLab/emma_report",
+                         max_attempts = max_attempts,
+                         sleep_time = sleep_time)
+
+      #ndwi_rast <- terra::rast(file.path(temp_directory,"ndwi.tif"))
+
+      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))
+
+
+  # Other drought layers?
+
+
+
+
+  # Get the weather station metadata
+
+    robust_pb_download(file = "noaa_stations.gz.parquet",
+                dest = file.path(temp_directory),
+                repo = "AdamWilsonLab/emma_report",
+                tag = "NOAA",
+                max_attempts = max_attempts,
+                sleep_time = sleep_time)
+
+    stations <- arrow::read_parquet(file.path(temp_directory,"noaa_stations.gz.parquet"))
+    stations_sf <- st_as_sf(stations,coords = c("lon","lat"))
+    st_crs(stations_sf) <- st_crs("EPSG:4326")
+    stations_sf <- st_transform(stations_sf, crs = st_crs(parks$cape_nature))
 
   # Generate the National Park reports via a for loop
 
+    #park_name <- unique(parks$national_parks$CUR_NME)[1]
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
 
-  #for (park_name in unique(parks$CUR_NME)[1]){
-
+    gc()
 
     focal_park <- parks$national_parks %>%
       filter(CUR_NME == park_name)
@@ -137,6 +169,7 @@ generate_reports <- function(output_directory = "reports/",
 
     for (park_name in unique(parks$cape_nature$COMPLEX)){
 
+      gc()
 
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)
@@ -149,6 +182,10 @@ generate_reports <- function(output_directory = "reports/",
 
 
     }# end for loop
+
+
+    #clean up temp directory
+      unlink(file.path(temp_directory), recursive = TRUE, force = TRUE)
 
 
 }#end fx
