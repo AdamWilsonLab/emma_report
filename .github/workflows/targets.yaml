@@ -151,6 +151,10 @@ jobs:
           mv .targets-runs/.git .
           rm -r .targets-runs
 
+      - name: update md
+        run: |
+          knitr::knit("index.Rmd")  
+
       - name: Upload latest run
         run: |
           git config --local user.name "GitHub Actions"
