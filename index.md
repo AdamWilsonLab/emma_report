@@ -10,7 +10,7 @@ output:
 ---
 
 
-Model last updated at 2022-07-11 02:35:49.
+Model last updated at 2022-07-11 17:31:58.
 
 
 
@@ -41,6 +41,9 @@ This repository was developed using the Targets framework as follows.
 
 
 
+```
+## Error in path.expand(path): invalid 'path' argument
+```
 
 ## Results
 
@@ -49,28 +52,34 @@ This repository was developed using the Targets framework as follows.
 These parameters represent the relationship of the following environmental variables to the recovery trajectory.
 
 
+```
+## Error in path.expand(path): invalid 'path' argument
+```
 
 
 ## Recovery Trajectories
 
 The plot below illustrates some example recovery trajectories. It currently just shows the top 20 cells with the most observations.
 
-
+![plot of chunk plot](figure/plot-1.png)
 
 ## Spatial Predictions
 
 Maps of spatial parameters in the model.  
 
 
+```
+## Error in path.expand(path): invalid 'path' argument
+```
 
 ## Park Information
 
-<!--html_preserve--><div id="rppqspuxac" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<!--html_preserve--><div id="cgcdekdtuh" style="overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
 <style>html {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#rppqspuxac .gt_table {
+#cgcdekdtuh .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -95,7 +104,7 @@ Maps of spatial parameters in the model.
   border-left-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_heading {
+#cgcdekdtuh .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -107,7 +116,7 @@ Maps of spatial parameters in the model.
   border-right-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_title {
+#cgcdekdtuh .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -119,7 +128,7 @@ Maps of spatial parameters in the model.
   border-bottom-width: 0;
 }
 
-#rppqspuxac .gt_subtitle {
+#cgcdekdtuh .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -131,13 +140,13 @@ Maps of spatial parameters in the model.
   border-top-width: 0;
 }
 
-#rppqspuxac .gt_bottom_border {
+#cgcdekdtuh .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_col_headings {
+#cgcdekdtuh .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -152,7 +161,7 @@ Maps of spatial parameters in the model.
   border-right-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_col_heading {
+#cgcdekdtuh .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -172,7 +181,7 @@ Maps of spatial parameters in the model.
   overflow-x: hidden;
 }
 
-#rppqspuxac .gt_column_spanner_outer {
+#cgcdekdtuh .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -184,15 +193,15 @@ Maps of spatial parameters in the model.
   padding-right: 4px;
 }
 
-#rppqspuxac .gt_column_spanner_outer:first-child {
+#cgcdekdtuh .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#rppqspuxac .gt_column_spanner_outer:last-child {
+#cgcdekdtuh .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#rppqspuxac .gt_column_spanner {
+#cgcdekdtuh .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -204,7 +213,7 @@ Maps of spatial parameters in the model.
   width: 100%;
 }
 
-#rppqspuxac .gt_group_heading {
+#cgcdekdtuh .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -229,7 +238,7 @@ Maps of spatial parameters in the model.
   vertical-align: middle;
 }
 
-#rppqspuxac .gt_empty_group_heading {
+#cgcdekdtuh .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -244,15 +253,15 @@ Maps of spatial parameters in the model.
   vertical-align: middle;
 }
 
-#rppqspuxac .gt_from_md > :first-child {
+#cgcdekdtuh .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#rppqspuxac .gt_from_md > :last-child {
+#cgcdekdtuh .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#rppqspuxac .gt_row {
+#cgcdekdtuh .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -271,7 +280,7 @@ Maps of spatial parameters in the model.
   overflow-x: hidden;
 }
 
-#rppqspuxac .gt_stub {
+#cgcdekdtuh .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -284,7 +293,7 @@ Maps of spatial parameters in the model.
   padding-right: 5px;
 }
 
-#rppqspuxac .gt_stub_row_group {
+#cgcdekdtuh .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -298,11 +307,11 @@ Maps of spatial parameters in the model.
   vertical-align: top;
 }
 
-#rppqspuxac .gt_row_group_first td {
+#cgcdekdtuh .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#rppqspuxac .gt_summary_row {
+#cgcdekdtuh .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -312,16 +321,16 @@ Maps of spatial parameters in the model.
   padding-right: 5px;
 }
 
-#rppqspuxac .gt_first_summary_row {
+#cgcdekdtuh .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_first_summary_row.thick {
+#cgcdekdtuh .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#rppqspuxac .gt_last_summary_row {
+#cgcdekdtuh .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -331,7 +340,7 @@ Maps of spatial parameters in the model.
   border-bottom-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_grand_summary_row {
+#cgcdekdtuh .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -341,7 +350,7 @@ Maps of spatial parameters in the model.
   padding-right: 5px;
 }
 
-#rppqspuxac .gt_first_grand_summary_row {
+#cgcdekdtuh .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -351,11 +360,11 @@ Maps of spatial parameters in the model.
   border-top-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_striped {
+#cgcdekdtuh .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#rppqspuxac .gt_table_body {
+#cgcdekdtuh .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -364,7 +373,7 @@ Maps of spatial parameters in the model.
   border-bottom-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_footnotes {
+#cgcdekdtuh .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -378,7 +387,7 @@ Maps of spatial parameters in the model.
   border-right-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_footnote {
+#cgcdekdtuh .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-left: 4px;
@@ -387,7 +396,7 @@ Maps of spatial parameters in the model.
   padding-right: 5px;
 }
 
-#rppqspuxac .gt_sourcenotes {
+#cgcdekdtuh .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -401,7 +410,7 @@ Maps of spatial parameters in the model.
   border-right-color: #D3D3D3;
 }
 
-#rppqspuxac .gt_sourcenote {
+#cgcdekdtuh .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -409,36 +418,36 @@ Maps of spatial parameters in the model.
   padding-right: 5px;
 }
 
-#rppqspuxac .gt_left {
+#cgcdekdtuh .gt_left {
   text-align: left;
 }
 
-#rppqspuxac .gt_center {
+#cgcdekdtuh .gt_center {
   text-align: center;
 }
 
-#rppqspuxac .gt_right {
+#cgcdekdtuh .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#rppqspuxac .gt_font_normal {
+#cgcdekdtuh .gt_font_normal {
   font-weight: normal;
 }
 
-#rppqspuxac .gt_font_bold {
+#cgcdekdtuh .gt_font_bold {
   font-weight: bold;
 }
 
-#rppqspuxac .gt_font_italic {
+#cgcdekdtuh .gt_font_italic {
   font-style: italic;
 }
 
-#rppqspuxac .gt_super {
+#cgcdekdtuh .gt_super {
   font-size: 65%;
 }
 
-#rppqspuxac .gt_two_val_uncert {
+#cgcdekdtuh .gt_two_val_uncert {
   display: inline-block;
   line-height: 1em;
   text-align: right;
@@ -447,31 +456,31 @@ Maps of spatial parameters in the model.
   margin-left: 0.1em;
 }
 
-#rppqspuxac .gt_footnote_marks {
+#cgcdekdtuh .gt_footnote_marks {
   font-style: italic;
   font-weight: normal;
   font-size: 75%;
   vertical-align: 0.4em;
 }
 
-#rppqspuxac .gt_asterisk {
+#cgcdekdtuh .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#rppqspuxac .gt_slash_mark {
+#cgcdekdtuh .gt_slash_mark {
   font-size: 0.7em;
   line-height: 0.7em;
   vertical-align: 0.15em;
 }
 
-#rppqspuxac .gt_fraction_numerator {
+#cgcdekdtuh .gt_fraction_numerator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: 0.45em;
 }
 
-#rppqspuxac .gt_fraction_denominator {
+#cgcdekdtuh .gt_fraction_denominator {
   font-size: 0.6em;
   line-height: 0.6em;
   vertical-align: -0.05em;
@@ -533,51 +542,4 @@ Maps of spatial parameters in the model.
   
 </table>
 </div><!--/html_preserve-->
-## Results
-
-### Environmental Controls on Ecosystem Recovery
-
-These parameters represent the relationship of the following environmental variables to the recovery trajectory.
-
-
-```
-## Error in filter(., type == "beta"): object 'model_results' not found
-```
-
-```
-## Error in ggplot(betas, aes(y = xname, xmin = q5, x = median, xmax = q95)): object 'betas' not found
-```
-
-```
-## Error in ggplotly(p1): object 'p1' not found
-```
-
-
-## Recovery Trajectories
-
-The plot below illustrates some example recovery trajectories. It currently just shows the top 20 cells with the most observations.
-
-
-```
-## Error in group_by(., cellID): object 'model_prediction' not found
-```
-
-```
-## Error in filter(., cellID %in% cells_with_long_records$cellID): object 'model_prediction' not found
-```
-
-
-## Spatial Predictions
-
-Maps of spatial parameters in the model.  
-
-
-```
-## Error in methods::extends(class(x), "CRS"): object 'spatial_outputs' not found
-```
-
-```
-## Error in stopifnot(inherits(x, "RasterLayer")): object 'rast' not found
-```
-
 
