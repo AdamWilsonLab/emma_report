@@ -7,7 +7,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|f7d829bfe3154bb1||||||||||||||
+.Random.seed|object|b64ecd2d7674f2d1||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -20,10 +20,10 @@ generate_reports|function|e85ebd06572fcfce||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19183.6129086916s|36061498ee3eb824|719394|rds|vector|||12.544||
-parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19183.6134515165s|38b8505555688739|717610|rds|vector|||46.8||
-ndwi|stem|71dcd5cec8261ed4|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19183.6157196208s|e655bbbdcbba1d63|81|rds|vector|||195.958||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19183.6158417505s|8f1609308eb3a189|12532|rds|vector|||10.547||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19183.6159692506s|41b3f5f621214bdd|3666614|rds|vector|||10.604||
-noaa_data|stem|71dcd5cec8261ed4|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19183.7021757298s|e655bbbdcbba1d63|81|rds|vector|||7448.228|attribute variables are assumed to be spatially constant throughout all geometries|
-reports|stem|35712d0e479112ad|6f1a63e166f080ab|0759734973bbc7ab|-653841556||t19183.7323030901s|44989414465ff33d|49|rds|vector|||2602.997|Discarded datum World Geodetic System 1984 in Proj4 definition|
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19183.9619010269s|36061498ee3eb824|719394|rds|vector|||14.144||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19183.962608113s|38b8505555688739|717610|rds|vector|||60.965||
+ndwi|stem|71dcd5cec8261ed4|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19183.9658880787s|e655bbbdcbba1d63|81|rds|vector|||283.383||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19183.9660175236s|8f1609308eb3a189|12532|rds|vector|||11.172||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19183.9661505796s|41b3f5f621214bdd|3666614|rds|vector|||11.004||
+noaa_data|stem|cb4bfb9b17519cdf|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19184.0706636185s|6281f79619f6778a|80|rds|vector|||9029.909|attribute variables are assumed to be spatially constant throughout all geometries|
+reports|stem|35712d0e479112ad|6f1a63e166f080ab|27122abb2cd04dd5|-653841556||t19184.1081833121s|44989414465ff33d|49|rds|vector|||3241.696|Discarded datum World Geodetic System 1984 in Proj4 definition|
