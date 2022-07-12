@@ -154,7 +154,7 @@ jobs:
 
       - name: update md
         run: |
-          rmarkdown::render("index.rmd")
+          rmarkdown::render("index.Rmd")
           #knitr::knit("index.Rmd")
         shell: Rscript {0}
 
