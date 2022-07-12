@@ -1,7 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
 filter_training_data|function|332014cfa3cb8341||||||||||||||
-noaa_data|stem|cb4bfb9b17519cdf|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19184.7004005028s|6281f79619f6778a|80|rds|vector|||7391.616|files 684240.gz.parquet not found in repo AdamWilsonLabemma_report|
-reports|stem|35712d0e479112ad|6f1a63e166f080ab|921e635c429bed7b|-653841556||t19184.7305237934s|44989414465ff33d|49|rds|vector|||2602.648|Discarded datum World Geodetic System 1984 in Proj4 definition|
 create_stan_data|function|7c6e224a02e15f45||||||||||||||
 summarize_predictions|function|561550e942ee3728||||||||||||||
 tidy_dynamic_data|function|3ec9d16fbf3cb1b7||||||||||||||
@@ -9,7 +7,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|fbd4ad31aad35544||||||||||||||
+.Random.seed|object|881fc8371bb590cb||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -22,8 +20,10 @@ generate_reports|function|e85ebd06572fcfce||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19185.6447252515s|36061498ee3eb824|719394|rds|vector|||12.166||
-parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19185.6452551191s|38b8505555688739|717610|rds|vector|||45.682||
-ndwi|stem|ce9214c9ba726687|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19185.647757416s|e655bbbdcbba1d63|81|rds|vector|||216.194||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19185.6478780655s|8f1609308eb3a189|12532|rds|vector|||10.414||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19185.6480039002s|41b3f5f621214bdd|3666614|rds|vector|||10.46||
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19185.75070641s|36061498ee3eb824|719394|rds|vector|||12.711||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19185.7512860007s|38b8505555688739|717610|rds|vector|||49.98||
+ndwi|stem|ce9214c9ba726687|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19185.7539202457s|e655bbbdcbba1d63|81|rds|vector|||227.592||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19185.7540439046s|8f1609308eb3a189|12532|rds|vector|||10.676||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19185.7541740913s|41b3f5f621214bdd|3666614|rds|vector|||10.766||
+noaa_data|stem|ce9214c9ba726687|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19185.8777487979s|e655bbbdcbba1d63|81|rds|vector|||10676.839|attribute variables are assumed to be spatially constant throughout all geometries|
+reports|stem|35712d0e479112ad|6f1a63e166f080ab|3c14fb29e1e9acc6|-653841556||t19185.9114295176s|44989414465ff33d|49|rds|vector|||2910.006|Discarded datum World Geodetic System 1984 in Proj4 definition|
