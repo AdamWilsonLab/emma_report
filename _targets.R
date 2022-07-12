@@ -73,8 +73,5 @@ list(
                                        n_stations = 3,
                                        parks = parks,
                                        ... = noaa_data,
-                                       ... = ndwi)),
-
- tar_target(name = update_index,
-            command = knitr::knit("index.Rmd"))
+                                       ... = ndwi))
 )
