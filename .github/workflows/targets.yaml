@@ -154,7 +154,8 @@ jobs:
 
       - name: update md
         run: |
-          knitr::knit("index.Rmd")
+          rmarkdown::render("index.rmd")
+          #knitr::knit("index.Rmd")
         shell: Rscript {0}
 
       - name: Upload latest run
