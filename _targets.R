@@ -63,17 +63,17 @@ list(
                                            temp_directory = "data/temp/noaa",
                                            sleep_time = 30,
                                            max_attempts = 10,
-                                           reset_all = FALSE)), #set this to TRUE to re-download everything, rather than only updating             
+                                           reset_all = FALSE)), #set this to TRUE to re-download everything, rather than only updating
 
- # tar_target(name = reports,
- #            command = generate_reports(output_directory = "reports/",
- #                                       temp_directory = "data/temp/reports/",
- #                                       report_location = "report_prototype.rmd",
- #                                       time_window_days = 365,
- #                                       n_stations = 3,
- #                                       parks = parks,
- #                                       ... = noaa_data,
- #                                       ... = ndwi)),
+ tar_target(name = reports,
+            command = generate_reports(output_directory = "reports/",
+                                       temp_directory = "data/temp/reports/",
+                                       report_location = "report_prototype.rmd",
+                                       time_window_days = 365,
+                                       n_stations = 3,
+                                       parks = parks,
+                                       ... = noaa_data,
+                                       ... = ndwi)),
 
  tar_target(name = update_index,
             command = knitr::knit("index.Rmd"))
