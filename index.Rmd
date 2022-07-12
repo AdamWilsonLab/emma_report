@@ -125,7 +125,8 @@ model_prediction %>%
 Maps of spatial parameters in the model.  
 
 ```{r compare_data, echo=F, eval=TRUE, warning=F, message=FALSE}
-rast=projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
+
+rast <- projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
 
 leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 
