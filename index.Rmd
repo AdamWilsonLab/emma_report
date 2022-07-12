@@ -24,7 +24,7 @@ library(leaflet)
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-tar_load(c(model_results, model_prediction, spatial_outputs))
+tar_load(names = c(model_results, model_prediction, spatial_outputs))
 
 ```
 
