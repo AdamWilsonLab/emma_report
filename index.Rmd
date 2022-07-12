@@ -21,10 +21,11 @@ library(lubridate)
 library(sf)
 library(plotly)
 library(leaflet)
+library(gt)
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-tar_load(c(model_results, model_prediction, spatial_outputs))
+tar_load(names = c(model_results, model_prediction, spatial_outputs, parks))
 
 ```
 
@@ -125,7 +126,8 @@ model_prediction %>%
 Maps of spatial parameters in the model.  
 
 ```{r compare_data, echo=F, eval=TRUE, warning=F, message=FALSE}
-rast=projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
+
+rast <- projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
 
 leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 
@@ -145,35 +147,84 @@ leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>%
 
 ## Park Information
 
-```{r,echo=FALSE,warning=FALSE,message=FALSE}
+```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
 
-library(gt)
 
-base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
-reports <- data.frame(report = list.files("reports/"))
+# need to merge each complex into a single geometry
 
-reports <- 
-reports %>%
-  mutate(url = paste(base_url,report,sep = ""),
-         park_name = gsub(pattern = "report.",replacement = "",x = report),
-         park_name = gsub(pattern = ".html",replacement = "",x = park_name),
-         park_name = gsub(pattern = "_",replacement = " ",x = park_name))
 
-reports %>%
-    mutate(
-        park = glue::glue("[{park_name}]({url})"),
-        park = map(park, gt::md))%>%
-  select(park)%>%
-  gt()
+  cn <- parks$cape_nature%>%
+      group_by(COMPLEX)%>%
+      summarise() %>%
+  rename(Park = COMPLEX)
 
-# reports %>%
-#     mutate(
-#         report = glue::glue("[link]({url})"),
-#         report = map(report, gt::md))%>%
-#   select(park,report)%>%
-#   gt()
+  np <- parks$national_parks%>%
+    group_by(CUR_NME)%>%
+    summarise() %>%
+    rename(Park = CUR_NME)
+  
+  
+  parks_sf <- bind_rows(cn,np)
+  
+  rm(np,cn)
+  
+  
+  base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
+  
+    reports <- 
+  data.frame(report = list.files("reports/")) %>%
+    mutate(url = paste(base_url,report,sep = ""),
+           park_name = gsub(pattern = "report.",replacement = "",x = report),
+           park_name = gsub(pattern = ".html",replacement = "",x = park_name),
+           park_name = gsub(pattern = "_",replacement = " ",x = park_name)) %>%
+      mutate(
+          park = glue::glue("[{park_name}]({url})"),
+          park = map(park, gt::md))
+  
+  parks_sf <-
+  parks_sf %>%
+    inner_join(y = reports,
+               by = c("Park"="park_name"))%>% 
+    st_transform(crs = st_crs(4326))%>% 
+   mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
+
+  bbox <- st_bbox(parks_sf) %>%
+  as.vector()
+
+
+```
+
+```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+
+  leaflet(data = parks_sf) %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addPolygons(color = "black",
+              stroke = TRUE,
+              fill = TRUE,
+              group = "Park",
+              popup = ~tag) %>%
+  addLayersControl(
+    baseGroups = c("NatGeo","World Imagery"),
+    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
 
 
 ```
 
+
+
+```{r park_table,echo=FALSE,warning=FALSE,message=FALSE,fig.align = 'right'}
+
+
+    reports%>%
+    select(park)%>%
+    rename(Park = park)%>%
+    gt()%>%
+  cols_align(align = "left")
+
+
+```
