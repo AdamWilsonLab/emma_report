@@ -162,6 +162,11 @@ jobs:
           #knitr::knit("index.Rmd")
         shell: Rscript {0}
         continue-on-error: true
+        
+      - name: Update md v2
+        run: |-
+          Rscript -e 'targets::tar_load(names = c(model_results, model_prediction, spatial_outputs, parks),envir=globalenv()) ; rmarkdown::render(input = "pages/index.Rmd")'
+        continue-on-error: true
 
       - name: Upload latest run
         run: |
