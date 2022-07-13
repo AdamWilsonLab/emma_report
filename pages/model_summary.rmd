@@ -1,14 +1,15 @@
 ---
-title: "EMMA Prototype"
+title: "EMMA Model Summary"
 description: Modeling vegetation postfire recovery data
+author:
+  - name: Adam Wilson & Glenn Moncrieff & Brian Maitner
 editor_options: 
   chunk_output_type: console
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
+    html_document:
+      toc: true
+      toc_depth: 2
 ---
-
 
 Model last updated at `r lubridate::now()`.
 
@@ -47,34 +48,6 @@ $$NDVI_{i,t}\sim\mathcal{N}(\mu_{i,t},\sigma_)$$
 An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. The full model also includes a sinusoidal term to capture seasonal variation, but lets keep it simple here.  
 
 
-
-## Workflow
-
-This repository was developed using the Targets framework as follows.
-
-
-```{r make_workfow, echo=F, eval = TRUE, message = F, include=FALSE}
-
-#This code chunk makes the targets visualization but does not call it (see next chunk for that)
-
-#tfile=paste0(tempfile(),".html")
-  targets_workflow_plot  <-targets::tar_visnetwork(reporter = "silent",
-                            targets_only = TRUE) #%>% 
-#  htmlwidgets::saveWidget(file = tfile)
-#webshot::install_phantomjs()
-#webshot::webshot(tfile, "network.png")
-#![targets_network](network.png)
-
-```
-
-```{r plot_workflow, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
-
-  #This code chunk plots the targets visualization.
-  # I do this in two steps to avoid errors that otherwise can occur
-
-  targets_workflow_plot
-
-```
 
 ## Results
 
@@ -143,88 +116,4 @@ leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>%
 #    labFormat = labelFormat(prefix = "$"),
 #    opacity = 1
 #  )
-```
-
-## Park Information
-
-```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
-
-
-# need to merge each complex into a single geometry
-
-
-  cn <- parks$cape_nature%>%
-      group_by(COMPLEX)%>%
-      summarise() %>%
-  rename(Park = COMPLEX)
-
-  np <- parks$national_parks%>%
-    group_by(CUR_NME)%>%
-    summarise() %>%
-    rename(Park = CUR_NME)
-  
-  
-  parks_sf <- bind_rows(cn,np)
-  
-  rm(np,cn)
-  
-  
-  base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
-  
-    reports <- 
-  data.frame(report = list.files("reports/")) %>%
-    mutate(url = paste(base_url,report,sep = ""),
-           park_name = gsub(pattern = "report.",replacement = "",x = report),
-           park_name = gsub(pattern = ".html",replacement = "",x = park_name),
-           park_name = gsub(pattern = "_",replacement = " ",x = park_name)) %>%
-      mutate(
-          park = glue::glue("[{park_name}]({url})"),
-          park = map(park, gt::md))
-  
-  parks_sf <-
-  parks_sf %>%
-    inner_join(y = reports,
-               by = c("Park"="park_name"))%>% 
-    st_transform(crs = st_crs(4326))%>% 
-   mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
-
-  bbox <- st_bbox(parks_sf) %>%
-  as.vector()
-
-
-```
-
-```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
-
-
-  leaflet(data = parks_sf) %>%
-  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
-    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
-  addPolygons(color = "black",
-              stroke = TRUE,
-              fill = TRUE,
-              group = "Park",
-              popup = ~tag) %>%
-  addLayersControl(
-    baseGroups = c("NatGeo","World Imagery"),
-    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
-  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
-
-
-
-```
-
-
-
-```{r park_table,echo=FALSE,warning=FALSE,message=FALSE,fig.align = 'right'}
-
-
-    reports%>%
-    select(park)%>%
-    rename(Park = park)%>%
-    gt()%>%
-  cols_align(align = "left")
-
-
 ```
