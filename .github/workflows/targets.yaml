@@ -154,10 +154,10 @@ jobs:
 
       - name: update md
         run: |
-          "targets::tar_load(names = c(model_results, model_prediction, spatial_outputs, parks), envir = globalenv())"
+          'targets::tar_load(names = c(model_results, model_prediction, spatial_outputs, parks), envir = globalenv()) ;
+          rmarkdown::render(input = "pages/index.Rmd");
+          rmarkdown::render(input = "pages/model_summary.rmd")'
           #rmarkdown::render(input = "pages/index.Rmd",output_dir = ".",envir = globalenv())
-          rmarkdown::render(input = "pages/index.Rmd")
-          rmarkdown::render(input = "pages/model_summary.rmd")
           #knitr::knit("index.Rmd")
         shell: Rscript {0}
         continue-on-error: true
