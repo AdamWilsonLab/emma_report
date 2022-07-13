@@ -25,7 +25,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|8b78c17c37d33246||||||||||||||
+.Random.seed|object|9ced68ebeb04adf4||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -38,6 +38,6 @@ generate_reports|function|fe6d17ca15be8d8a||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19186.768695883s|36061498ee3eb824|719394|rds|vector|||12.159||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19186.7688136627s|8f1609308eb3a189|12532|rds|vector|||10.156||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19186.7689388499s|41b3f5f621214bdd|3666614|rds|vector|||10.404||
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19186.7763424256s|36061498ee3eb824|719394|rds|vector|||13.017||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19186.7764618242s|8f1609308eb3a189|12532|rds|vector|||10.283||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19186.7765912229s|41b3f5f621214bdd|3666614|rds|vector|||10.704||
