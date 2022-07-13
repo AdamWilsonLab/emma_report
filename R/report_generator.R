@@ -14,7 +14,7 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 #tar_load(spatial_outputs)
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
-                             report_location = "pages/report_prototype.rmd",
+                             report_location = "report_prototype.rmd",
                              time_window_days = 120,
                              n_stations = 3,
                              parks,
@@ -177,9 +177,7 @@ generate_reports <- function(output_directory = "reports/",
       render(input = report_location,
              output_file = gsub(pattern = " ",replacement = "_",
                                 x = paste0('report.', park_name, '.html')),
-             output_dir = output_directory
-      )
-
+             output_dir = output_directory)
 
     }# end for loop
 

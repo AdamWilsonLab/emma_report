@@ -25,7 +25,7 @@ library(gt)
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-#tar_load(names = c(model_results, model_prediction, spatial_outputs, parks))
+
 
 ```
 
@@ -110,7 +110,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
 
 
     reports%>%
-    select(park)%>%
+    dplyr::select(park)%>%
     rename(Park = park)%>%
     gt()%>%
   cols_align(align = "left")
