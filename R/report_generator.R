@@ -14,7 +14,7 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 #tar_load(spatial_outputs)
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
-                             report_location = "report_prototype.rmd",
+                             report_location = "pages/report_prototype.rmd",
                              time_window_days = 120,
                              n_stations = 3,
                              parks,
