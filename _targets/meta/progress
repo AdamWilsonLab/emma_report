@@ -9,7 +9,9 @@ spatial_outputs|stem|spatial_outputs|0|started
 spatial_outputs|stem|spatial_outputs|0|built
 model_results|stem|model_results|0|started
 model_results|stem|model_results|0|built
-noaa_data|stem|noaa_data|0|started
-noaa_data|stem|noaa_data|0|built
 reports|stem|reports|0|started
 reports|stem|reports|0|built
+model_summary|stem|model_summary|0|started
+model_summary|stem|model_summary|0|built
+index|stem|index|0|started
+index|stem|index|0|built

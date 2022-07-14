@@ -155,11 +155,15 @@ generate_reports <- function(output_directory = "reports/",
     focal_park <- parks$national_parks %>%
       filter(CUR_NME == park_name)
 
-  render(input = report_location,
-           output_file = gsub(pattern = " ",replacement = "_",
-                                        x = paste0('report.', park_name, '.html')),
-           output_dir = output_directory
-    )
+
+    tryCatch(expr =
+      render(input = report_location,
+               output_file = gsub(pattern = " ",replacement = "_",
+                                            x = paste0('report.', park_name, '.html')),
+               output_dir = output_directory
+        ),
+      error = function(e){e}
+      )
 
 
   }# end for loop
@@ -173,13 +177,13 @@ generate_reports <- function(output_directory = "reports/",
 
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)
-
-      render(input = report_location,
-             output_file = gsub(pattern = " ",replacement = "_",
-                                x = paste0('report.', park_name, '.html')),
-             output_dir = output_directory
+      tryCatch(expr =
+                render(input = report_location,
+                       output_file = gsub(pattern = " ",replacement = "_",
+                                          x = paste0('report.', park_name, '.html')),
+                       output_dir = output_directory),
+              error = function(e){e}
       )
-
 
     }# end for loop
 
