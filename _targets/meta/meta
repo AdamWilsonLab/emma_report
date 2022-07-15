@@ -1,6 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|iteration|parent|children|seconds|warnings|error
 filter_training_data|function|332014cfa3cb8341||||||||||||||
-noaa_data|stem|548ac7d6f50aad34|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19187.104067832s|e655bbbdcbba1d63|81|rds|vector|||7407.027|attribute variables are assumed to be spatially constant throughout all geometries|
 create_stan_data|function|7c6e224a02e15f45||||||||||||||
 summarize_predictions|function|561550e942ee3728||||||||||||||
 tidy_dynamic_data|function|3ec9d16fbf3cb1b7||||||||||||||
@@ -8,7 +7,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|49450ca35fedf275||||||||||||||
+.Random.seed|object|6fb203ed958e7f15||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -22,11 +21,12 @@ generate_reports|function|5274b60056ea1bf2||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19187.9583747971s|36061498ee3eb824|719394|rds|vector|||12.151||
-parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19187.9589075322s|38b8505555688739|717610|rds|vector|||45.925||
-ndwi|stem|548ac7d6f50aad34|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19187.9613381021s|e655bbbdcbba1d63|81|rds|vector|||209.997||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19187.9614592138s|8f1609308eb3a189|12532|rds|vector|||10.455||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19187.9615837052s|41b3f5f621214bdd|3666614|rds|vector|||10.346||
-reports|stem|35712d0e479112ad|885125eabad63c2e|c993742092bd15e3|-653841556||t19187.9893461911s|44989414465ff33d|49|rds|vector|||2398.67|Discarded datum World Geodetic System 1984 in Proj4 definition|
-model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19187.9893821635s|bb4e721372eac6a0|88|rds|vector|||3.1|input and ouput crs are the same|
-index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19187.9894157284s|e655bbbdcbba1d63|81|rds|vector|||2.898||
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19188.152408343s|36061498ee3eb824|719394|rds|vector|||12.213||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19188.1530710652s|38b8505555688739|717610|rds|vector|||57.144||
+ndwi|stem|35f2d600e0d11450|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19188.1557509951s|6281f79619f6778a|80|rds|vector|||231.539||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19188.1558717401s|8f1609308eb3a189|12532|rds|vector|||10.424||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19188.1559966056s|41b3f5f621214bdd|3666614|rds|vector|||10.328||
+noaa_data|stem|35f2d600e0d11450|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19188.2458410018s|6281f79619f6778a|80|rds|vector|||7762.548|files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
+model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19188.2458851267s|bb4e721372eac6a0|88|rds|vector|||3.804|input and ouput crs are the same|
+reports|stem|35712d0e479112ad|885125eabad63c2e|9ef8c55588969a4a|-653841556||t19188.2790540845s|44989414465ff33d|49|rds|vector|||2865.765|files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
+index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19188.2790933017s|e655bbbdcbba1d63|81|rds|vector|||3.38||
