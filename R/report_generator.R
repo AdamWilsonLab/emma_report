@@ -122,7 +122,8 @@ generate_reports <- function(output_directory = "reports/",
 
       #ndwi_rast <- terra::rast(file.path(temp_directory,"ndwi.tif"))
 
-      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))
+      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))%>%
+        round(digits = 2) #round to save memory
 
 
   # Other drought layers?
@@ -147,6 +148,7 @@ generate_reports <- function(output_directory = "reports/",
   # Generate the National Park reports via a for loop
 
     #park_name <- unique(parks$national_parks$CUR_NME)[1]
+    #park_name <- unique(parks$national_parks$CUR_NME)[2]
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
 
