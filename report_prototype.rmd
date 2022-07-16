@@ -162,9 +162,20 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
   
   ndvi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
                            domain =  values(most_recent_ndvi_raster),
+                           #domain =  c(-1,1),
                            na.color = "transparent")
 
+  ndwi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
+                           domain =  values(terra::rast(ndwi_rast)),
+                           #domain = c(-1,1),
+                           na.color = "transparent")
   
+  ndwi_bin_pal <- colorBin(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
+                           #domain =  values(terra::rast(ndwi_rast)),
+                           domain = c(-1,1),
+                           bins = c(-1,-.3,0.0,0.2,1),
+                           na.color = "transparent")
+
 
 # Create bounding box for plotting  
   
@@ -187,7 +198,8 @@ bbox <- st_bbox(focal_wgs) %>%
               fill = FALSE,
               group = "Park") %>%
   addRasterImage(x = raster::raster(most_recent_ndvi_raster),
-                 group = "NDVI")%>%
+                 group = "NDVI",
+                 colors = ndvi_pal)%>%
   addPolygons(data = fires_wgs,
               color = "red",
               fill = TRUE,fillOpacity = 0,
@@ -209,6 +221,7 @@ bbox <- st_bbox(focal_wgs) %>%
   leaflet::addLegend(position = "bottomright",
             pal = ndvi_pal,          
             values = ~values(raster::raster(most_recent_ndvi_raster)),
+            #values = ~c(-1,1),
             opacity = 1,
             title = "NDVI") %>%
     addLayersControl(
@@ -221,113 +234,6 @@ bbox <- st_bbox(focal_wgs) %>%
 
 Figure X. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NA values in the fire layer indicate that no fires have been recorded for that area.
 
-
-```{r precip, eval = FALSE,fig.width = 10, echo = FALSE, warning = FALSE, message = FALSE}
-
-#construct needed bounding box
-  bb1 <- focal_wgs %>% st_bbox()
-  class(bb1) <- "numeric"
-
-# get climate data.  Currently set to grab climate data starting from one day before, using 2 days if that fails.
-  #If we fun into errors in the future, this could be turned into a "while" loop.
-  
-  
-focal_arc <- 
-  tryCatch(expr = arc2(date = seq(Sys.Date() - (time_window_days+1), Sys.Date() - 1, "days"),
-                    box = bb1) %>%
-                bind_rows(), error = function(e){
-                  
-                  arc2(date = seq(Sys.Date() - (time_window_days+2), Sys.Date() - 2, "days"),
-                    box = bb1) %>%
-                bind_rows()
-
-                })
-
-
-#in case the park is too small to show up, enlarge the bounding box until some data shows up  
-
-  if(nrow(focal_arc) == 0){
-    
-    while(nrow(focal_arc)==0){
-      
-      bb1[1] <- bb1[1] - 0.5
-      bb1[2] <- bb1[2] - 0.5
-      bb1[3] <- bb1[3] + 0.5
-      bb1[4] <- bb1[4] + 0.5
-      
-      
-      focal_arc <- 
-  tryCatch(expr = arc2(date = seq(Sys.Date() - (time_window_days+1), Sys.Date() - 1, "days"),
-                    box = bb1) %>%
-                bind_rows(), error = function(e){
-                  
-                  arc2(date = seq(Sys.Date() - (time_window_days+2), Sys.Date() - 2, "days"),
-                    box = bb1) %>%
-                bind_rows()
-
-                })
-      
-    }
-    
-    
-    
-  }#if no data retereived
-
-
-
-
-
-  
-#toss values outside of the park (unless there aren't any)  
-
-  
-  focal_arc %>%
-    st_as_sf(coords = c("lon","lat"),
-             crs = st_crs(focal_wgs)) -> focal_arc
-
-st_intersection(x = focal_arc,
-                y = focal_wgs) -> park_arc
-
-
-#make a plot
-  if(nrow(park_arc) == 0){
-    
-    
-    
-    focal_arc %>%
-      group_by(date)%>%
-      summarize(mean_precip = mean(precip)) %>%
-      st_drop_geometry()%>% mutate(date = as.Date(date))%>%
-      ggplot(mapping = aes(x = date, y = mean_precip))+
-      geom_line()+
-      xlab("Date")+
-      ylab("Mean Precipitation (mm)")+
-             ylim(c(0, max(focal_arc$precip)%>% {if(.==0){100}else .}) )
-      
-
-  }else{
-    
-    park_arc %>%
-      group_by(date)%>%
-      summarize(mean_precip = mean(precip)) %>%
-      st_drop_geometry()%>% mutate(date = as.Date(date))%>%
-      ggplot(mapping = aes(x = date, y = mean_precip))+
-      geom_line()+
-      xlab("Date")+
-      ylab("Mean Precipitation (mm)")+
-             ylim(c(0, max(focal_arc$precip)%>% {if(.==0){100}else .}) )
-  
-  }
-
-
-
-  #clean up
-    rm(focal_arc, park_arc)
-
-  #clear out arc data
-    arc2_cache$delete_all()
-
-```
 
 ## Weather Data
 
@@ -552,12 +458,16 @@ library(leafem)
               fill = FALSE,
               group = "Park") %>%
   addRasterImage(x = ndwi_rast,
-                 group = "NDWI")%>% 
+                 group = "NDWI",
+                 #colors = ndwi_pal
+                 colors = ndwi_bin_pal
+                 )%>% 
   addMouseCoordinates() %>%
       addImageQuery(ndwi_rast, type="mousemove", layerId = "NDWI") %>%
   leaflet::addLegend(position = "bottomright",
-            pal = ndvi_pal,          
-            values = ~values(raster::raster(most_recent_ndvi_raster)),
+            #pal = ndwi_pal,
+            pal = ndwi_bin_pal,
+            values = ~values(ndwi_rast),
             opacity = 1,
             title = "NDWI") %>%
     addLayersControl(
