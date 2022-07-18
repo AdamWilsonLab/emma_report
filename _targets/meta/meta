@@ -7,7 +7,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|92e26b8ea0c699a0||||||||||||||
+.Random.seed|object|00399b26d111d709||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -21,12 +21,12 @@ generate_reports|function|aa2e2180dd5ff113||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19190.0144812516s|36061498ee3eb824|719394|rds|vector|||12.439||
-parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19190.0150031055s|38b8505555688739|717610|rds|vector|||44.974||
-ndwi|stem|295475125d42cb01|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19190.017721217s|e655bbbdcbba1d63|81|rds|vector|||234.837||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19190.0178416341s|8f1609308eb3a189|12532|rds|vector|||10.391||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19190.0179664493s|41b3f5f621214bdd|3666614|rds|vector|||10.351||
-noaa_data|stem|295475125d42cb01|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19190.1168345337s|e655bbbdcbba1d63|81|rds|vector|||8542.19|files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
-model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19190.1168853211s|bb4e721372eac6a0|88|rds|vector|||4.379|input and ouput crs are the same|
-reports|stem|35712d0e479112ad|885125eabad63c2e|60532afac1673ea7|-653841556||t19190.1456579972s|44989414465ff33d|49|rds|vector|||2485.953|Some values were outside the color scale and will be treated as NA|
-index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19190.1456985531s|e655bbbdcbba1d63|81|rds|vector|||3.495||
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19191.0134211452s|36061498ee3eb824|719394|rds|vector|||12.513||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19191.0139669061s|38b8505555688739|717610|rds|vector|||47.051||
+ndwi|stem|d582cc6fa32fb6a9|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19191.0161523083s|e655bbbdcbba1d63|81|rds|vector|||188.81||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19191.0162744885s|8f1609308eb3a189|12532|rds|vector|||10.549||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19191.0164029189s|41b3f5f621214bdd|3666614|rds|vector|||10.686||
+noaa_data|stem|d582cc6fa32fb6a9|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19191.1033967428s|e655bbbdcbba1d63|81|rds|vector|||7516.251|files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
+model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19191.1034357268s|bb4e721372eac6a0|88|rds|vector|||3.361|input and ouput crs are the same|
+reports|stem|35712d0e479112ad|885125eabad63c2e|77d21edc8762c6fb|-653841556||t19191.1295009973s|44989414465ff33d|49|rds|vector|||2252.035|Some values were outside the color scale and will be treated as NA|
+index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19191.1295319715s|e655bbbdcbba1d63|81|rds|vector|||2.667||
