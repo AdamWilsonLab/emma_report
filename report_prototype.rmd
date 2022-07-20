@@ -439,7 +439,7 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 ## Drought Indices
 
-
+### NDWI
 ```{r NDWI_plot, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 library(raster)
@@ -486,3 +486,65 @@ Interpreting NDWI:
   * 0.0 – -0.3 = Moderate drought, non-aqueous surfaces,
   * -0.3 – -1 = Drought, non-aqueous surface
   
+### SPI
+
+
+```{r calc_spi, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+library(SPEI)
+
+  #Make a dataset with only mostly complete data
+
+  stations_to_keep <-
+  focal_precip %>%
+    as.data.frame()%>%
+    pivot_longer(cols = !date_time,
+                 names_to = "station_name",
+                 values_to = "monthly_precip_mm") %>%
+    group_by(station_name) %>%
+    summarize(fraction_na = sum(is.na(monthly_precip_mm))/length(monthly_precip_mm)) %>%
+    filter(fraction_na < 0.05) %>%
+    dplyr::select(station_name)
+
+  
+  focal_precip%>%
+    as.data.frame()%>%
+    .[stations_to_keep$station_name]->
+    focal_spi_data
+  
+  
+  #calculate spi at different temporal windows
+
+    spi_1 <- spi(data = ts(focal_spi_data,
+                           frequency = 12,
+                           start = c(rownames(focal_spi_data)[1]%>%
+                                       substr(start = 0,stop = 4),
+                                     rownames(focal_spi_data)[1]%>%
+                                       substr(start = 6,stop = 7))),
+                 scale =  1)
+    
+    
+    spi_3 <- spi(data = ts(focal_spi_data,
+                           frequency = 12,
+                           start = c(rownames(focal_spi_data)[1]%>%
+                                       substr(start = 0,stop = 4),
+                                     rownames(focal_spi_data)[1]%>%
+                                       substr(start = 6,stop = 7))),
+                 scale =  3)
+    
+    spi_12 <- spi(data = ts(focal_spi_data,
+                           frequency = 12,
+                           start = c(rownames(focal_spi_data)[1]%>%
+                                       substr(start = 0,stop = 4),
+                                     rownames(focal_spi_data)[1]%>%
+                                       substr(start = 6,stop = 7))),
+                 scale =  12)
+
+plot(spi_1,main=' 1 Month SPI')
+plot(spi_3,main=' 3 Month SPI')
+plot(spi_12,main=' 12 Month SPI')
+
+
+
+
+```
