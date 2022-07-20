@@ -7,7 +7,7 @@ robust_pb_download_solo|function|a40beb94c364506a||||||||||||||
 clean_up|function|08bcf9ecea369349||||||||||||||
 get_release_ndwi_modis|function|dc695cfb3f10343e||||||||||||||
 release_posteriors|function|e85e8a50366c3522||||||||||||||
-.Random.seed|object|323c8b47506e58c3||||||||||||||
+.Random.seed|object|5d39e295504440f8||||||||||||||
 tidy_static_data|function|43f7289642705070||||||||||||||
 summarize_model_output|function|50f2b753a815b00e||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565||||||||||||||
@@ -21,12 +21,12 @@ generate_reports|function|aa2e2180dd5ff113||||||||||||||
 get_park_polygons|function|eece94dc2ce1eda6||||||||||||||
 update_climate_data|function|1f6d688ddedd5855||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6||||||||||||||
-model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19192.0161779856s|36061498ee3eb824|719394|rds|vector|||12.767||
-parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19192.0167531829s|38b8505555688739|717610|rds|vector|||49.584||
-ndwi|stem|7568c6bab27992bb|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19192.01938156s|6281f79619f6778a|80|rds|vector|||227.085||
-spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19192.0195044784s|8f1609308eb3a189|12532|rds|vector|||10.611||
-model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19192.0196337857s|41b3f5f621214bdd|3666614|rds|vector|||10.679||
-noaa_data|stem|7568c6bab27992bb|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19192.1121092907s|6281f79619f6778a|80|rds|vector|||7989.877|files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
-model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19192.1121537839s|bb4e721372eac6a0|88|rds|vector|||3.834|input and ouput crs are the same|
-reports|stem|35712d0e479112ad|885125eabad63c2e|8356509f3aa77b5a|-653841556||t19192.1403191395s|44989414465ff33d|49|rds|vector|||2433.48|Some values were outside the color scale and will be treated as NA|
-index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19192.1403557619s|e655bbbdcbba1d63|81|rds|vector|||3.156||
+model_prediction|stem|30fbc23b1e49fbdc|4af6374459a311cc|5b264e4e72da3550|1564443633||t19193.6287894868s|36061498ee3eb824|719394|rds|vector|||13.024||
+parks|stem|76e108455f1867de|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19193.6294282838s|38b8505555688739|717610|rds|vector|||55.09||
+ndwi|stem|4e3c559bc53c82fd|c30e9c6e62f4db0a|a6d491664e4e3846|62726435||t19193.6324329619s|e655bbbdcbba1d63|81|rds|vector|||259.595||
+spatial_outputs|stem|5fcacc989c82bd00|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19193.6325565267s|8f1609308eb3a189|12532|rds|vector|||10.673||
+model_results|stem|d7e099d4363f0eea|72019223cd81982c|5b264e4e72da3550|-1393141758||t19193.6326868971s|41b3f5f621214bdd|3666614|rds|vector|||10.842||
+noaa_data|stem|4e3c559bc53c82fd|213719836a57dd4a|5e0dddc4134ee92c|1392023248||t19193.751427392s|e655bbbdcbba1d63|81|rds|vector|||10259.165|attribute variables are assumed to be spatially constant throughout all geometries|
+model_summary|stem|f6cd9678ef6dc66b|e8e50b85f51aaca1|f7eeaed47ec76af1|-817296688||t19193.7514636419s|bb4e721372eac6a0|88|rds|vector|||3.124|input and ouput crs are the same|
+reports|stem|35712d0e479112ad|885125eabad63c2e|be3fd3d2bb41a447|-653841556||t19193.7726850424s|44989414465ff33d|49|rds|vector|||1833.531|Some values were outside the color scale and will be treated as NA|
+index|stem|f31014d665152587|a4ca43c67b0c546c|3e41612e46a0059b|-1857023687||t19193.7727155051s|e655bbbdcbba1d63|81|rds|vector|||2.62||
