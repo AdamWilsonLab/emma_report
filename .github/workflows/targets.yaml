@@ -61,6 +61,8 @@ jobs:
       - uses: actions/checkout@v2
         with:
           lfs:  'true'
+      - name: Whitelist directory
+        run: git config --global --add safe.directory /__w/emma_report/emma_report
       - name: Checkout LFS objects
         run: git lfs checkout
         continue-on-error: true
@@ -151,12 +153,6 @@ jobs:
           rm -r .git
           mv .targets-runs/.git .
           rm -r .targets-runs
-
-      - name: update md
-        run: |
-          rmarkdown::render("index.Rmd")
-          #knitr::knit("index.Rmd")
-        shell: Rscript {0}
 
       - name: Upload latest run
         run: |
