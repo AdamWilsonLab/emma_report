@@ -112,6 +112,7 @@ generate_reports <- function(output_directory = "reports/",
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
 
 
+
   # MODIS NDWI
 
       robust_pb_download(file = "ndwi.tif",

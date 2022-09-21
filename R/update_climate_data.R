@@ -310,7 +310,7 @@ update_climate_data <- function(parks,
 
   # clean up cache
 
-    rnoaa::isd_cache$delete_all()
+    rnoaa::isd_cache$delete_all(force = TRUE)
 
   # clean up temp files
     unlink(file.path(temp_directory),
