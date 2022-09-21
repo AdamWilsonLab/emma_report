@@ -44,7 +44,6 @@ list(
                  command = get_model_data(file = "model_prediction.rds")
     ),
 
-
   tar_target(name = parks,
              command = get_park_polygons(temp_directory = "data/temp/",
                                          sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
@@ -52,18 +51,24 @@ list(
                                          cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
              ),
 
-  tar_target(name = ndwi,
-             command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
-                                              tag = "current"))
-  ,
 
+  tar_age(name = ndwi,
+          command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
+                                           tag = "current"),
+          age = as.difftime(7, units = "days")
+          #age = as.difftime(0, units = "hours")
+  ),
 
-  tar_target(name = noaa_data,
-             command = update_climate_data(parks = parks,
-                                           temp_directory = "data/temp/noaa",
-                                           sleep_time = 30,
-                                           max_attempts = 10,
-                                           reset_all = FALSE)), #set this to TRUE to re-download everything, rather than only updating
+  tar_age(name = noaa_data,
+          command = update_climate_data(parks = parks,
+                                        temp_directory = "data/temp/noaa",
+                                        sleep_time = 30,
+                                        max_attempts = 10,
+                                        reset_all = FALSE), #set this to TRUE to re-download everything, rather than only updating
+          #age = as.difftime(7, units = "days")
+          age = as.difftime(0, units = "hours") #will update whenever run
+  ),
+
 
  tar_target(name = reports,
             command = generate_reports(output_directory = "reports/",
