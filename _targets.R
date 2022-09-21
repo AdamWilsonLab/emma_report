@@ -79,7 +79,7 @@ list(
                                          temp_directory = "data/temp/reports/",
                                          report_location = "report_prototype.rmd",
                                          time_window_days = 365,
-                                         min_date = "2020-01-01",
+                                         min_date = "2010-01-01",
                                          n_stations = 3,
                                          parks = parks,
                                          ... = noaa_data,
