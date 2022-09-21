@@ -161,13 +161,13 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
   
   
   ndvi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
-                           domain =  values(most_recent_ndvi_raster),
-                           #domain =  c(-1,1),
+                           #domain =  values(most_recent_ndvi_raster),
+                           domain =  c(-1,0,1),
                            na.color = "transparent")
 
   ndwi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
-                           domain =  values(terra::rast(ndwi_rast)),
-                           #domain = c(-1,1),
+                           #domain =  values(terra::rast(ndwi_rast)),
+                           domain = c(-1,1),
                            na.color = "transparent")
   
   ndwi_bin_pal <- colorBin(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
@@ -275,7 +275,7 @@ library(dygraphs)
     rm(to_rm)
     
     
-  focal_weather  <- open_dataset(file.path(temp_directory,closest_stations))
+  focal_weather  <- open_dataset(file.path(temp_directory, closest_stations))
   
   focal_weather %>% collect() -> focal_weather
   
@@ -507,13 +507,12 @@ library(SPEI)
     dplyr::select(station_name)
 
   
-  focal_precip%>%
-    as.data.frame()%>%
-    .[stations_to_keep$station_name]->
-    focal_spi_data
-  
-  
-  #calculate spi at different temporal windows
+  focal_precip %>%
+    as.data.frame() %>%
+    .[stations_to_keep$station_name] %>%
+     mutate_if(is.character, as.numeric)-> focal_spi_data
+
+    #calculate spi at different temporal windows
 
     spi_1 <- spi(data = ts(focal_spi_data,
                            frequency = 12,
