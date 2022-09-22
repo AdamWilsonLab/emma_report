@@ -106,7 +106,7 @@ get_release_ndwi_modis <- function(temp_directory = "data/temp/raw_data/NDWI_MOD
 
   # End
     message("NDWI download finished")
-    return(Sys.Date())
+    return(as.character(Sys.Date()))
 
 
 

@@ -320,7 +320,7 @@ update_climate_data <- function(parks,
   # clean up garbage
     gc()
 
-  return(Sys.Date())
+  return(as.character(Sys.Date()))
 
 }# end fx
 
