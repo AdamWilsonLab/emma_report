@@ -6,6 +6,7 @@ library(piggyback)
 library(plotly)
 library(leaflet)
 library(rnoaa)
+library(gt)
 
 #remotes::install_github("ropensci/stantargets")
 # if(!"basemapR" %in% rownames(installed.packages())){
