@@ -70,8 +70,8 @@ list(
                                           sleep_time = 30,
                                           max_attempts = 10,
                                           reset_all = FALSE), #set this to TRUE to re-download everything, rather than only updating
-            #age = as.difftime(7, units = "days")
-            age = as.difftime(0, units = "hours") #will update whenever run
+            age = as.difftime(7, units = "days")
+            #age = as.difftime(0, units = "hours") #will update whenever run
     ),
 
 

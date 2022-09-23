@@ -168,7 +168,7 @@ generate_reports <- function(output_directory = "reports/",
                                             x = paste0('report.', park_name, '.html')),
                output_dir = output_directory
         ),
-      error = function(e){e}
+      error = function(e){message("Error processing ", park_name);e}
       )
 
 
@@ -189,7 +189,7 @@ generate_reports <- function(output_directory = "reports/",
                        output_file = gsub(pattern = " ",replacement = "_",
                                           x = paste0('report.', park_name, '.html')),
                        output_dir = output_directory),
-              error = function(e){e}
+              error = function(e){message("Error processing ", park_name); e}
       )
 
     }# end for loop
