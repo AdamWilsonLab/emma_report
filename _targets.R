@@ -29,7 +29,7 @@ tar_option_set(packages = c("piggyback","cmdstanr", "posterior", "bayesplot", "t
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction,parks))
 Sys.setenv(HOME="/home/rstudio")
 
-# tar_destroy(ask = F)
+tar_destroy(ask = F)
 
 list(
 
