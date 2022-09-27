@@ -83,7 +83,8 @@ generate_reports <- function(output_directory = "reports/",
   # make a polygon version and convert to WGS84 (for plotting ease)
 
     fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
-      st_as_sf() %>% rename(Years = lyr.1) %>%
+      st_as_sf() %>%
+      rename(Years = lyr.1) %>%
       st_transform(crs = st_crs(4326))
 
   # get most recent NDVI data
@@ -110,6 +111,9 @@ generate_reports <- function(output_directory = "reports/",
   # Fix the NDVI values
 
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
+    most_recent_ndvi_raster %>%
+      terra::mask(mask = most_recent_ndvi_raster,
+                  maskvalue = 0) -> most_recent_ndvi_raster
 
 
   # MODIS NDWI
@@ -125,7 +129,6 @@ generate_reports <- function(output_directory = "reports/",
 
       ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))%>%
         round(digits = 2) #round to save memory
-
 
   # Other drought layers?
 
@@ -165,7 +168,7 @@ generate_reports <- function(output_directory = "reports/",
                                             x = paste0('report.', park_name, '.html')),
                output_dir = output_directory
         ),
-      error = function(e){e}
+      error = function(e){message("Error processing ", park_name);e}
       )
 
 
@@ -180,12 +183,13 @@ generate_reports <- function(output_directory = "reports/",
 
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)
+
       tryCatch(expr =
                 render(input = report_location,
                        output_file = gsub(pattern = " ",replacement = "_",
                                           x = paste0('report.', park_name, '.html')),
                        output_dir = output_directory),
-              error = function(e){e}
+              error = function(e){message("Error processing ", park_name); e}
       )
 
     }# end for loop
