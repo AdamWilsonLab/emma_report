@@ -71,8 +71,14 @@ jobs:
           ref: targets-runs
           fetch-depth: 1
           path: .targets-runs
+
       - name: Whitelist directory
         run: git config --global --add safe.directory /__w/emma_report/emma_report
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
+        continue-on-error: true
+
 
 
       - name: Restore output files from the previous run
@@ -93,25 +99,27 @@ jobs:
         run: git ls-files -mo --exclude=renv > .targets-files
 
       - name: Create the runs branch if it does not already exist
-        #if: steps.runs-exist.outcome != 'success'
+        if: steps.runs-exist.outcome != 'success'
         run: git checkout --orphan targets-runs
 
-      # - name: Put the worktree in the runs branch if the latter already exists
-      #   if: steps.runs-exist.outcome == 'success'
-      #   run: |
-      #     rm -r .git
-      #     mv .targets-runs/.git .
-      #     rm -r .targets-runs
+      - name: Put the worktree in the runs branch if the latter already exists
+        if: steps.runs-exist.outcome == 'success'
+        run: |
+          rm -r .git
+          mv .targets-runs/.git .
+          rm -r .targets-runs
 
       - name: Upload latest run
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
           rm -r .gitignore .github/workflows
+          git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
+          git lfs track "data/**"
           git add --all -- ':!renv'
           for file in $(git ls-files -mo --exclude=renv)
           do
-            git add --force $file
+            git add -f $file
           done
           git commit -am "Run pipeline"
           git push origin targets-runs
