@@ -1,0 +1,11 @@
+.targets-files
+_targets/.gitignore
+_targets/meta/meta
+_targets/meta/process
+_targets/meta/progress
+_targets/objects/model_prediction
+_targets/objects/model_results
+_targets/objects/parks
+_targets/objects/spatial_outputs
+data/temp/reports/model_results.rds
+data/temp/reports/spatial_outputs.rds
