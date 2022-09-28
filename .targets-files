@@ -1,3 +1,4 @@
+.main-runs/
 .targets-files
 _targets/.gitignore
 _targets/meta/meta

@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|83c15d3ecc010835|||||||||||||||
+.Random.seed|object|851512cbcdc645ad|||||||||||||||
 clean_up|function|08bcf9ecea369349|||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565|||||||||||||||
 create_stan_data|function|7c6e224a02e15f45|||||||||||||||
@@ -10,14 +10,14 @@ get_park_polygons|function|eece94dc2ce1eda6|||||||||||||||
 get_release_ndwi_modis|function|41a69ea9a1df0841|||||||||||||||
 good_max|function|d93feaf4abe9f8eb|||||||||||||||
 good_mean|function|37479be04005688b|||||||||||||||
-index|stem|e9099775f56d1d34|c01d5277708ade71|db70121e39ef5462|-1857023687||t19263.1334054642s|e655bbbdcbba1d63|81|rds|local|vector|||1.342||
-model_prediction|stem|40c020f04e7439ca|4af6374459a311cc|5b264e4e72da3550|1564443633||t19263.1327451419s|16b57c4e5f97ad64|3424207|rds|local|vector|||12.923||
-model_results|stem|437119f2ef452720|72019223cd81982c|5b264e4e72da3550|-1393141758||t19263.1333897698s|dfd8a6b92d9e1dcd|16898948|rds|local|vector|||11.167||
-parks|stem|183a82d3abf90451|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19263.1330708817s|38b8505555688739|717610|rds|local|vector|||28.039||
+index|stem|e9099775f56d1d34|c01d5277708ade71|db70121e39ef5462|-1857023687||t19263.137426033s|e655bbbdcbba1d63|81|rds|local|vector|||1.532||
+model_prediction|stem|40c020f04e7439ca|4af6374459a311cc|5b264e4e72da3550|1564443633||t19263.1367585319s|16b57c4e5f97ad64|3424207|rds|local|vector|||13.322||
+model_results|stem|437119f2ef452720|72019223cd81982c|5b264e4e72da3550|-1393141758||t19263.1374081163s|dfd8a6b92d9e1dcd|16898948|rds|local|vector|||11.217||
+parks|stem|183a82d3abf90451|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19263.137089227s|38b8505555688739|717610|rds|local|vector|||28.472||
 release_posteriors|function|e85e8a50366c3522|||||||||||||||
 robust_pb_download|function|c9145002d00cc12e|||||||||||||||
 robust_pb_download_solo|function|a40beb94c364506a|||||||||||||||
-spatial_outputs|stem|d275614827ae6025|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19263.1332387517s|52db4f11487bd757|32263235|rds|local|vector|||11.938||
+spatial_outputs|stem|d275614827ae6025|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19263.1372567736s|52db4f11487bd757|32263235|rds|local|vector|||12.056||
 summarize_model_output|function|50f2b753a815b00e|||||||||||||||
 summarize_predictions|function|561550e942ee3728|||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6|||||||||||||||
