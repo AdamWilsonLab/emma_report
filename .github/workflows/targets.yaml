@@ -29,6 +29,13 @@ on:
       - main
       - master
 
+# Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+  schedule:
+   # - cron:  '1 0 * * 0' #every sunday just after midnight
+    - cron:  '0 0 * * *' #daily at midnight
+
+
 name: targets
 
 jobs:
