@@ -78,23 +78,23 @@ jobs:
 
       - name: Check if previous runs exists
         id: runs-exist
-        run: git ls-remote --exit-code --heads origin targets-runs
+        run: git ls-remote --exit-code --heads origin main-runs
         continue-on-error: true
 
       - name: Checkout previous run
         if: steps.runs-exist.outcome == 'success'
         uses: actions/checkout@v2
         with:
-          ref: targets-runs
+          ref: main-runs
           fetch-depth: 1
-          path: .targets-runs
+          path: .main-runs
           lfs:  'true' #attempting to fix issue with target-committed lfs files not being treated as lfs
 
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
         run: |
-          for (dest in scan(".targets-runs/.targets-files", what = character())) {
-            source <- file.path(".targets-runs", dest)
+          for (dest in scan(".main-runs/.targets-files", what = character())) {
+            source <- file.path(".main-runs", dest)
             if (!file.exists(dirname(dest))) dir.create(dirname(dest), recursive = TRUE)
             if (file.exists(source)) file.rename(source, dest)
           }
@@ -109,14 +109,14 @@ jobs:
 
       - name: Create the runs branch if it does not already exist
         if: steps.runs-exist.outcome != 'success'
-        run: git checkout --orphan targets-runs
+        run: git checkout --orphan main-runs
 
       - name: Put the worktree in the runs branch if the latter already exists
         if: steps.runs-exist.outcome == 'success'
         run: |
           rm -r .git
-          mv .targets-runs/.git .
-          rm -r .targets-runs
+          mv .main-runs/.git .
+          rm -r .main-runs
 
       - name: Upload latest run
         run: |
@@ -131,11 +131,11 @@ jobs:
             git add -f $file
           done
           git commit -am "Run pipeline"
-          git push origin targets-runs
+          git push origin main-runs
 
       - name: Prepare failure artifact
         if: failure()
-        run: rm -rf .git .github .targets-files .targets-runs
+        run: rm -rf .git .github .targets-files .main-runs
 
       - name: Post failure artifact
         if: failure()
