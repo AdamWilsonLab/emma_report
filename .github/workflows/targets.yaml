@@ -48,28 +48,39 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          lfs:  'true'
+
+      - name: Whitelist directory
+        run: git config --global --add safe.directory /__w/emma_report/emma_report
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
+        continue-on-error: true
+
       - name: Install R Package Dependencies
         run: |-
           Rscript -e "questionr::qscan(list.files(pattern='*.R',recursive=T), load = TRUE, detail = TRUE)" # this scans all scripts and installs any needed packages
 
 
-      # - name: Cache packages
-      #   uses: actions/cache@v1
-      #   with:
-      #     path: ${{ env.RENV_PATHS_ROOT }}
-      #     key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-      #     restore-keys: ${{ runner.os }}-renv-
+      - name: Cache packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: ${{ runner.os }}-renv-
 
-      # - name: Restore packages
-      #   shell: Rscript {0}
-      #   run: |
-      #     if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-      #     renv::restore()
+      - name: Restore packages
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
 
       - name: Check if previous runs exists
         id: runs-exist
         run: git ls-remote --exit-code --heads origin targets-runs
         continue-on-error: true
+
       - name: Checkout previous run
         if: steps.runs-exist.outcome == 'success'
         uses: actions/checkout@v2
@@ -78,6 +89,7 @@ jobs:
           fetch-depth: 1
           path: .targets-runs
           lfs:  'true' #attempting to fix issue with target-committed lfs files not being treated as lfs
+
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
         run: |
