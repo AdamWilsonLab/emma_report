@@ -55,7 +55,7 @@ list(
                                            sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
                                            cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
                )
-   #  ,
+   ,
    #
    #
    #  tar_age(name = ndwi,
@@ -94,11 +94,11 @@ list(
    #                               ... = model_prediction,
    #                               ... = spatial_outputs)),
    #
-   # tar_target(name = index,
-   #            command = workflow(call = rmarkdown::render(input = "index.qmd"),
-   #                               ... = parks,
-   #                               ... = reports,
-   #                               ... = model_summary))
+   tar_target(name = index,
+              command = workflow(call = rmarkdown::render(input = "index.qmd"),
+                                 ... = parks,
+                                 ... = reports,
+                                 ... = model_summary))
    #
    #
    #
