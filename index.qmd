@@ -37,6 +37,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
 
 ```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
 
+  tar_load(parks)
 
 # need to merge each complex into a single geometry
 
