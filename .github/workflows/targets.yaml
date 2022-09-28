@@ -70,7 +70,6 @@ jobs:
         id: runs-exist
         run: git ls-remote --exit-code --heads origin targets-runs
         continue-on-error: true
-
       - name: Checkout previous run
         if: steps.runs-exist.outcome == 'success'
         uses: actions/checkout@v2
@@ -78,16 +77,7 @@ jobs:
           ref: targets-runs
           fetch-depth: 1
           path: .targets-runs
-
-      - name: Whitelist directory
-        run: git config --global --add safe.directory /__w/emma_report/emma_report
-
-      - name: Checkout LFS objects
-        run: git lfs checkout
-        continue-on-error: true
-
-
-
+          lfs:  'true' #attempting to fix issue with target-committed lfs files not being treated as lfs
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
         run: |
