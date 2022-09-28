@@ -1,3 +1,6 @@
+# classic
+
+
 # MIT License
 # Copyright (c) 2021 Eli Lilly and Company
 # Author: William Michael Landau (will.landau at gmail)
@@ -28,13 +31,13 @@ on:
     branches:
       - main
       - master
+      - dev-adam
 
 # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
   schedule:
    # - cron:  '1 0 * * 0' #every sunday just after midnight
     - cron:  '0 0 * * *' #daily at midnight
-
 
 name: targets
 
@@ -44,79 +47,115 @@ jobs:
     container: adamwilsonlab/emma:latest
     env:
       GITHUB_PAT: ${{ secrets.GH_PAT_BSM }}
-      RENV_PATHS_ROOT: ~/.local/share/renv
-
+#      RENV_PATHS_ROOT: ~/.local/share/renv
     steps:
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+#       - name: Maximize build space
+#         uses: easimon/maximize-build-space@master # https://github.com/easimon/maximize-build-space
+#         with:
+# #          root-reserve-mb: 512
+# #          swap-size-mb: 1024
+#           remove-dotnet: 'true'
+#           remove-android: 'true'
+#           remove-haskell: 'true'
       - uses: actions/checkout@v2
         with:
           lfs:  'true'
-
       - name: Whitelist directory
         run: git config --global --add safe.directory /__w/emma_report/emma_report
-
       - name: Checkout LFS objects
         run: git lfs checkout
         continue-on-error: true
-
       - name: Install R Package Dependencies
         run: |-
           Rscript -e "questionr::qscan(list.files(pattern='*.R',recursive=T), load = TRUE, detail = TRUE)" # this scans all scripts and installs any needed packages
+      - name: Authorize Github for R
+        run: |-
+      # - name: Cache packages
+      #   uses: actions/cache@v1
+      #   with:
+      #     path: ${{ env.RENV_PATHS_ROOT }}
+      #     key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+      #     restore-keys: ${{ runner.os }}-renv-
 
-
-      - name: Cache packages
-        uses: actions/cache@v1
-        with:
-          path: ${{ env.RENV_PATHS_ROOT }}
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: ${{ runner.os }}-renv-
-
-      - name: Restore packages
-        shell: Rscript {0}
-        run: |
-          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-          renv::restore()
+      # - name: Restore packages
+      #   shell: Rscript {0}
+      #   run: |
+      #     if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+      #     renv::restore()
 
       - name: Check if previous runs exists
         id: runs-exist
-        run: git ls-remote --exit-code --heads origin main-runs
+        run: git ls-remote --exit-code --heads origin ${{ steps.extract_branch.outputs.branch }}-runs
         continue-on-error: true
 
       - name: Checkout previous run
         if: steps.runs-exist.outcome == 'success'
         uses: actions/checkout@v2
         with:
-          ref: main-runs
+          ref: ${{ steps.extract_branch.outputs.branch }}-runs
           fetch-depth: 1
-          path: .main-runs
-          lfs:  'true' #attempting to fix issue with target-committed lfs files not being treated as lfs
+          path: .${{ steps.extract_branch.outputs.branch }}-runs
 
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
         run: |
-          for (dest in scan(".main-runs/.targets-files", what = character())) {
-            source <- file.path(".main-runs", dest)
+          for (dest in scan(".${{ steps.extract_branch.outputs.branch }}-runs/.targets-files", what = character())) {
+            source <- file.path(".${{ steps.extract_branch.outputs.branch }}-runs", dest)
             if (!file.exists(dirname(dest))) dir.create(dirname(dest), recursive = TRUE)
             if (file.exists(source)) file.rename(source, dest)
           }
         shell: Rscript {0}
 
-      - name: Run targets pipeline
-        run: targets::tar_make()
+#      - name: Run targets pipeline
+#        run: targets::tar_make(callr_function = NULL)
+#        shell: Rscript {0}
+#      - name: Identify files that the targets pipeline produced
+#        run: git ls-files -mo --exclude=renv > .targets-files
+
+      - name: Run targets pt 1
+        run: |
+          Sys.setenv(HOME="/home/rstudio")
+          cmdstanr::set_cmdstan_path("/home/rstudio/.cmdstanr/cmdstan-2.28.1")
+          cmdstanr::check_cmdstan_toolchain()
+          #cmdstanr::install_cmdstan()
         shell: Rscript {0}
 
-      - name: Identify files that the targets pipeline produced
-        run: git ls-files -mo --exclude=renv > .targets-files
+      - name: Verify credentials
+        run: |
+          pwd
+          ls
+          ./.github/decrypt_secret.sh
+          ls ~/.config/earthengine
+          earthengine -h
+        env:
+          RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
+        continue-on-error: true
+
+#      - name: check on files
+#        run: |
+#          file data/raw_data/ndvi_modis/2021_12_19.tif
+#          file data/raw_data/ndvi_modis/2022_01_01.tif
+#        continue-on-error: true
+
+      - name: Run targets pt 2
+        run: |
+          targets::tar_make()
+        shell: Rscript {0}
 
       - name: Create the runs branch if it does not already exist
         if: steps.runs-exist.outcome != 'success'
-        run: git checkout --orphan main-runs
+        run: git checkout --orphan ${{ steps.extract_branch.outputs.branch }}-runs
 
       - name: Put the worktree in the runs branch if the latter already exists
         if: steps.runs-exist.outcome == 'success'
         run: |
           rm -r .git
-          mv .main-runs/.git .
-          rm -r .main-runs
+          mv .${{ steps.extract_branch.outputs.branch }}-runs/.git .
+          rm -r .${{ steps.extract_branch.outputs.branch }}-runs
 
       - name: Upload latest run
         run: |
@@ -131,11 +170,11 @@ jobs:
             git add -f $file
           done
           git commit -am "Run pipeline"
-          git push origin main-runs
+          git push origin ${{ steps.extract_branch.outputs.branch }}-runs
 
       - name: Prepare failure artifact
         if: failure()
-        run: rm -rf .git .github .targets-files .main-runs
+        run: rm -rf .git .github .targets-files .${{ steps.extract_branch.outputs.branch }}-runs
 
       - name: Post failure artifact
         if: failure()
