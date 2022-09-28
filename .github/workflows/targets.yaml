@@ -71,6 +71,9 @@ jobs:
           ref: targets-runs
           fetch-depth: 1
           path: .targets-runs
+      - name: Whitelist directory
+        run: git config --global --add safe.directory /__w/emma_report/emma_report
+
 
       - name: Restore output files from the previous run
         if: steps.runs-exist.outcome == 'success'
