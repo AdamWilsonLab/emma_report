@@ -1,0 +1,118 @@
+---
+title: "EMMA Report"
+description: Modeling vegetation postfire recovery data
+editor_options: 
+  chunk_output_type: console
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+---
+
+
+Page last updated at `r lubridate::now()`.
+
+```{r, echo=F, message=F,include=F, results="hide"}
+library(targets)
+library(tidyverse)
+library(doParallel)
+library(raster)
+library(lubridate)
+library(sf)
+library(plotly)
+library(leaflet)
+library(gt)
+
+# load data saved in the pipeline
+#tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
+
+
+```
+
+# Model Overview
+
+We estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. More details are available <a href=https://adamwilsonlab.github.io/emma_report/model_summary.html>here.</a>
+
+# Park Information
+
+```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
+
+
+# need to merge each complex into a single geometry
+
+
+  cn <- parks$cape_nature%>%
+      group_by(COMPLEX)%>%
+      summarise() %>%
+  rename(Park = COMPLEX)
+
+  np <- parks$national_parks%>%
+    group_by(CUR_NME)%>%
+    summarise() %>%
+    rename(Park = CUR_NME)
+  
+  
+  parks_sf <- bind_rows(cn,np)
+  
+  rm(np,cn)
+  
+  
+  base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
+  
+    reports <- 
+  data.frame(report = list.files("reports/")) %>%
+    mutate(url = paste(base_url,report,sep = ""),
+           park_name = gsub(pattern = "report.",replacement = "",x = report),
+           park_name = gsub(pattern = ".html",replacement = "",x = park_name),
+           park_name = gsub(pattern = "_",replacement = " ",x = park_name)) %>%
+      mutate(
+          park = glue::glue("[{park_name}]({url})"),
+          park = map(park, gt::md))
+  
+  parks_sf <-
+  parks_sf %>%
+    inner_join(y = reports,
+               by = c("Park"="park_name"))%>% 
+    st_transform(crs = st_crs(4326))%>% 
+   mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
+
+  bbox <- st_bbox(parks_sf) %>%
+  as.vector()
+
+
+```
+
+```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+
+  leaflet(data = parks_sf) %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addPolygons(color = "black",
+              stroke = TRUE,
+              fill = TRUE,
+              group = "Park",
+              popup = ~tag) %>%
+  addLayersControl(
+    baseGroups = c("NatGeo","World Imagery"),
+    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+
+
+
+```
+
+
+
+```{r park_table,echo=FALSE,warning=FALSE,message=FALSE,fig.align = 'right'}
+
+
+    reports%>%
+    dplyr::select(park)%>%
+    rename(Park = park)%>%
+    gt()%>%
+  cols_align(align = "left")
+
+
+```
