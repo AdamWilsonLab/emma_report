@@ -28,72 +28,54 @@ on:
     branches:
       - main
       - master
-      - dev-adam
-
-# Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-  schedule:
-   # - cron:  '1 0 * * 0' #every sunday just after midnight
-    - cron:  '0 0 * * *' #daily at midnight
 
 name: targets
 
 jobs:
   targets:
-    runs-on: ubuntu-18.04
-    container: adamwilsonlab/emma:latest
+    runs-on: ubuntu-latest
     env:
-      GITHUB_PAT: ${{ secrets.GH_PAT_BSM }}
-#      RENV_PATHS_ROOT: ~/.local/share/renv
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RENV_PATHS_ROOT: ~/.local/share/renv
     steps:
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
-#       - name: Maximize build space
-#         uses: easimon/maximize-build-space@master # https://github.com/easimon/maximize-build-space
-#         with:
-# #          root-reserve-mb: 512
-# #          swap-size-mb: 1024
-#           remove-dotnet: 'true'
-#           remove-android: 'true'
-#           remove-haskell: 'true'
       - uses: actions/checkout@v2
-        with:
-          lfs:  'true'
-      - name: Whitelist directory
-        run: git config --global --add safe.directory /__w/emma_report/emma_report
-      - name: Checkout LFS objects
-        run: git lfs checkout
-        continue-on-error: true
-      - name: Install R Package Dependencies
-        run: |-
-          Rscript -e "questionr::qscan(list.files(pattern='*.R',recursive=T), load = TRUE, detail = TRUE)" # this scans all scripts and installs any needed packages
-      - name: Authorize Github for R
-        run: |-
-      # - name: Cache packages
-      #   uses: actions/cache@v1
-      #   with:
-      #     path: ${{ env.RENV_PATHS_ROOT }}
-      #     key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-      #     restore-keys: ${{ runner.os }}-renv-
+      - uses: r-lib/actions/setup-r@master
+      - uses: r-lib/actions/setup-pandoc@master
 
-      # - name: Restore packages
-      #   shell: Rscript {0}
-      #   run: |
-      #     if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
-      #     renv::restore()
+      - name: Install Mac system dependencies
+        if: runner.os == 'macOS'
+        run: brew install zeromq
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install libcurl4-openssl-dev
+          sudo apt-get install libssl-dev
+          sudo apt-get install libzmq3-dev
+
+      - name: Cache packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: ${{ runner.os }}-renv-
+
+      - name: Restore packages
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
 
       - name: Check if previous runs exists
         id: runs-exist
-        run: git ls-remote --exit-code --heads origin ${{ steps.extract_branch.outputs.branch }}-runs
+        run: git ls-remote --exit-code --heads origin targets-runs
         continue-on-error: true
 
       - name: Checkout previous run
         if: steps.runs-exist.outcome == 'success'
         uses: actions/checkout@v2
         with:
-          ref: ${{ steps.extract_branch.outputs.branch }}-runs
+          ref: targets-runs
           fetch-depth: 1
           path: .targets-runs
 
@@ -107,45 +89,16 @@ jobs:
           }
         shell: Rscript {0}
 
-#      - name: Run targets pipeline
-#        run: targets::tar_make(callr_function = NULL)
-#        shell: Rscript {0}
-#      - name: Identify files that the targets pipeline produced
-#        run: git ls-files -mo --exclude=renv > .targets-files
-
-      - name: Run targets pt 1
-        run: |
-          Sys.setenv(HOME="/home/rstudio")
-          cmdstanr::set_cmdstan_path("/home/rstudio/.cmdstanr/cmdstan-2.28.1")
-          cmdstanr::check_cmdstan_toolchain()
-          #cmdstanr::install_cmdstan()
+      - name: Run targets pipeline
+        run: targets::tar_make()
         shell: Rscript {0}
 
-      - name: Verify credentials
-        run: |
-          pwd
-          ls
-          ./.github/decrypt_secret.sh
-          ls ~/.config/earthengine
-          earthengine -h
-        env:
-          RGEE_SECRET: ${{ secrets.RGEE_SECRET }}
-        continue-on-error: true
-
-#      - name: check on files
-#        run: |
-#          file data/raw_data/ndvi_modis/2021_12_19.tif
-#          file data/raw_data/ndvi_modis/2022_01_01.tif
-#        continue-on-error: true
-
-      - name: Run targets pt 2
-        run: |
-          targets::tar_make()
-        shell: Rscript {0}
+      - name: Identify files that the targets pipeline produced
+        run: git ls-files -mo --exclude=renv > .targets-files
 
       - name: Create the runs branch if it does not already exist
         if: steps.runs-exist.outcome != 'success'
-        run: git checkout --orphan ${{ steps.extract_branch.outputs.branch }}-runs
+        run: git checkout --orphan targets-runs
 
       - name: Put the worktree in the runs branch if the latter already exists
         if: steps.runs-exist.outcome == 'success'
@@ -159,15 +112,13 @@ jobs:
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
           rm -r .gitignore .github/workflows
-          git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
-          git lfs track "data/**"
           git add --all -- ':!renv'
           for file in $(git ls-files -mo --exclude=renv)
           do
-            git add -f $file
+            git add --force $file
           done
           git commit -am "Run pipeline"
-          git push origin ${{ steps.extract_branch.outputs.branch }}-runs
+          git push origin targets-runs
 
       - name: Prepare failure artifact
         if: failure()
