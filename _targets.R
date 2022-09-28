@@ -47,14 +47,14 @@ list(
     tar_target(name = model_prediction,
                  command = get_model_data(file = "model_prediction.rds")
     )
-    ,
-
-    tar_target(name = parks,
-               command = get_park_polygons(temp_directory = "data/temp/",
-                                           sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
-                                           sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
-                                           cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
-               )
+    # ,
+    #
+    # tar_target(name = parks,
+    #            command = get_park_polygons(temp_directory = "data/temp/",
+    #                                        sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
+    #                                        sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
+    #                                        cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp")
+    #            )
    #  ,
    #
    #
