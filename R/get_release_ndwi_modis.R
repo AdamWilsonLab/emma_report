@@ -70,8 +70,11 @@ get_release_ndwi_modis <- function(temp_directory = "data/temp/raw_data/NDWI_MOD
                                 dsn = file.path(temp_directory, "ndwi.tif"),
                                 maxPixels = 10000000000)
 
+    ndwi_raster <- rast(file.path(temp_directory, "ndwi.tif"))
     ndwi_raster_og <- ndwi_raster
+
     plot(ndwi_raster_og)
+
 
   # Load raster
 
