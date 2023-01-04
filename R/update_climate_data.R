@@ -114,9 +114,8 @@ update_climate_data <- function(parks,
     }
 
 
-
-
-    for(i in 1:length(unique(stations_to_update$usaf))){
+    if(  length(unique(stations_to_update$usaf)) > 0){
+      for(i in 1:length(unique(stations_to_update$usaf))){
 
       usaf_i <- unique(stations_to_update$usaf)[i]
 
@@ -307,7 +306,7 @@ update_climate_data <- function(parks,
 
 
     }# i loop
-
+    }#if there are things to update
   # clean up cache
 
     rnoaa::isd_cache$delete_all(force = TRUE)
