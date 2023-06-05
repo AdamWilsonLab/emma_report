@@ -7,6 +7,7 @@ library(plotly)
 library(leaflet)
 library(rnoaa)
 library(gt)
+library(dygraphs)
 
 #remotes::install_github("ropensci/stantargets")
 # if(!"basemapR" %in% rownames(installed.packages())){
@@ -58,12 +59,12 @@ list(
    ,
 
 
-    tar_age(name = ndwi,
-            command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
-                                             tag = "current"),
-            age = as.difftime(7, units = "days")
-            #age = as.difftime(0, units = "hours")
-    ),
+    # tar_age(name = ndwi,
+    #         command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
+    #                                          tag = "current"),
+    #         age = as.difftime(7, units = "days")
+    #         #age = as.difftime(0, units = "hours")
+    # ),
 
     tar_age(name = noaa_data,
             command = update_climate_data(parks = parks,
