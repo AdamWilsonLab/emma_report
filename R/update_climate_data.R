@@ -26,10 +26,10 @@ good_mean <- function(x){
 
 
 update_climate_data <- function(parks,
-                             temp_directory = "data/temp/noaa",
-                             sleep_time = 1,
-                             max_attempts = 100,
-                             reset_all=FALSE){
+                                temp_directory = "data/temp/noaa",
+                                sleep_time = 1,
+                                max_attempts = 100,
+                                reset_all=FALSE){
 
   #clean dir if needed
     if(dir.exists(temp_directory)){
