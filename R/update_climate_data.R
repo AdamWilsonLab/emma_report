@@ -29,7 +29,9 @@ update_climate_data <- function(parks,
                                 temp_directory = "data/temp/noaa",
                                 sleep_time = 1,
                                 max_attempts = 100,
-                                reset_all=FALSE){
+                                reset_all=FALSE,
+                                batch = TRUE,
+                                batches = 2){
 
   #clean dir if needed
     if(dir.exists(temp_directory)){
@@ -94,8 +96,9 @@ update_climate_data <- function(parks,
       dplyr::filter(!(usaf %in% stations_in_releases$station_id)|
                end_year ==  format(Sys.Date(), "%Y")) -> stations_to_update
 
-    #to save time, we'll only download full information for stations that are missing.  for ones that just need an update, we can just pull the newest data
 
+
+    #to save time, we'll only download full information for stations that are missing.  for ones that just need an update, we can just pull the newest data
 
     if(reset_all){
 
@@ -112,6 +115,26 @@ update_climate_data <- function(parks,
 
 
     }
+
+
+    #batches=TRUE, only update the stations in the corresponding batch
+
+      if(batches){
+
+        batched_stations <- split(as.numeric(sort(unique(stations$usaf))), cut_number(as.numeric(sort(unique(stations$usaf))), batches))
+
+        current_batch <- batched_stations[rep(1:batches,ceiling(366/length(1:batches)))[lubridate::yday(Sys.Date())]]
+
+        current_batch <- unlist(current_batch) %>% unname()
+
+
+        stations_to_update %>%
+          filter(usaf %in% current_batch) -> stations_to_update
+
+
+
+        }
+
 
 
     if(  length(unique(stations_to_update$usaf)) > 0){

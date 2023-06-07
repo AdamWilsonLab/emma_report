@@ -64,7 +64,9 @@ list(
                                           temp_directory = "data/temp/noaa",
                                           sleep_time = 30,
                                           max_attempts = 10,
-                                          reset_all = FALSE), #set this to TRUE to re-download everything, rather than only updating
+                                          reset_all = FALSE,
+                                          batch = TRUE,
+                                          batches = 2), #set this to TRUE to re-download everything, rather than only updating
             age = as.difftime(7, units = "days")
             #age = as.difftime(0, units = "hours") #will update whenever run
     ),
