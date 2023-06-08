@@ -7,6 +7,7 @@ library(plotly)
 library(leaflet)
 library(rnoaa)
 library(gt)
+library(dygraphs)
 
 #remotes::install_github("ropensci/stantargets")
 # if(!"basemapR" %in% rownames(installed.packages())){
@@ -58,19 +59,14 @@ list(
    ,
 
 
-    tar_age(name = ndwi,
-            command = get_release_ndwi_modis(temp_directory = "data/temp/raw_data/NDWI_MODIS/",
-                                             tag = "current"),
-            age = as.difftime(7, units = "days")
-            #age = as.difftime(0, units = "hours")
-    ),
-
     tar_age(name = noaa_data,
             command = update_climate_data(parks = parks,
                                           temp_directory = "data/temp/noaa",
                                           sleep_time = 30,
                                           max_attempts = 10,
-                                          reset_all = FALSE), #set this to TRUE to re-download everything, rather than only updating
+                                          reset_all = FALSE,
+                                          batch = TRUE,
+                                          batches = 2), #set this to TRUE to re-download everything, rather than only updating
             age = as.difftime(7, units = "days")
             #age = as.difftime(0, units = "hours") #will update whenever run
     ),

@@ -121,7 +121,7 @@ generate_reports <- function(output_directory = "reports/",
       robust_pb_download(file = "ndwi.tif",
                          tag = tag,
                          dest = file.path(temp_directory),
-                         repo = "AdamWilsonLab/emma_report",
+                         repo = "AdamWilsonLab/emma_envdata",
                          max_attempts = max_attempts,
                          sleep_time = sleep_time)
 
