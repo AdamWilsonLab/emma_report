@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|06057ccb7ed8b9bb|||||||||||||||
+.Random.seed|object|e03d9c8af66a6423|||||||||||||||
 clean_up|function|08bcf9ecea369349|||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565|||||||||||||||
 create_stan_data|function|7c6e224a02e15f45|||||||||||||||
@@ -10,18 +10,18 @@ get_park_polygons|function|eece94dc2ce1eda6|||||||||||||||
 get_release_ndwi_modis|function|bbff24c27a6d4e7d|||||||||||||||
 good_max|function|d93feaf4abe9f8eb|||||||||||||||
 good_mean|function|37479be04005688b|||||||||||||||
-index|stem|f4ae612e3825cdc2|c01d5277708ade71|ee14f6c948cec6d3|-1857023687||t19519.1648914585s|e655bbbdcbba1d63|81|rds|local|vector|||7.524||
-model_prediction|stem|7ae6696106c3302c|4af6374459a311cc|5b264e4e72da3550|1564443633||t19519.0136888315s|16b57c4e5f97ad64|3424207|rds|local|vector|||18.318||
-model_results|stem|2740c44991bba2aa|72019223cd81982c|5b264e4e72da3550|-1393141758||t19519.0144217953s|dfd8a6b92d9e1dcd|16898948|rds|local|vector|||11.603||
-model_summary|stem|b197c2615202a198|89dc60a17ac37e7c|b72ee13db9922178|-817296688||t19519.124070602s|bb4e721372eac6a0|88|rds|local|vector|||43.917||
+index|stem|f4ae612e3825cdc2|c01d5277708ade71|ee14f6c948cec6d3|-1857023687||t19520.2083343581s|e655bbbdcbba1d63|81|rds|local|vector|||9.037||
+model_prediction|stem|7ae6696106c3302c|4af6374459a311cc|5b264e4e72da3550|1564443633||t19520.0133845227s|16b57c4e5f97ad64|3424207|rds|local|vector|||18.105||
+model_results|stem|2740c44991bba2aa|72019223cd81982c|5b264e4e72da3550|-1393141758||t19520.0140548765s|dfd8a6b92d9e1dcd|16898948|rds|local|vector|||11.927||
+model_summary|stem|b197c2615202a198|89dc60a17ac37e7c|b72ee13db9922178|-817296688||t19520.1643639931s|bb4e721372eac6a0|88|rds|local|vector|||45.556||
 ndwi|stem|28157d137ad31573|c30e9c6e62f4db0a|8fdb73ee57bc9cda|62726435||t19381.0087803654s|b2c2d69496a0fbf4|63|rds|local|vector|||230.639||
-noaa_data|stem|e58f20999874b50b|390f67f326c53cbf|505447c2116dee22|1392023248||t19519.1235621436s|b2c2d69496a0fbf4|63|rds|local|vector|||9429.694|attribute variables are assumed to be spatially constant throughout all geometries. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report. files 688280.gz.parquet not found in repo AdamWilsonLabemma_report|
-parks|stem|408cf1da8498d2d8|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19519.0140754769s|af81871c37d6fdb2|717793|rds|local|vector|||33.287||
+noaa_data|stem|7764b881e7798a07|390f67f326c53cbf|505447c2116dee22|1392023248||t19520.1638366453s|b2c2d69496a0fbf4|63|rds|local|vector|||12941.108|attribute variables are assumed to be spatially constant throughout all geometries|
+parks|stem|408cf1da8498d2d8|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19520.013713981s|af81871c37d6fdb2|717793|rds|local|vector|||28.348||
 release_posteriors|function|e85e8a50366c3522|||||||||||||||
-reports|stem|bb98630c05b5bd13|0d5b83284d2cd6c6|b4c7a44a5f128010|-653841556||t19519.1648032116s|44989414465ff33d|49|rds|local|vector|||3519.281||
+reports|stem|bb98630c05b5bd13|0d5b83284d2cd6c6|46e8d7680cb988cc|-653841556||t19520.2082286131s|44989414465ff33d|49|rds|local|vector|||3789.88||
 robust_pb_download|function|c9145002d00cc12e|||||||||||||||
 robust_pb_download_solo|function|a40beb94c364506a|||||||||||||||
-spatial_outputs|stem|eb652fb97728a727|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19519.0142612758s|bf562e24e1b8207f|32263236|rds|local|vector|||13.198||
+spatial_outputs|stem|eb652fb97728a727|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19520.0138907482s|bf562e24e1b8207f|32263236|rds|local|vector|||12.413||
 summarize_model_output|function|50f2b753a815b00e|||||||||||||||
 summarize_predictions|function|561550e942ee3728|||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6|||||||||||||||
