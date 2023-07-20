@@ -1,4 +1,6 @@
 name|type|parent|branches|progress
+remnants|stem|remnants|0|started
+remnants|stem|remnants|0|built
 model_prediction|stem|model_prediction|0|started
 model_prediction|stem|model_prediction|0|built
 parks|stem|parks|0|started
