@@ -181,7 +181,8 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
                            #domain =  values(terra::rast(ndwi_rast)),
                            domain = c(-1,1),
                            bins = c(-1,-.3,0.0,0.2,1),
-                           na.color = "transparent")
+                           na.color = "transparent",
+                           alpha = TRUE)
 
 
 # Create bounding box for plotting  
@@ -200,11 +201,11 @@ bbox <- st_bbox(focal_wgs) %>%
 
   # Get data for closest weather stations
   
-    cent <- suppressWarnings(st_centroid(focal_park))
+    cent <- suppressWarnings( focal_park %>%
+                                st_union()%>%
+                                st_centroid())
     
-    #st_crs(focal_park)==st_crs(stations_sf)
-    
-    
+
     closest_stations <- 
       data.frame(station = stations_sf$usaf,
                distance = as.numeric(st_distance(cent,stations_sf)))
@@ -489,7 +490,8 @@ library(leafem)
   addRasterImage(x = ndwi_rast,
                  group = "NDWI",
                  #colors = ndwi_pal
-                 colors = ndwi_bin_pal
+                 colors = ndwi_bin_pal,
+                 opacity = 0.8
                  )%>% 
   addMouseCoordinates() %>%
       addImageQuery(ndwi_rast, type="mousemove", layerId = "NDWI") %>%
