@@ -19,6 +19,7 @@ generate_reports <- function(output_directory = "reports/",
                              time_window_days = 120,
                              n_stations = 3,
                              parks,
+                             remnants,
                              sleep_time = 10,
                              max_attempts = 10,
                              tag = "current",
@@ -80,6 +81,14 @@ generate_reports <- function(output_directory = "reports/",
                  fun = function(x){
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
+
+  # crop years since fire raster to the remnants
+
+    remnants <- terra::rast("data/misc/remnants.tif")
+
+    years_since_fire_raster %>%
+      mask(remnants) -> years_since_fire_raster
+
   # make a polygon version and convert to WGS84 (for plotting ease)
 
     fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
@@ -115,6 +124,12 @@ generate_reports <- function(output_directory = "reports/",
       terra::mask(mask = most_recent_ndvi_raster,
                   maskvalue = 0) -> most_recent_ndvi_raster
 
+  # Get NDVI date
+
+    most_recent_ndvi_file %>%
+      mutate(file_name = gsub(pattern = ".tif",replacement="",x=file_name))%>%
+      pull(file_name)%>%
+      as_date() -> most_recent_ndvi_date
 
   # MODIS NDWI
 
@@ -130,9 +145,15 @@ generate_reports <- function(output_directory = "reports/",
       ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))%>%
         round(digits = 2) #round to save memory
 
+    # MODIS NDWI date
+
+      env_files %>%
+        filter(file_name == "ndwi.tif")%>%
+        pull(timestamp) %>%
+        as_date() -> most_recent_ndwi_date
+
+
   # Other drought layers?
-
-
 
 
   # Get the weather station metadata

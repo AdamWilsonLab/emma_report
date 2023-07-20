@@ -37,10 +37,17 @@ library(rgee)
 
 ```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE}
 
-#CREATE wgs84 version of the park polygon
+# CREATE wgs84 version of the park polygon
 
     focal_park %>% 
     st_transform(crs = st_crs(4326)) -> focal_wgs
+
+# Create a truncated version of the fire maps (ranging from 1-20)
+
+  fires_wgs %>%
+    mutate(Years = case_when(Years > 20 ~ 20,
+                             Years <=20 ~ Years)) -> fires_wgs_truncated
+  
 
 
 #Note that the "addLegend_decreasing" isn't quite right, but might be close enough if you feel strongly about the ordering
@@ -153,11 +160,11 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
 # Create continuous palettes
 
   pal <- colorNumeric(palette = "Reds",
-                      domain = fires_wgs$Years,
+                      domain = fires_wgs_truncated$Years,
                       reverse = TRUE)
 
   antipal <- colorNumeric(palette = "Reds",
-                          domain = fires_wgs$Years,reverse = FALSE)
+                          domain = fires_wgs_truncated$Years,reverse = FALSE)
   
   
   ndvi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
@@ -187,60 +194,9 @@ bbox <- st_bbox(focal_wgs) %>%
 ```
 
 
-```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r prep_weather_data, echo = FALSE, warning = FALSE, message = FALSE}
 
-  leaflet(data = focal_wgs) %>%
-  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
-    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
-  addPolygons(color = "black",
-              stroke = TRUE,
-              fill = FALSE,
-              group = "Park") %>%
-  addRasterImage(x = raster::raster(most_recent_ndvi_raster),
-                 group = "NDVI",
-                 colors = ndvi_pal)%>%
-  addPolygons(data = fires_wgs,
-              color = "red",
-              fill = TRUE,fillOpacity = 0,
-              stroke = TRUE,
-              label = paste(fires_wgs$Years, "years since burn"),
-              weight = 1,
-              group = "Fire Outlines") %>%
-    addPolygons(data = fires_wgs,
-              color = ~antipal(Years),
-              fillOpacity = .75,
-              stroke = FALSE,
-              label = fires_wgs$Years,
-              group = "Fires") %>%
-    addLegend_decreasing(position = "bottomright",
-            pal = pal,
-            values = ~fires_wgs$Years,
-    title = "Years<br/>Since<br/>Fire",
-    opacity = 1) %>%
-  leaflet::addLegend(position = "bottomright",
-            pal = ndvi_pal,          
-            values = ~values(raster::raster(most_recent_ndvi_raster)),
-            #values = ~c(-1,1),
-            opacity = 1,
-            title = "NDVI") %>%
-    addLayersControl(
-    baseGroups = c("NatGeo","World Imagery"),
-    overlayGroups = c("NDVI", "Fire Outlines","Fires", "Park"),
-    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
-  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
-
-```
-
-Figure X. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NA values in the fire layer indicate that no fires have been recorded for that area.
-
-
-## Weather Data
-
-```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE}
-
-library(dygraphs)
-# see: https://rstudio.github.io/dygraphs/
+# Process the station and weather data
 
   # Get data for closest weather stations
   
@@ -272,9 +228,14 @@ library(dygraphs)
                 max_attempts = max_attempts,
                 sleep_time = sleep_time,
                 show_progress=FALSE) -> to_rm
-    rm(to_rm)
     
+    if(exists("to_rm")){rm(to_rm)}
     
+  
+  #Hack in case some of the files aren't downloaded correctly.  
+    closest_stations  <- intersect(closest_stations,
+                                   list.files(temp_directory))
+  
   focal_weather  <- open_dataset(file.path(temp_directory, closest_stations))
   
   focal_weather %>% collect() -> focal_weather
@@ -284,7 +245,8 @@ library(dygraphs)
     stations %>%
     dplyr::select(usaf,wban,station_name)%>%
     inner_join(y = focal_weather,
-               by = c("usaf"="usaf_station","wban"="wban_station"))%>%
+               by = c("usaf"="usaf_station","wban"="wban_station"),
+               multiple = "all")%>%
     dplyr::rename(station_name = station_name.x)-> focal_weather
 
   #with dygraphs, first element should be x axis, or else do it as an xts
@@ -307,9 +269,6 @@ library(dygraphs)
   focal_weather <- 
     focal_weather%>%
       filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
-  
-
-    
   
   #Generate precip dataset
   
@@ -344,7 +303,77 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
                 values_fn = mean) %>%
     xts::xts(order.by = .$date_time) -> focal_temp
   
+#Generate sf of station points
   
+  focal_stations_sf <-
+  stations_sf %>%
+    filter(usaf %in%gsub(pattern = ".gz.parquet",
+                         replacement = "",x = closest_stations)) %>%
+    st_transform(st_crs(fires_wgs_truncated))
+
+
+```
+
+```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+  leaflet(data = focal_wgs) %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addPolygons(color = "black",
+              stroke = TRUE,
+              fill = FALSE,
+              group = "Park") %>%
+  addRasterImage(x = raster::raster(most_recent_ndvi_raster),
+                 group = "NDVI",
+                 colors = ndvi_pal)%>%
+  addPolygons(data = fires_wgs_truncated,
+              color = "red",
+              fill = TRUE,fillOpacity = 0,
+              stroke = TRUE,
+              label = paste(fires_wgs$Years, "years since burn"),
+              weight = 1,
+              group = "Fire Outlines") %>%
+    addPolygons(data = fires_wgs_truncated,
+              color = ~antipal(Years),
+              fillOpacity = .75,
+              stroke = FALSE,
+              label = fires_wgs$Years,
+              group = "Fires") %>%
+    addMarkers(data = focal_stations_sf,
+               label = focal_stations_sf$station_name,
+               group = "Stations") %>%
+    hideGroup("Stations") %>%
+    addLegend_decreasing(position = "bottomright",
+            pal = pal,
+            values = ~fires_wgs_truncated$Years,
+    title = "Years<br/>Since<br/>Fire",
+    opacity = 1) %>%
+  leaflet::addLegend(position = "bottomright",
+            pal = ndvi_pal,          
+            values = ~values(raster::raster(most_recent_ndvi_raster)),
+            #values = ~c(-1,1),
+            opacity = 1,
+            title = "NDVI") %>%
+    addLayersControl(
+    baseGroups = c("NatGeo","World Imagery"),
+    overlayGroups = c("NDVI", "Fire Outlines","Fires", "Park", "Stations"),
+    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+
+```
+
+Figure X. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest.
+
+
+## Weather Data
+
+```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE}
+
+  # see: https://rstudio.github.io/dygraphs/
+
+
+    library(dygraphs)
   
   
 
@@ -383,7 +412,7 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
           main = "Temperature",
           xlab = "Date",
           ylab = "Temp. (C)") %>%
-    dySeries()%>%
+    dySeries() %>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
 
   
@@ -478,6 +507,10 @@ library(leafem)
 
 
 ```
+
+NDWI is...  
+
+The NDWI data was last updated on `r most_recent_ndwi_date` (although it may be older than that, need to update the code to log the collection date.)
 
 Interpreting NDWI:
 
