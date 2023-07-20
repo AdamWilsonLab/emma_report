@@ -2,7 +2,7 @@
 title: "EMMA Report Prototype"
 description: Modeling vegetation postfire recovery data
 author:
-  - name: Adam Wilson & Glenn Moncrieff
+  - name: Adam Wilson & Glenn Moncrieff & Brian Maitner
 editor_options: 
   chunk_output_type: console
 output:
@@ -26,7 +26,6 @@ library(xts)
 library(plotly)
 library(leaflet)
 library(dygraphs)
-library(rgee)
 
 ```
 
@@ -241,6 +240,7 @@ bbox <- st_bbox(focal_wgs) %>%
   
   focal_weather %>% collect() -> focal_weather
   
+  
   #fix station names in focal weather (missing in many case)
   
     stations %>%
@@ -273,11 +273,11 @@ bbox <- st_bbox(focal_wgs) %>%
   
   #Generate precip dataset
   
-  focal_weather%>%
+focal_weather %>%
   group_by(station_name,year,month)%>%
   summarise(monthly_precip_mm = sum(na.omit(mean_precip_mm)))%>%
   ungroup() %>%
-mutate(date_time = paste(year,month,01,sep = "-"))%>%
+  mutate(date_time = paste(year,month,01,sep = "-"))%>%
   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
   dplyr::filter(!is.na(date_time))%>%
@@ -285,7 +285,15 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
   pivot_wider(values_from = monthly_precip_mm,
               names_from = station_name,
               values_fn = mean) %>%
+    mutate(doy =  lubridate::yday(date_time) ) %>%
+    left_join(x=.,
+              y  = group_by(., doy) %>%
+                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+                                          na.rm=TRUE))
+              ) %>%
+  dplyr::select(-doy)%>%
   xts::xts(order.by = .$date_time) -> focal_precip
+
 
   
   # focal_weather %>%
@@ -295,14 +303,39 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
   #             values_fn = mean) %>%
   #   xts::xts(order.by = .$date_time) -> focal_precip
   
-#Generate temp dataset
+  # Generate temp dataset
   
-  focal_weather%>%
-    dplyr::select(date_time, station_name, temp_c) %>%
-    pivot_wider(values_from = temp_c,
-                names_from = station_name,
-                values_fn = mean) %>%
-    xts::xts(order.by = .$date_time) -> focal_temp
+  # focal_weather%>%
+  #   dplyr::select(date_time, station_name, temp_c) %>%
+  #   pivot_wider(values_from = temp_c,
+  #               names_from = station_name,
+  #               values_fn = mean) %>%
+  #   xts::xts(order.by = .$date_time) -> focal_temp
+  
+    
+    #mean daily temp dataset
+    focal_weather%>%
+  group_by(station_name,year,month,day)%>%
+  summarise(daily_temp_C = mean(na.omit(temp_c)))%>%
+  ungroup() %>%
+mutate(date_time = paste(year,month,day,sep = "-"))%>%
+  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+  dplyr::filter(!is.na(date_time))%>%
+  dplyr::select(date_time,station_name, daily_temp_C) %>%
+  pivot_wider(values_from = daily_temp_C,
+              names_from = station_name,
+              values_fn = mean) %>%
+    mutate(doy =  lubridate::yday(date_time) ) %>%
+    left_join(x=.,
+              y  = group_by(., doy) %>%
+                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+                                          na.rm=TRUE))
+              ) %>%
+  dplyr::select(-doy)%>%
+    xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
+
+
+  
   
 #Generate sf of station points
   
@@ -364,7 +397,7 @@ mutate(date_time = paste(year,month,01,sep = "-"))%>%
 
 ```
 
-Figure X. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest.
+Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest.
 
 
 ## Weather Data
@@ -385,29 +418,14 @@ Figure X. Leaflet map showing NDVI and the number of years since the most recent
     dySeries()%>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> precip_graph
   
-
-  dygraph(data = focal_temp[,colnames(focal_temp)[which(colnames(focal_precip)!="date_time")]],
-          main = "Temperature",
-          xlab = "Date",
-          ylab = "Temp. (C)") %>%
-    dySeries()%>%
-    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
-
-  
-    #mean daily temp dataset
-    focal_weather%>%
-  group_by(station_name,year,month,day)%>%
-  summarise(daily_temp_C = mean(na.omit(temp_c)))%>%
-  ungroup() %>%
-mutate(date_time = paste(year,month,day,sep = "-"))%>%
-  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
-  dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name, daily_temp_C) %>%
-  pivot_wider(values_from = daily_temp_C,
-              names_from = station_name,
-              values_fn = mean)%>%
-    xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
-
+# 
+#   dygraph(data = focal_temp[,colnames(focal_temp)[which(colnames(focal_precip)!="date_time")]],
+#           main = "Temperature",
+#           xlab = "Date",
+#           ylab = "Temp. (C)") %>%
+#     dySeries()%>%
+#     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
+# 
 
       dygraph(data = focal_mean_daily_temp[,colnames(focal_mean_daily_temp)[which(colnames(focal_mean_daily_temp)!="date_time")]],
           main = "Temperature",
@@ -416,8 +434,6 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
     dySeries() %>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
 
-  
-  
   #mean temp dataset
 #     focal_weather%>%
 #   group_by(station_name,year,month)%>%
@@ -448,7 +464,8 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 
 ```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
-
+#| fig-cap: 
+#|   - "Figure 2. Climate Data from NOAA.  Mean data is a long-term average for each day of the year across these weather stations."
   #This code chunk plots the targets visualization.
   # I do this in two steps to avoid errors that otherwise can occur
 
@@ -458,6 +475,9 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 
 ```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
+#| fig-cap: 
+#|   - "Figure 2. Climate Data from NOAA.  Mean data is a long-term average for each day of the year across these weather stations."
+
 
   #This code chunk plots the targets visualization.
   # I do this in two steps to avoid errors that otherwise can occur
@@ -510,9 +530,7 @@ library(leafem)
 
 ```
 
-NDWI is...  
-
-The NDWI data was last updated on `r most_recent_ndwi_date` (although it may be older than that, need to update the code to log the collection date.)
+The Normalized Difference Water Index [(NDWI)](https://en.wikipedia.org/wiki/Normalized_difference_water_index) is a measure of the water content of leaves ranging between -1 (no water) and 1 (water). The NDWI data were last updated on `r most_recent_ndwi_date` (although they may be older than the update date).
 
 Interpreting NDWI:
 
@@ -524,9 +542,15 @@ Interpreting NDWI:
 ### SPI
 
 
-```{r calc_spi, eval = FALSE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research/subseasonal/atlas/SPI-html/SPI-description.html#:~:text=The%20SPI%20is%20used%20for,from%20subseasonal%20to%20interannual%20scales.) is a drought index ranging from -3 (very dry) to +3 (very wet).
+
+
+
+```{r calc_spi, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 library(SPEI)
+require(ggplot2)
+
 
   #Make a dataset with only mostly complete data
 
@@ -547,6 +571,9 @@ library(SPEI)
     .[stations_to_keep$station_name] %>%
      mutate_if(is.character, as.numeric)-> focal_spi_data
 
+  focal_spi_data %>%
+    dplyr::select(!mean) -> focal_spi_data
+  
     #calculate spi at different temporal windows
 
     spi_1 <- spi(data = ts(focal_spi_data,
@@ -555,7 +582,8 @@ library(SPEI)
                                        substr(start = 0,stop = 4),
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
-                 scale =  1)
+                 scale =  1,
+                 verbose = FALSE)
     
     
     spi_3 <- spi(data = ts(focal_spi_data,
@@ -564,7 +592,8 @@ library(SPEI)
                                        substr(start = 0,stop = 4),
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
-                 scale =  3)
+                 scale =  3,
+                 verbose = FALSE)
     
     spi_12 <- spi(data = ts(focal_spi_data,
                            frequency = 12,
@@ -572,12 +601,17 @@ library(SPEI)
                                        substr(start = 0,stop = 4),
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
-                 scale =  12)
+                 scale =  12,
+                 verbose = FALSE)
 
-plot(spi_1,main=' 1 Month SPI')
-plot(spi_3,main=' 3 Month SPI')
-plot(spi_12,main=' 12 Month SPI')
+plot(spi_1)+
+  ggtitle('1 Month SPI')
 
+plot(spi_3)+
+  ggtitle('3 Month SPI')
+
+plot(spi_12)+
+  ggtitle('12 Month SPI')
 
 
 

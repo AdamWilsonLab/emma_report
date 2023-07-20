@@ -77,11 +77,15 @@ list(
             #age = as.difftime(0, units = "hours") #will update whenever run
     ),
 
+   # the target below is used so that things are re-run if the qmd changes
+   tar_target(name = report_location,
+              command = "report_prototype.qmd",
+              format = "file"),
 
    tar_target(name = reports,
               command = generate_reports(output_directory = "reports/",
                                          temp_directory = "data/temp/reports/",
-                                         report_location = "report_prototype.qmd",
+                                         report_location = report_location,
                                          time_window_days = 365,
                                          min_date = "2010-01-01",
                                          n_stations = 3,
