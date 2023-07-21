@@ -45,11 +45,11 @@ generate_reports <- function(output_directory = "reports/",
 
   # Get outputs from model
 
-    model_results <- tar_load(model_results)
+    #model_results <- tar_load(model_results)
 
-    model_prediction <- tar_load(model_prediction)
+    #model_prediction <- tar_load(model_prediction)
 
-    spatial_outputs <- tar_load(spatial_outputs)
+    #spatial_outputs <- tar_load(spatial_outputs)
 
 
   # Get list of available env data files
