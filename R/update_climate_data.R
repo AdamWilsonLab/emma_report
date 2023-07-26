@@ -292,7 +292,9 @@ update_climate_data <- function(parks,
 
       # Calculate max and mean values ( if there is any data)
 
-        if(!all(is.na(data_i$AA1_depth),is.na(data_i$AA2_depth),is.na(data_i$AA3_depth))){
+        if(!all(is.na(data_i$AA1_depth),
+                is.na(data_i$AA2_depth),
+                is.na(data_i$AA3_depth))){
 
           #data_i_og <-data_i
           #data_i <- data_i_og
