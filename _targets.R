@@ -100,7 +100,8 @@ list(
                                          n_stations = 3,
                                          parks = parks,
                                          ... = noaa_data,
-                                         ... = ndwi))
+                                         ... = ndwi,
+                                         ... = gsod_data))
    ,
 
    tar_target(name = model_summary,
