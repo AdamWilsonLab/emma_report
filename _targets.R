@@ -64,7 +64,6 @@ list(
    ,
 
 
-
     tar_age(name = noaa_data,
             command = update_climate_data(parks = parks,
                                           temp_directory = "data/temp/noaa",
@@ -76,6 +75,16 @@ list(
             age = as.difftime(7, units = "days")
             #age = as.difftime(0, units = "hours") #will update whenever run
     ),
+
+   tar_age(name = gsod_data,
+           command = update_climate_data_gsod(parks,
+                                         temp_directory = "data/temp/gsod",
+                                         sleep_time = 1,
+                                         max_attempts = 10),
+           age = as.difftime(1, units = "days")
+           #age = as.difftime(0, units = "hours") #will update whenever run
+   ),
+
 
    # the target below is used so that things are re-run if the qmd changes
    tar_target(name = report_location,
