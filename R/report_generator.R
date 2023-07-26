@@ -25,7 +25,7 @@ generate_reports <- function(output_directory = "reports/",
                              sleep_time = 10,
                              max_attempts = 10,
                              tag = "current",
-                             min_date = "1900-01-01",
+                             min_date = "1970-01-01",
                              ...
 ){
 
@@ -142,8 +142,6 @@ generate_reports <- function(output_directory = "reports/",
                          max_attempts = max_attempts,
                          sleep_time = sleep_time)
 
-      #ndwi_rast <- terra::rast(file.path(temp_directory,"ndwi.tif"))
-
       ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))%>%
         round(digits = 2) #round to save memory
 
@@ -160,15 +158,24 @@ generate_reports <- function(output_directory = "reports/",
 
   # Get the weather station metadata
 
-    robust_pb_download(file = "noaa_stations.gz.parquet",
-                dest = file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_report",
-                tag = "NOAA",
-                max_attempts = max_attempts,
-                sleep_time = sleep_time)
+    # robust_pb_download(file = "noaa_stations.gz.parquet",
+    #             dest = file.path(temp_directory),
+    #             repo = "AdamWilsonLab/emma_report",
+    #             tag = "NOAA",
+    #             max_attempts = max_attempts,
+    #             sleep_time = sleep_time)
 
-    stations <- arrow::read_parquet(file.path(temp_directory,"noaa_stations.gz.parquet"))
-    stations_sf <- st_as_sf(stations,coords = c("lon","lat"))
+
+    robust_pb_download(file = "gsod_stations.gz.parquet",
+                       dest = file.path(temp_directory),
+                       repo = "AdamWilsonLab/emma_report",
+                       tag = "GSOD",
+                       max_attempts = max_attempts,
+                       sleep_time = sleep_time)
+
+    # stations <- arrow::read_parquet(file.path(temp_directory,"noaa_stations.gz.parquet"))
+    stations <- arrow::read_parquet(file.path(temp_directory,"gsod_stations.gz.parquet"))
+    stations_sf <- st_as_sf(stations,coords = c("LON","LAT"))
     st_crs(stations_sf) <- st_crs("EPSG:4326")
     stations_sf <- st_transform(stations_sf, crs = st_crs(parks$cape_nature))
 

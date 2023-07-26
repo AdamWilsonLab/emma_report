@@ -206,7 +206,7 @@ bbox <- st_bbox(focal_wgs) %>%
     
 
     closest_stations <- 
-      data.frame(station = stations_sf$usaf,
+      data.frame(station = stations_sf$STNID,
                distance = as.numeric(st_distance(cent,stations_sf)))
     
     closest_stations <- closest_stations[order(closest_stations$distance),]
@@ -214,17 +214,13 @@ bbox <- st_bbox(focal_wgs) %>%
     closest_stations <- closest_stations$station[1:n_stations]
     
     closest_stations %>%
-          gsub(pattern = "/",replacement = "",fixed = TRUE)%>% #what kind of sadist puts a slash in a name?
-          gsub(pattern = " ",replacement = "_") %>%
-          gsub(pattern = ")",replacement = "_",fixed = TRUE) %>%
-          gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
           paste(.,".gz.parquet",sep = "")-> closest_stations
     
 
     robust_pb_download(file = closest_stations,
                 dest = temp_directory,
                 repo = "AdamWilsonLab/emma_report",
-                tag = "NOAA",
+                tag = "GSOD",
                 max_attempts = max_attempts,
                 sleep_time = sleep_time,
                 show_progress=FALSE) -> to_rm
@@ -243,45 +239,46 @@ bbox <- st_bbox(focal_wgs) %>%
   
   #fix station names in focal weather (missing in many case)
   
-    stations %>%
-    dplyr::select(usaf,wban,station_name)%>%
-    inner_join(y = focal_weather,
-               by = c("usaf"="usaf_station","wban"="wban_station"),
-               multiple = "all")%>%
-    dplyr::rename(station_name = station_name.x)-> focal_weather
+  #commenting this out for now.  Don't think we need it since switch to gsod
+    # stations %>%
+    # dplyr::select(usaf,wban,station_name)%>%
+    # inner_join(y = focal_weather,
+    #            by = c("usaf"="usaf_station","wban"="wban_station"),
+    #            multiple = "all")%>%
+    # dplyr::rename(station_name = station_name.x)-> focal_weather
 
   #with dygraphs, first element should be x axis, or else do it as an xts
   
   # probably easiest to do xts, since its a time series anyway
   
-  focal_weather %>%
-    as.data.frame() %>% #for some reason, this code throws an error without this line.  no idea why.
-    mutate(year = substr(x = date,1,4),
-           month = substr(x = date,5,6),
-           day = substr(x=date,7,8),
-           hour= substr(x=time,1,2),
-           minute = substr(x=time,3,4)) %>%
-    mutate(date_time = paste(year,month,day,hour,minute,sep = "-"))%>%
-    mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
-    dplyr::filter(!is.na(date_time)) -> focal_weather
+  #focal_weather %>%
+   # as.data.frame() %>% #for some reason, this code throws an error without this line.  no idea why.
+    # mutate(year = substr(x = date,1,4),
+    #        month = substr(x = date,5,6),
+    #        day = substr(x=date,7,8),
+    #        hour= substr(x=time,1,2),
+    #        minute = substr(x=time,3,4)) %>%
+    #mutate(date_time = paste(year,month,day,hour,minute,sep = "-"))%>%
+    #mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
+    #dplyr::filter(!is.na(date_time)) -> focal_weather
   
-  #Filter out oldest data
+  # Filter out oldest data
   
-  focal_weather <- 
-    focal_weather%>%
-      filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
-  
+    focal_weather <- 
+      focal_weather%>%  
+      filter(YEARMODA > min_date)
+
   #Generate precip dataset
   
 focal_weather %>%
-  group_by(station_name,year,month)%>%
-  summarise(monthly_precip_mm = sum(na.omit(mean_precip_mm)))%>%
+  group_by(STNID,NAME,YEAR,MONTH)%>%
+  summarise(monthly_precip_mm = sum(na.omit(PRCP)))%>%
   ungroup() %>%
-  mutate(date_time = paste(year,month,01,sep = "-"))%>%
+  mutate(date_time = paste(YEAR,MONTH,01,sep = "-"))%>%
   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
   dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name, monthly_precip_mm) %>%
+  dplyr::select(date_time,station_name = NAME, monthly_precip_mm) %>%
   pivot_wider(values_from = monthly_precip_mm,
               names_from = station_name,
               values_fn = mean) %>%
@@ -314,14 +311,14 @@ focal_weather %>%
   
     
     #mean daily temp dataset
-    focal_weather%>%
-  group_by(station_name,year,month,day)%>%
-  summarise(daily_temp_C = mean(na.omit(temp_c)))%>%
+  focal_weather%>%
+  group_by(STNID,NAME,YEAR,MONTH,DAY)%>%
+  summarise(daily_temp_C = mean(na.omit(TEMP)))%>%
   ungroup() %>%
-mutate(date_time = paste(year,month,day,sep = "-"))%>%
+  mutate(date_time = paste(YEAR,MONTH,DAY,sep = "-"))%>%
   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
   dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name, daily_temp_C) %>%
+  dplyr::select(date_time,station_name=NAME, daily_temp_C) %>%
   pivot_wider(values_from = daily_temp_C,
               names_from = station_name,
               values_fn = mean) %>%
@@ -335,13 +332,12 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
     xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
 
 
-  
-  
+
 #Generate sf of station points
   
   focal_stations_sf <-
   stations_sf %>%
-    filter(usaf %in%gsub(pattern = ".gz.parquet",
+    filter(STNID %in% gsub(pattern = ".gz.parquet",
                          replacement = "",x = closest_stations)) %>%
     st_transform(st_crs(fires_wgs_truncated))
 
@@ -562,7 +558,7 @@ require(ggplot2)
                  values_to = "monthly_precip_mm") %>%
     group_by(station_name) %>%
     summarize(fraction_na = sum(is.na(monthly_precip_mm))/length(monthly_precip_mm)) %>%
-    filter(fraction_na < 0.05) %>%
+    filter(fraction_na < 0.50) %>%
     dplyr::select(station_name)
 
   
@@ -583,7 +579,7 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  1,
-                 verbose = FALSE)
+                 verbose = FALSE,na.rm = TRUE)
     
     
     spi_3 <- spi(data = ts(focal_spi_data,
@@ -593,7 +589,8 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  3,
-                 verbose = FALSE)
+                 verbose = FALSE,
+                 na.rm = TRUE)
     
     spi_12 <- spi(data = ts(focal_spi_data,
                            frequency = 12,
@@ -602,16 +599,20 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  12,
-                 verbose = FALSE)
+                 verbose = FALSE,
+                 na.rm = TRUE)
 
 plot(spi_1)+
-  ggtitle('1 Month SPI')
+  ggtitle('1 Month SPI')+
+  scale_x_continuous(expand = c(0, 0))
 
 plot(spi_3)+
-  ggtitle('3 Month SPI')
+  ggtitle('3 Month SPI')+
+  scale_x_continuous(expand = c(0, 0))
 
 plot(spi_12)+
-  ggtitle('12 Month SPI')
+  ggtitle('12 Month SPI')+
+  scale_x_continuous(expand = c(0, 0))
 
 
 
