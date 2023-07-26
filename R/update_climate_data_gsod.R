@@ -7,10 +7,7 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_model/medecos/R/rob
 update_climate_data_gsod <- function(parks,
                                      temp_directory = "data/temp/gsod",
                                      sleep_time = 1,
-                                     max_attempts = 100,
-                                     reset_all=FALSE,
-                                     batch = TRUE,
-                                     batches = 2){
+                                     max_attempts = 100){
   
     #create release if needed
   
@@ -105,7 +102,7 @@ update_climate_data_gsod <- function(parks,
         
         message("Downloading data for ",station_i,": station ", i, " of ", nrow(isd_history))
 
-        data_i <- get_GSOD(years = isd_history$start_year[i]:year(Sys.Date()),
+        data_i <- get_GSOD(years = as.numeric(isd_history$start_year[i]):year(Sys.Date()),
                            station = station_i)
         
         
