@@ -73,7 +73,9 @@ generate_reports <- function(output_directory = "reports/",
                   max_attempts = max_attempts,
                   sleep_time = sleep_time)
 
-    most_recent_fire_raster <- terra::rast(file.path(temp_directory, most_recent_fire_file$file_name))
+    most_recent_fire_raster <- terra::rast(file.path(temp_directory,
+                                                     most_recent_fire_file$file_name))
+
     most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
 
   # convert from date of fire to years since fire
@@ -183,6 +185,7 @@ generate_reports <- function(output_directory = "reports/",
 
     #park_name <- unique(parks$national_parks$CUR_NME)[1]
     #park_name <- unique(parks$national_parks$CUR_NME)[2]
+    #park_name <- unique(parks$national_parks$CUR_NME)[4] #Algulhas
 
   for (park_name in unique(parks$national_parks$CUR_NME)){
 
