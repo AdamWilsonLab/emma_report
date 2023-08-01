@@ -194,28 +194,36 @@ bbox <- st_bbox(focal_wgs) %>%
 ```
 
 
-```{r prep_weather_data, echo = FALSE, warning = FALSE, message = FALSE}
+```{r identify_closest_stations, echo = verbose, warning = verbose, message = verbose}
+
 
 # Process the station and weather data
 
   # Get data for closest weather stations
   
+
     cent <- suppressWarnings( focal_park %>%
                                 st_union()%>%
                                 st_centroid())
     
 
-    closest_stations <- 
+    closest_stations <-
       data.frame(station = stations_sf$STNID,
                distance = as.numeric(st_distance(cent,stations_sf)))
-    
+
     closest_stations <- closest_stations[order(closest_stations$distance),]
-    
+
     closest_stations <- closest_stations$station[1:n_stations]
-    
+
     closest_stations %>%
           paste(.,".gz.parquet",sep = "")-> closest_stations
-    
+
+
+```
+
+
+
+```{r download_weather_data, echo = verbose, warning = verbose, message = verbose}
 
     robust_pb_download(file = closest_stations,
                 dest = temp_directory,
@@ -224,20 +232,125 @@ bbox <- st_bbox(focal_wgs) %>%
                 max_attempts = max_attempts,
                 sleep_time = sleep_time,
                 show_progress=FALSE) -> to_rm
-    
+
     if(exists("to_rm")){rm(to_rm)}
-    
-  
-  #Hack in case some of the files aren't downloaded correctly.  
+
+
+  #Hack in case some of the files aren't downloaded correctly.
+
+    if(verbose){message("Removing any non-downloaded stations")}
+
     closest_stations  <- intersect(closest_stations,
                                    list.files(temp_directory))
+
+```
+
+
+```{r prep_weather_data, echo = verbose, warning = verbose, message = verbose}
+
+    if(verbose){message("Opening weather datasets")}
+
+    focal_weather  <- open_dataset(file.path(temp_directory, closest_stations)) %>%
+      collect()
+    
+  # Filter out oldest data
+
+    if(verbose){message("Filtering old weather data")}
+
+    focal_weather <-
+      focal_weather %>%
+      dplyr::filter(YEARMODA > min_date)
+    
+    
+```
+
+
+```{r prep_precip_data, echo = verbose, warning = verbose, message = verbose}
+
+
+  #Generate precip dataset
+
+  if(verbose){message("Generating precip dataset")}
+
+focal_weather %>%
+  dplyr::select(STNID,NAME,YEAR,MONTH,DAY,PRCP) %>%
+  dplyr::group_by(STNID,NAME,YEAR,MONTH) %>%
+  dplyr::summarise(n_NAs = sum(is.na(PRCP)),
+                   n_days = n(),
+                   frac_NAs = n_NAs/n_days) %>%
+  full_join(y = focal_weather,multiple="all") %>%
+  dplyr::mutate(PRCP = case_when(frac_NAs > 0.5 ~ NA,
+                                 frac_NAs <= 0.5 ~ PRCP)) %>% #this line sets months to NA if most of the data are missing
+  dplyr::group_by(STNID,NAME,YEAR,MONTH) %>%
+  dplyr::summarise(monthly_precip_mm = sum(na.omit(PRCP))) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(date_time = paste(YEAR,MONTH,01,sep = "-")) %>%
+  dplyr::mutate(date_time = strptime(date_time,format = "%Y-%m-%d")) %>%
+  dplyr::mutate(date_time = lubridate::floor_date(date_time)-1) %>%
+  dplyr::filter(!is.na(date_time)) %>%
+  dplyr::select(date_time,station_name = NAME, monthly_precip_mm) %>%
+  pivot_wider(values_from = monthly_precip_mm,
+               names_from = station_name,
+               values_fn = mean) %>%
+  dplyr::mutate(doy =  lubridate::yday(date_time) ) %>%
+  left_join(x=.,
+            y  = dplyr::group_by(., doy) %>%
+              dplyr::summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+                                           na.rm=TRUE))
+               ) %>%
+  dplyr::select(-doy) %>%
+  xts::xts(order.by = .$date_time) -> focal_precip
+
+
+
+```
+
+
+```{r prep_temp_data, echo = verbose, warning = verbose, message = verbose, eval=TRUE}
+
+  # mean daily temp dataset
+
+  focal_weather %>%
+  dplyr::group_by(STNID,NAME,YEAR,MONTH,DAY) %>%
+  dplyr::summarise(daily_temp_C = mean(na.omit(TEMP))) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(date_time = paste(YEAR,MONTH,DAY,sep = "-")) %>%
+  dplyr::mutate(date_time = strptime(date_time,format = "%Y-%m-%d")) %>%
+  dplyr::filter(!is.na(date_time)) %>%
+  dplyr::select(date_time, station_name = NAME, daily_temp_C) %>%
+  pivot_wider(values_from = daily_temp_C,
+              names_from = station_name,
+              values_fn = mean) %>%
+    dplyr::mutate(doy =  lubridate::yday(date_time) ) %>%
+    left_join(x=.,
+              y  = dplyr::group_by(., doy) %>%
+                dplyr::summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+                                          na.rm=TRUE))
+              ) %>%
+  dplyr::select(-doy) %>%
+  xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
+
+
+
+#Generate sf of station points
+
+  focal_stations_sf <-
+  stations_sf %>%
+    dplyr::filter(STNID %in% gsub(pattern = ".gz.parquet",
+                         replacement = "",x = closest_stations)) %>%
+    st_transform(st_crs(fires_wgs_truncated))
+
+
+```
+
+
+```{r prep_noaa_weather_data, echo = FALSE, eval = FALSE, warning = FALSE, message = FALSE}
+
+  #commenting this out for now.  Don't think we need it since switch to gsod, but keeping it just in case
   
-  focal_weather  <- open_dataset(file.path(temp_directory, closest_stations)) %>%
-    collect()
-  
+
   #fix station names in focal weather (missing in many case)
   
-  #commenting this out for now.  Don't think we need it since switch to gsod
     # stations %>%
     # dplyr::select(usaf,wban,station_name)%>%
     # inner_join(y = focal_weather,
@@ -259,44 +372,6 @@ bbox <- st_bbox(focal_wgs) %>%
     #mutate(date_time = paste(year,month,day,hour,minute,sep = "-"))%>%
     #mutate(date_time = strptime(date_time,format = "%Y-%m-%d-%H-%M"))%>%
     #dplyr::filter(!is.na(date_time)) -> focal_weather
-  
-  # Filter out oldest data
-  
-    focal_weather <- 
-      focal_weather%>%  
-      filter(YEARMODA > min_date)
-
-  #Generate precip dataset
-  
-focal_weather %>%
-  select(STNID,NAME,YEAR,MONTH,DAY,PRCP) %>%
-  group_by(STNID,NAME,YEAR,MONTH) %>%
-  summarise(n_NAs = sum(is.na(PRCP)),
-            n_days = n(),
-            frac_NAs = n_NAs/n_days) %>%
-  full_join(y = focal_weather,multiple="all") %>%
-  mutate(PRCP = case_when(frac_NAs > 0.5 ~ NA,   
-                          frac_NAs <= 0.5 ~ PRCP)) %>% #this line sets months to NA if most of the data are missing
-  group_by(STNID,NAME,YEAR,MONTH) %>%
-  summarise(monthly_precip_mm = sum(na.omit(PRCP)))%>%
-  ungroup() %>%
-  mutate(date_time = paste(YEAR,MONTH,01,sep = "-"))%>%
-  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
-  mutate(date_time = lubridate::floor_date(date_time)-1)%>%
-  dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name = NAME, monthly_precip_mm) %>%
-  pivot_wider(values_from = monthly_precip_mm,
-              names_from = station_name,
-              values_fn = mean) %>%
-    mutate(doy =  lubridate::yday(date_time) ) %>%
-    left_join(x=.,
-              y  = group_by(., doy) %>%
-                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
-                                          na.rm=TRUE))
-              ) %>%
-  dplyr::select(-doy)%>%
-  xts::xts(order.by = .$date_time) -> focal_precip
-
 
   # focal_weather %>%
   #   dplyr::select(date_time, usaf_station, mean_precip_mm) %>%
@@ -313,43 +388,13 @@ focal_weather %>%
   #               names_from = station_name,
   #               values_fn = mean) %>%
   #   xts::xts(order.by = .$date_time) -> focal_temp
-  
-    
-    #mean daily temp dataset
-  focal_weather%>%
-  group_by(STNID,NAME,YEAR,MONTH,DAY)%>%
-  summarise(daily_temp_C = mean(na.omit(TEMP)))%>%
-  ungroup() %>%
-  mutate(date_time = paste(YEAR,MONTH,DAY,sep = "-"))%>%
-  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
-  dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name=NAME, daily_temp_C) %>%
-  pivot_wider(values_from = daily_temp_C,
-              names_from = station_name,
-              values_fn = mean) %>%
-    mutate(doy =  lubridate::yday(date_time) ) %>%
-    left_join(x=.,
-              y  = group_by(., doy) %>%
-                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
-                                          na.rm=TRUE))
-              ) %>%
-  dplyr::select(-doy)%>%
-    xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
 
-
-
-#Generate sf of station points
-  
-  focal_stations_sf <-
-  stations_sf %>%
-    filter(STNID %in% gsub(pattern = ".gz.parquet",
-                         replacement = "",x = closest_stations)) %>%
-    st_transform(st_crs(fires_wgs_truncated))
 
 
 ```
 
-```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=TRUE}
 
   leaflet(data = focal_wgs) %>%
   addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
@@ -403,7 +448,7 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
 
 ## Weather Data
 
-```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE}
+```{r weatherdyplot, echo=FALSE, message=FALSE, warning=FALSE, eval=TRUE}
 
   # see: https://rstudio.github.io/dygraphs/
 
@@ -464,7 +509,7 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
 
 
 
-```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
+```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6, eval=TRUE}
 #| fig-cap: 
 #|   - "Figure 2. Climate Data from NOAA.  Mean data is a long-term average for each day of the year across these weather stations."
   #This code chunk plots the targets visualization.
@@ -475,7 +520,7 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
 ```
 
 
-```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
+```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6, eval=TRUE}
 #| fig-cap: 
 #|   - "Figure 2. Climate Data from NOAA.  Mean data is a long-term average for each day of the year across these weather stations."
 
@@ -547,7 +592,7 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
 
 
 
-```{r calc_spi, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r calc_spi, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=TRUE}
 
 library(SPEI)
 require(ggplot2)
