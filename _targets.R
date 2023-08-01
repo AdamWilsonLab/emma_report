@@ -5,7 +5,7 @@ library(arrow)
 library(piggyback)
 library(plotly)
 library(leaflet)
-library(rnoaa)
+#library(rnoaa)
 library(gt)
 library(dygraphs)
 
@@ -64,17 +64,17 @@ list(
    ,
 
 
-    tar_age(name = noaa_data,
-            command = update_climate_data(parks = parks,
-                                          temp_directory = "data/temp/noaa",
-                                          sleep_time = 30,
-                                          max_attempts = 10,
-                                          reset_all = FALSE, #set this to TRUE to re-download everything, rather than only updating
-                                          batch = TRUE, #if batch = TRUE, the argument 'batches' will be used to decide what fraction of records to update that day (e.g., 2 batches will update half of the records each day)
-                                          batches = 2),
-            age = as.difftime(7, units = "days")
-            #age = as.difftime(0, units = "hours") #will update whenever run
-    ),
+    # tar_age(name = noaa_data,
+    #         command = update_climate_data(parks = parks,
+    #                                       temp_directory = "data/temp/noaa",
+    #                                       sleep_time = 30,
+    #                                       max_attempts = 10,
+    #                                       reset_all = FALSE, #set this to TRUE to re-download everything, rather than only updating
+    #                                       batch = TRUE, #if batch = TRUE, the argument 'batches' will be used to decide what fraction of records to update that day (e.g., 2 batches will update half of the records each day)
+    #                                       batches = 2),
+    #         age = as.difftime(7, units = "days")
+    #         #age = as.difftime(0, units = "hours") #will update whenever run
+    # ),
 
    tar_age(name = gsod_data,
            command = update_climate_data_gsod(parks,
@@ -99,7 +99,6 @@ list(
                                          min_date = "2010-01-01",
                                          n_stations = 3,
                                          parks = parks,
-                                         ... = noaa_data,
                                          ... = ndwi,
                                          ... = gsod_data))
    ,

@@ -103,9 +103,13 @@ update_climate_data_gsod <- function(parks,
 
         message("Downloading data for ",station_i,": station ", i, " of ", nrow(isd_history))
 
-        data_i <- get_GSOD(years = as.numeric(isd_history$start_year[i]):year(Sys.Date()),
-                           station = station_i)
+        data_i <- robust_get_GSOD(years = as.numeric(isd_history$start_year[i]):year(Sys.Date()),
+                           station = station_i,
+                           max_attempts = max_attempts)
 
+        # move on if there was an issue in the download
+
+        if(!inherits(data_i,"data.frame")){next}
 
         # write data as a parquet file
 
@@ -144,3 +148,48 @@ update_climate_data_gsod <- function(parks,
 
 
   }#end fx
+
+
+#########################
+
+robust_get_GSOD <- function(years, station, max_attempts=10){
+
+  n_attempts <- 1
+
+  while(n_attempts <= max_attempts){
+
+    #message(n_attempts)
+
+    out_data <- tryCatch(get_GSOD(years = years,
+                                  station = station),
+                         error = function(e){e})
+
+    # if it worked, move on
+      if(inherits(out_data, c("data.table","data.frame"))){
+        return(out_data)
+      }
+
+
+    # send message if giving up
+      if(n_attempts == max_attempts){
+
+        message("Reached maximum download attempts for station ", station,
+                ", giving up.")
+
+        }
+
+    # if it failed increment
+      n_attempts = n_attempts + 1
+
+
+  } #while loop
+
+
+  return(out_data)
+
+
+}
+
+
+
+

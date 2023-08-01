@@ -26,6 +26,7 @@ generate_reports <- function(output_directory = "reports/",
                              max_attempts = 10,
                              tag = "current",
                              min_date = "1970-01-01",
+                             verbose=FALSE,
                              ...
 ){
 
