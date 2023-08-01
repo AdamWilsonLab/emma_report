@@ -1,4 +1,6 @@
-# emma_report
+# EMMA Reports
+
+Draft reports can be found [here](https://adamwilsonlab.github.io/emma_report/)
 
 # EMMA workflow overview
 
