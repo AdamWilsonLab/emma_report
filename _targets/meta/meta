@@ -1,5 +1,5 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|77aab2bdb639428b|||||||||||||||
+.Random.seed|object|080a8ec8fecb960d|||||||||||||||
 clean_up|function|08bcf9ecea369349|||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565|||||||||||||||
 create_stan_data|function|7c6e224a02e15f45|||||||||||||||
@@ -13,23 +13,23 @@ get_remnants_raster|function|8dc84da102419cfc|||||||||||||||
 github_files|function|87a1757263d12051|||||||||||||||
 good_max|function|d93feaf4abe9f8eb|||||||||||||||
 good_mean|function|37479be04005688b|||||||||||||||
-gsod_data|stem|5904a989c269ab11|9a50bb8e1793ebdf|a834762872f26a4f|-870682635||t19602.0364658536s|e0224cf10db1a05d|62|rds|local|vector|||2116.34|This station, 68911099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68926399999, only provides data for years 1990 to 2022.Please send a request that falls within these years.. This station, 68929099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68933099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68935099999, only provides data for years 1998 to 2022.Please send a request that falls within these years.|
-index|stem|71d9c2f51ab43581|c01d5277708ade71|3d4df925ae24bb98|-1857023687||t19602.0618013163s|6281f79619f6778a|80|rds|local|vector|||2.702||
-model_prediction|stem|5c22b736591c4ef2|4af6374459a311cc|5b264e4e72da3550|1564443633||t19602.0113780335s|0978d1722465b0b9|3424202|rds|local|vector|||11.394||
-model_results|stem|e8d5114c3893c7a5|72019223cd81982c|5b264e4e72da3550|-1393141758||t19602.0119708201s|b148a8f9285f9d8e|16898947|rds|local|vector|||11.605||
-model_summary|stem|d5023efebe1c9ae8|89dc60a17ac37e7c|a6c737e9220eb08c|-817296688||t19602.0369501207s|e7d9c43b1c994be3|87|rds|local|vector|||41.831||
+gsod_data|stem|70d79b45d082d938|9a50bb8e1793ebdf|a834762872f26a4f|-870682635||t19603.0301897517s|e0224cf10db1a05d|62|rds|local|vector|||1448.658|This station, 68911099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68926399999, only provides data for years 1990 to 2022.Please send a request that falls within these years.. This station, 68929099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68933099999, only provides data for years 2004 to 2022.Please send a request that falls within these years.. This station, 68935099999, only provides data for years 1998 to 2022.Please send a request that falls within these years.|
+index|stem|71d9c2f51ab43581|c01d5277708ade71|3d4df925ae24bb98|-1857023687||t19603.0588837993s|6281f79619f6778a|80|rds|local|vector|||3.174||
+model_prediction|stem|5c22b736591c4ef2|4af6374459a311cc|5b264e4e72da3550|1564443633||t19603.0128072039s|0978d1722465b0b9|3424202|rds|local|vector|||11.566||
+model_results|stem|e8d5114c3893c7a5|72019223cd81982c|5b264e4e72da3550|-1393141758||t19603.0134224789s|b148a8f9285f9d8e|16898947|rds|local|vector|||11.808||
+model_summary|stem|d5023efebe1c9ae8|89dc60a17ac37e7c|a6c737e9220eb08c|-817296688||t19603.0307485892s|e7d9c43b1c994be3|87|rds|local|vector|||48.274||
 ndwi|stem|28157d137ad31573|c30e9c6e62f4db0a|8fdb73ee57bc9cda|62726435||t19381.0087803654s|b2c2d69496a0fbf4|63|rds|local|vector|||230.639||
 noaa_data|stem|34410c6397dcec0e|390f67f326c53cbf|36cfb1236851299a|1392023248||t19570.0922750312s|e0224cf10db1a05d|62|rds|local|vector|||4828.585|attribute variables are assumed to be spatially constant throughout all geometries. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 68442|
-parks|stem|e57ed77939afd163|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19602.0116475284s|af81871c37d6fdb2|717793|rds|local|vector|||23.192||
+parks|stem|e57ed77939afd163|d1458414f42e244a|8e36c262fb1e3352|2002097943||t19603.0130805566s|af81871c37d6fdb2|717793|rds|local|vector|||23.506||
 release_posteriors|function|e85e8a50366c3522|||||||||||||||
-remnants|stem|d36ea1299fa8d732|f59abf2e521e357b|ae51ad81129c9733|630969701||t19602.0112415499s|44e327d1ee1978d7|43|rds|local|vector|||12.718||
-report_location|stem|73fd3a8a2e833300|87d32c46dc33ec46|ef46db3751d8e999|1773364094|report_prototype.qmd|t19602.0101501899s|b9e9dff71976cdc5|22494|file|local|vector|||5.958||
-reports|stem|804f0f5312e8d020|53b1c04d758195a2|9bd4c7d731d41e12|-653841556||t19602.0617699732s|2a8869f2435f83e9|47|rds|local|vector|||2144.429||
+remnants|stem|d36ea1299fa8d732|f59abf2e521e357b|ae51ad81129c9733|630969701||t19603.0126674718s|44e327d1ee1978d7|43|rds|local|vector|||12.439||
+report_location|stem|73fd3a8a2e833300|87d32c46dc33ec46|ef46db3751d8e999|1773364094|report_prototype.qmd|t19603.0114392844s|b9e9dff71976cdc5|22494|file|local|vector|||5.958||
+reports|stem|804f0f5312e8d020|53b1c04d758195a2|89372c0d453d8881|-653841556||t19603.0588469448s|2a8869f2435f83e9|47|rds|local|vector|||2427.694||
 robust_get_GSOD|function|b02ae978925d7e4c|||||||||||||||
 robust_pb_download|function|c9145002d00cc12e|||||||||||||||
 robust_pb_download_solo|function|a40beb94c364506a|||||||||||||||
 robust_pb_upload|function|1084cd316907e451|||||||||||||||
-spatial_outputs|stem|c69661fe3a18389a|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19602.011814475s|bf562e24e1b8207f|32263236|rds|local|vector|||12.044||
+spatial_outputs|stem|c69661fe3a18389a|8b04e8b38e843dd5|5b264e4e72da3550|-1659775273||t19603.0132579765s|bf562e24e1b8207f|32263236|rds|local|vector|||12.311||
 summarize_model_output|function|50f2b753a815b00e|||||||||||||||
 summarize_predictions|function|561550e942ee3728|||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6|||||||||||||||
