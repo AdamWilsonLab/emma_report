@@ -101,19 +101,19 @@ list(
                                          parks = parks,
                                          ... = ndwi,
                                          ... = gsod_data))
-   ,
+   #,
 
-   tar_target(name = model_summary,
-              command = workflow(call = rmarkdown::render(input = "model_summary.qmd"),
-                                 ... = model_results,
-                                 ... = model_prediction,
-                                 ... = spatial_outputs)),
+   # tar_target(name = model_summary,
+   #            command = workflow(call = rmarkdown::render(input = "model_summary.qmd"),
+   #                               ... = model_results,
+   #                               ... = model_prediction,
+   #                               ... = spatial_outputs)),
 
-   tar_target(name = index,
-              command = workflow(call = rmarkdown::render(input = "index.qmd"),
-                                 ... = parks,
-                                 ... = reports,
-                                 ... = model_summary))
+   # tar_target(name = index,
+   #            command = workflow(call = rmarkdown::render(input = "index.qmd"),
+   #                               ... = parks,
+   #                               ... = reports,
+   #                               ... = model_summary))
 
 
 
