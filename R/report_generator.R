@@ -196,7 +196,7 @@ generate_reports <- function(output_directory = "reports/",
       filter(CUR_NME == park_name)
 
 
-    tryCatch(expr =
+    debug <- tryCatch(expr =
       render(input = report_location,
                output_file = gsub(pattern = " ",replacement = "_",
                                             x = paste0('report.', park_name, '.html')),
@@ -205,6 +205,7 @@ generate_reports <- function(output_directory = "reports/",
       error = function(e){message("Error processing ", park_name);e}
       )
 
+    #if(inherits(debug,"error")){stop()}
 
   }# end for loop
 
@@ -219,13 +220,15 @@ generate_reports <- function(output_directory = "reports/",
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)
 
-      tryCatch(expr =
+      debug <- tryCatch(expr =
                 render(input = report_location,
                        output_file = gsub(pattern = " ",replacement = "_",
                                           x = paste0('report.', park_name, '.html')),
                        output_dir = output_directory),
               error = function(e){message("Error processing ", park_name); e}
       )
+
+      #if(inherits(debug,"error")){stop()}
 
     }# end for loop
 
