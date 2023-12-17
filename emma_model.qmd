@@ -11,7 +11,7 @@ output:
     html_preview: false
 ---
 
-```{r, echo=F}
+```{r, echo=F, eval=F}
 library(targets)
 library(tidyverse)
 # load data saved in the pipeline
@@ -43,7 +43,7 @@ model_fit$time()$total
 ```
 
 
-```{r p1, echo=T, eval=T, message=FALSE}
+```{r p1, echo=T, eval=F, message=FALSE}
 params=c("tau","alpha_mu","gamma_b2","gamma_b1","lambda_b1","lambda_b2")
 posteriors=model_fit$draws(params) %>% 
   as_tibble() %>% 
@@ -58,7 +58,7 @@ ggplot(posteriors,aes(x=value))+
 
 When we make this comparison, the posterior predictive intervals from ADVI and MCMC are almost identical
 
-```{r plot, echo=T, eval=T, message=FALSE}
+```{r plot, echo=T, eval=F, message=FALSE}
 posterior_summary %>% 
     filter(pid %in% as.numeric(sample(levels(as.factor(posterior_summary$pid)),20))) %>% # just show a few
   ggplot(aes(x=age)) +
