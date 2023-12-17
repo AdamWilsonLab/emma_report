@@ -18,6 +18,7 @@ generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
                              #report_location = "report_prototype.rmd",
                              report_location = "report_prototype.qmd",
+                             park_data_tag = "park_data",
                              time_window_days = 120,
                              n_stations = 3,
                              parks,
@@ -59,6 +60,21 @@ generate_reports <- function(output_directory = "reports/",
 
     env_files <- pb_list(repo = "AdamWilsonLab/emma_envdata")
 
+  #Get list of available report files
+
+    report_files <- pb_list(repo = "AdamWilsonLab/emma_report")
+
+
+  # create output release if needed
+
+    if(!park_data_tag %in% report_files$tag){
+
+      pb_release_create(repo = "AdamWilsonLab/emma_report",
+                        tag = park_data_tag)
+
+    }
+
+
   #get most recent fire data
 
     env_files %>%
@@ -92,7 +108,7 @@ generate_reports <- function(output_directory = "reports/",
     remnants <- terra::rast("data/misc/remnants.tif")
 
     years_since_fire_raster %>%
-      mask(remnants) -> years_since_fire_raster
+      terra::mask(remnants) -> years_since_fire_raster
 
   # make a polygon version and convert to WGS84 (for plotting ease)
 
@@ -195,8 +211,7 @@ generate_reports <- function(output_directory = "reports/",
     focal_park <- parks$national_parks %>%
       filter(CUR_NME == park_name)
 
-
-    tryCatch(expr =
+    debug <- tryCatch(expr =
       render(input = report_location,
                output_file = gsub(pattern = " ",replacement = "_",
                                             x = paste0('report.', park_name, '.html')),
@@ -205,6 +220,7 @@ generate_reports <- function(output_directory = "reports/",
       error = function(e){message("Error processing ", park_name);e}
       )
 
+    #if(inherits(debug,"error")){stop()}
 
   }# end for loop
 
@@ -219,13 +235,15 @@ generate_reports <- function(output_directory = "reports/",
       focal_park <- parks$cape_nature %>%
         filter(COMPLEX == park_name)
 
-      tryCatch(expr =
+      debug <- tryCatch(expr =
                 render(input = report_location,
                        output_file = gsub(pattern = " ",replacement = "_",
                                           x = paste0('report.', park_name, '.html')),
                        output_dir = output_directory),
               error = function(e){message("Error processing ", park_name); e}
       )
+
+      #if(inherits(debug,"error")){stop()}
 
     }# end for loop
 

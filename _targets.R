@@ -95,6 +95,7 @@ list(
               command = generate_reports(output_directory = "reports/",
                                          temp_directory = "data/temp/reports/",
                                          report_location = report_location,
+                                         park_data_tag = "park_data",
                                          time_window_days = 365,
                                          min_date = "2010-01-01",
                                          n_stations = 3,
