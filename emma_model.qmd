@@ -38,7 +38,7 @@ Lets load up our Stan model which codes the model described above. This is not a
 
 How long did that take?
 
-```{r vb_time, echo=T, eval=T, message=FALSE}
+```{r vb_time, echo=T, eval=F, message=FALSE}
 model_fit$time()$total
 ```
 
