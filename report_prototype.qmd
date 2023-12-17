@@ -11,7 +11,7 @@ output:
       toc_depth: 2
 ---
 
-Model last updated at `r lubridate::now()`.
+Page last updated at `r lubridate::now()`.
 
 
 ```{r, echo=F, message = F, results = "hide"}
@@ -34,7 +34,7 @@ library(dygraphs)
 
 ## NDVI and Time Since Fire
 
-```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE}
+```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE,include=FALSE}
 
 # CREATE wgs84 version of the park polygon
 
@@ -56,7 +56,8 @@ library(dygraphs)
 
       focal_fires %>%
         st_write(dsn = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
-                 append=FALSE
+                 append=FALSE,
+                 quiet = TRUE
                  )
 
       robust_pb_upload(files = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
@@ -65,6 +66,10 @@ library(dygraphs)
       
       file.remove(file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")))
       
+
+# Park-specific file link
+    park_fires_file  <- paste("https://github.com/AdamWilsonLab/emma_report/releases/download/park_data/",
+                              paste(park_no_spaces,"fires.gpkg",sep= "_"),sep = "")
 
 # Create a truncated version of the fire maps (ranging from 1-20)
 
@@ -449,7 +454,7 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 ```
 
-Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest.
+Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Fire data for the park are available at: `r park_fires_file`.
 
 
 ## Weather Data
