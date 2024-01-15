@@ -60,10 +60,9 @@ generate_reports <- function(output_directory = "reports/",
 
     env_files <- pb_list(repo = "AdamWilsonLab/emma_envdata")
 
-  #Get list of available report files
+  # Get list of available report files
 
     report_files <- pb_list(repo = "AdamWilsonLab/emma_report")
-
 
   # create output release if needed
 
@@ -220,7 +219,7 @@ generate_reports <- function(output_directory = "reports/",
       error = function(e){message("Error processing ", park_name);e}
       )
 
-    #if(inherits(debug,"error")){stop()}
+    if(inherits(debug,"error")){stop("Error processing ", park_name)}
 
   }# end for loop
 

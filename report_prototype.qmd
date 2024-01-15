@@ -21,7 +21,7 @@ library(doParallel)
 library(raster)
 library(lubridate)
 library(sf)
-library(rnoaa)
+#library(rnoaa)
 library(xts)
 library(plotly)
 library(leaflet)
@@ -60,7 +60,7 @@ library(dygraphs)
                  quiet = TRUE
                  )
 
-      robust_pb_upload(files = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
+      robust_pb_upload(file = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
                        repo = "AdamWilsonLab/emma_report",
                        tag = park_data_tag)
       
@@ -400,8 +400,6 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
                           x = closest_stations)) %>%
     st_transform(st_crs(fires_wgs_truncated))
     
-    
-
 ```
 
 ```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
@@ -640,7 +638,8 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  1,
-                 verbose = FALSE)
+                 verbose = FALSE,
+                 na.rm = TRUE)
     
     
     spi_3 <- spi(data = ts(focal_spi_data,
@@ -650,7 +649,8 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  3,
-                 verbose = FALSE)
+                 verbose = FALSE,
+                 na.rm = TRUE)
     
     spi_12 <- spi(data = ts(focal_spi_data,
                            frequency = 12,
@@ -659,7 +659,8 @@ require(ggplot2)
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
                  scale =  12,
-                 verbose = FALSE)
+                 verbose = FALSE,
+                 na.rm = TRUE)
 
 plot(spi_1)+
   ggtitle('1 Month SPI')
