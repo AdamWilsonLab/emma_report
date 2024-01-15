@@ -275,6 +275,8 @@ bbox <- st_bbox(focal_wgs) %>%
   
   focal_weather %>% collect() -> focal_weather
   
+  if(nrow(focal_weather) < 1){stop("No weather data loaded")}
+  
 ```  
   
 ```{r reformat_to_match_noaa, echo = FALSE, warning = FALSE, message = FALSE}
@@ -316,6 +318,8 @@ bbox <- st_bbox(focal_wgs) %>%
 #this bit is causing issues for some reason
     focal_weather %>%
     dplyr::mutate(year = YEAR) -> focal_weather
+
+
 
 ```
 
