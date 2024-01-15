@@ -21,7 +21,8 @@ update_climate_data_gsod <- function(parks,
 
     #Create temp directory if needed
 
-      if(!dir.exists(temp_directory)){dir.create(temp_directory,recursive = TRUE)}
+      if(!dir.exists(temp_directory)){
+        dir.create(temp_directory,recursive = TRUE)}
 
     #create subdir within the temp dir
 
@@ -30,7 +31,7 @@ update_climate_data_gsod <- function(parks,
 
     # Get list of stations
 
-    load(system.file("extdata", "isd_history.rda", package = "GSODR"))
+      load(system.file("extdata", "isd_history.rda", package = "GSODR"))
 
     # only take stations with data within South Africa
 
@@ -85,8 +86,8 @@ update_climate_data_gsod <- function(parks,
                 repo = "AdamWilsonLab/emma_report/",
                 tag = "GSOD",
                 overwrite = TRUE,
-                max_attempts = 10,
-                sleep_time = 10,
+                max_attempts = max_attempts,
+                sleep_time = sleep_time,
                 temp_directory = file.path(temp_directory,"/upload_check/"))
 
     # remove the parquet
@@ -104,7 +105,8 @@ update_climate_data_gsod <- function(parks,
 
         data_i <- robust_get_GSOD(years = as.numeric(isd_history$start_year[i]):year(Sys.Date()),
                            station = station_i,
-                           max_attempts = max_attempts)
+                           max_attempts = max_attempts,
+                           sleep_time = sleep_time)
 
         # move on if there was an issue in the download
 
@@ -131,8 +133,8 @@ update_climate_data_gsod <- function(parks,
                            repo = "AdamWilsonLab/emma_report/",
                            tag = "GSOD",
                            overwrite = TRUE,
-                           max_attempts = 10,
-                           sleep_time = 10,
+                           max_attempts = max_attempts,
+                           sleep_time = sleep_time,
                            temp_directory = file.path(temp_directory,"/upload_check/"))
 
         #remove the parquet
@@ -160,7 +162,7 @@ update_climate_data_gsod <- function(parks,
 
 #########################
 
-robust_get_GSOD <- function(years, station, max_attempts=10){
+robust_get_GSOD <- function(years, station, max_attempts=10, sleep_time = 1){
 
   n_attempts <- 1
 
@@ -194,7 +196,12 @@ robust_get_GSOD <- function(years, station, max_attempts=10){
         }
 
     # if it failed increment
+
       n_attempts = n_attempts + 1
+
+    # sleep if needed
+
+      Sys.sleep(sleep_time)
 
 
   } #while loop
