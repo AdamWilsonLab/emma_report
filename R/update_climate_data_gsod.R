@@ -3,7 +3,6 @@ library(GSODR)
 library(tidyverse)
 library(lubridate)
 
-source("https://raw.githubusercontent.com/AdamWilsonLab/emma_model/medecos/R/robust_pb_upload.R")
 update_climate_data_gsod <- function(parks,
                                      temp_directory = "data/temp/gsod",
                                      sleep_time = 1,
@@ -111,6 +110,10 @@ update_climate_data_gsod <- function(parks,
 
         if(!inherits(data_i,"data.frame")){next}
 
+        # if the data are empty, throw an error
+
+        if(nrow(data_i) < 1){ stop("No data downloaded") }
+
         # write data as a parquet file
 
           data_i %>%
@@ -158,7 +161,8 @@ robust_get_GSOD <- function(years, station, max_attempts=10){
 
   while(n_attempts <= max_attempts){
 
-    #message(n_attempts)
+    message("attempt ", n_attempts, " of ", max_attempts,
+            " to download GSOD data for station ", station)
 
     out_data <- tryCatch(get_GSOD(years = years,
                                   station = station),
