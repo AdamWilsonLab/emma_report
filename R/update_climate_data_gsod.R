@@ -112,7 +112,12 @@ update_climate_data_gsod <- function(parks,
 
         # if the data are empty, throw an error
 
-        if(nrow(data_i) < 1){ stop("No data downloaded") }
+        if(nrow(data_i) < 1){
+          warning("No data downloaded")
+          next
+          }
+
+        # if(nrow(data_i) < 1){ stop("No data downloaded") }
 
         # write data as a parquet file
 
@@ -168,13 +173,19 @@ robust_get_GSOD <- function(years, station, max_attempts=10){
                                   station = station),
                          error = function(e){e})
 
-    # if it worked, move on
+    # if download completed, check that it contains data
       if(inherits(out_data, c("data.table","data.frame"))){
-        return(out_data)
-      }
+
+
+        if(nrow(out_data) > 0){ return(out_data) }
+
+        if(nrow(out_data) == 0){ message("Empty dataframe downloaded, retrying") }
+
+      }#if
 
 
     # send message if giving up
+
       if(n_attempts == max_attempts){
 
         message("Reached maximum download attempts for station ", station,

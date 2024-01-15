@@ -81,7 +81,7 @@ list(
            command = update_climate_data_gsod(parks,
                                          temp_directory = "data/temp/gsod",
                                          sleep_time = 1,
-                                         max_attempts = 10),
+                                         max_attempts = 100),
            age = as.difftime(7, units = "days") #weekly updates
            #age = as.difftime(1, units = "days") #daily updates
            #age = as.difftime(0, units = "hours") #will update whenever run
