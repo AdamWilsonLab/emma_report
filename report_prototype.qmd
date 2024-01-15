@@ -224,7 +224,7 @@ bbox <- st_bbox(focal_wgs) %>%
 ```
 
 
-```{r prep_weather_data, echo = FALSE, warning = FALSE, message = FALSE}
+```{r identify_closest_stations, echo = FALSE, warning = FALSE, message = FALSE}
 
 # Process the station and weather data
 
@@ -266,12 +266,21 @@ bbox <- st_bbox(focal_wgs) %>%
   #Hack in case some of the files aren't downloaded correctly.  
     closest_stations  <- intersect(closest_stations,
                                    list.files(temp_directory))
-  
+
+```
+
+```{r load_weather_dataset, echo = FALSE, warning = FALSE, message = FALSE}
+
   focal_weather  <- open_dataset(file.path(temp_directory, closest_stations))
   
   focal_weather %>% collect() -> focal_weather
   
+```  
   
+```{r reformat_to_match_noaa, echo = FALSE, warning = FALSE, message = FALSE}
+```
+
+```{r debug1, echo = FALSE, warning = FALSE, message = FALSE}
   #fix station names in focal weather (missing in many case)
   
     # stations %>%
@@ -299,24 +308,79 @@ bbox <- st_bbox(focal_wgs) %>%
   
   #reformatting the GSOD to match NOAA format
   focal_weather %>%
-    as.data.frame() %>% #for some reason, this code throws an error without this line.  no idea why.
-    mutate(year =YEAR,
-           month = MONTH,
-           day = DAY,
-           station_name = NAME,
-           mean_precip_mm = PRCP,
-           temp_c = TEMP)%>%
-    mutate(date_time = paste(year,month,day,sep = "-"))%>%
-    mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+    as.data.frame() -> focal_weather #for some reason, this code throws an error without this line.  no idea why.
+```  
+
+```{r debug2.0, echo = FALSE, warning = FALSE, message = FALSE}
+    
+#this bit is causing issues for some reason
+    focal_weather %>%
+    dplyr::mutate(year = YEAR) -> focal_weather
+
+```
+
+```{r debug2.1, echo = FALSE, warning = FALSE, message = FALSE}
+    
+#this bit is causing issues for some reason
+    focal_weather %>%
+    dplyr::mutate(month = MONTH) -> focal_weather
+
+```
+
+```{r debug2.2, echo = FALSE, warning = FALSE, message = FALSE}
+    
+#this bit is causing issues for some reason
+    focal_weather %>%
+    dplyr::mutate(day = DAY) -> focal_weather
+
+
+
+```
+
+```{r debug2.3, echo = FALSE, warning = FALSE, message = FALSE}
+    
+#this bit is causing issues for some reason
+    focal_weather %>%
+    dplyr::mutate(station_name = NAME,
+                  mean_precip_mm = PRCP,
+                  temp_c = TEMP) -> focal_weather
+
+
+
+```
+
+```{r debug3, echo = FALSE, warning = FALSE, message = FALSE}
+
+    focal_weather %>%
+    dplyr::mutate(date_time = paste(year,month,day,sep = "-")) -> focal_weather
+  
+```
+
+```{r debug4, echo = FALSE, warning = FALSE, message = FALSE}
+
+    focal_weather %>%
+    dplyr::mutate(date_time = strptime(date_time,format = "%Y-%m-%d")) -> focal_weather
+
+```
+
+```{r debug5, echo = FALSE, warning = FALSE, message = FALSE}
+
+    focal_weather %>%
     dplyr::filter(!is.na(date_time)) -> focal_weather
+
+```
   
-  
+```{r filter_old_weather_data, echo = FALSE, warning = FALSE, message = FALSE}
   
   #Filter out oldest data
   
   focal_weather <- 
-    focal_weather%>%
-      filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
+    focal_weather %>%
+    dplyr::filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
+
+```
+  
+```{r generate_precip_dataset, echo = FALSE, warning = FALSE, message = FALSE}
   
   #Generate precip dataset
   
@@ -359,7 +423,10 @@ focal_weather %>%
   #               values_fn = mean) %>%
   #   xts::xts(order.by = .$date_time) -> focal_temp
   
-    
+```
+
+```{r generate_temp_dataset, echo = FALSE, warning = FALSE, message = FALSE}
+
     #mean daily temp dataset
 
     focal_weather%>%
@@ -382,7 +449,10 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
   dplyr::select(-doy)%>%
     xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
 
+```
 
+
+```{r generate_sf_of_stations, echo = FALSE, warning = FALSE, message = FALSE}
   
   
 #Generate sf of station points
