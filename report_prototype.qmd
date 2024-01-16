@@ -280,9 +280,7 @@ bbox <- st_bbox(focal_wgs) %>%
 ```  
   
 ```{r reformat_to_match_noaa, echo = FALSE, warning = FALSE, message = FALSE}
-```
 
-```{r debug1, echo = FALSE, warning = FALSE, message = FALSE}
   #fix station names in focal weather (missing in many case)
   
     # stations %>%
@@ -309,67 +307,17 @@ bbox <- st_bbox(focal_wgs) %>%
   
   
   #reformatting the GSOD to match NOAA format
+
   focal_weather %>%
-    as.data.frame() -> focal_weather #for some reason, this code throws an error without this line.  no idea why.
-```  
-
-```{r debug2.0, echo = FALSE, warning = FALSE, message = FALSE}
-    
-#this bit is causing issues for some reason
-    focal_weather %>%
-    dplyr::mutate(year = YEAR) -> focal_weather
-
-
-
-```
-
-```{r debug2.1, echo = FALSE, warning = FALSE, message = FALSE}
-    
-#this bit is causing issues for some reason
-    focal_weather %>%
-    dplyr::mutate(month = MONTH) -> focal_weather
-
-```
-
-```{r debug2.2, echo = FALSE, warning = FALSE, message = FALSE}
-    
-#this bit is causing issues for some reason
-    focal_weather %>%
-    dplyr::mutate(day = DAY) -> focal_weather
-
-
-
-```
-
-```{r debug2.3, echo = FALSE, warning = FALSE, message = FALSE}
-    
-#this bit is causing issues for some reason
-    focal_weather %>%
-    dplyr::mutate(station_name = NAME,
+    as.data.frame() %>%
+    dplyr::mutate(year = YEAR,
+                  month = MONTH,
+                  day = DAY,
+                  station_name = NAME,
                   mean_precip_mm = PRCP,
-                  temp_c = TEMP) -> focal_weather
-
-
-
-```
-
-```{r debug3, echo = FALSE, warning = FALSE, message = FALSE}
-
-    focal_weather %>%
-    dplyr::mutate(date_time = paste(year,month,day,sep = "-")) -> focal_weather
-  
-```
-
-```{r debug4, echo = FALSE, warning = FALSE, message = FALSE}
-
-    focal_weather %>%
-    dplyr::mutate(date_time = strptime(date_time,format = "%Y-%m-%d")) -> focal_weather
-
-```
-
-```{r debug5, echo = FALSE, warning = FALSE, message = FALSE}
-
-    focal_weather %>%
+                  temp_c = TEMP) %>%
+    dplyr::mutate(date_time = paste(year,month,day,sep = "-")) %>%
+    dplyr::mutate(date_time = strptime(date_time,format = "%Y-%m-%d")) %>%
     dplyr::filter(!is.na(date_time)) -> focal_weather
 
 ```
