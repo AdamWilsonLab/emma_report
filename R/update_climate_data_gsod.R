@@ -3,7 +3,6 @@ library(GSODR)
 library(tidyverse)
 library(lubridate)
 
-source("https://raw.githubusercontent.com/AdamWilsonLab/emma_model/medecos/R/robust_pb_upload.R")
 update_climate_data_gsod <- function(parks,
                                      temp_directory = "data/temp/gsod",
                                      sleep_time = 1,
@@ -22,7 +21,8 @@ update_climate_data_gsod <- function(parks,
 
     #Create temp directory if needed
 
-      if(!dir.exists(temp_directory)){dir.create(temp_directory,recursive = TRUE)}
+      if(!dir.exists(temp_directory)){
+        dir.create(temp_directory,recursive = TRUE)}
 
     #create subdir within the temp dir
 
@@ -31,7 +31,7 @@ update_climate_data_gsod <- function(parks,
 
     # Get list of stations
 
-    load(system.file("extdata", "isd_history.rda", package = "GSODR"))
+      load(system.file("extdata", "isd_history.rda", package = "GSODR"))
 
     # only take stations with data within South Africa
 
@@ -86,8 +86,8 @@ update_climate_data_gsod <- function(parks,
                 repo = "AdamWilsonLab/emma_report/",
                 tag = "GSOD",
                 overwrite = TRUE,
-                max_attempts = 10,
-                sleep_time = 10,
+                max_attempts = max_attempts,
+                sleep_time = sleep_time,
                 temp_directory = file.path(temp_directory,"/upload_check/"))
 
     # remove the parquet
@@ -105,11 +105,21 @@ update_climate_data_gsod <- function(parks,
 
         data_i <- robust_get_GSOD(years = as.numeric(isd_history$start_year[i]):year(Sys.Date()),
                            station = station_i,
-                           max_attempts = max_attempts)
+                           max_attempts = max_attempts,
+                           sleep_time = sleep_time)
 
         # move on if there was an issue in the download
 
         if(!inherits(data_i,"data.frame")){next}
+
+        # if the data are empty, throw an error
+
+        if(nrow(data_i) < 1){
+          warning("No data downloaded")
+          next
+          }
+
+        # if(nrow(data_i) < 1){ stop("No data downloaded") }
 
         # write data as a parquet file
 
@@ -123,8 +133,8 @@ update_climate_data_gsod <- function(parks,
                            repo = "AdamWilsonLab/emma_report/",
                            tag = "GSOD",
                            overwrite = TRUE,
-                           max_attempts = 10,
-                           sleep_time = 10,
+                           max_attempts = max_attempts,
+                           sleep_time = sleep_time,
                            temp_directory = file.path(temp_directory,"/upload_check/"))
 
         #remove the parquet
@@ -152,25 +162,32 @@ update_climate_data_gsod <- function(parks,
 
 #########################
 
-robust_get_GSOD <- function(years, station, max_attempts=10){
+robust_get_GSOD <- function(years, station, max_attempts=10, sleep_time = 1){
 
   n_attempts <- 1
 
   while(n_attempts <= max_attempts){
 
-    #message(n_attempts)
+    message("attempt ", n_attempts, " of ", max_attempts,
+            " to download GSOD data for station ", station)
 
     out_data <- tryCatch(get_GSOD(years = years,
                                   station = station),
                          error = function(e){e})
 
-    # if it worked, move on
+    # if download completed, check that it contains data
       if(inherits(out_data, c("data.table","data.frame"))){
-        return(out_data)
-      }
+
+
+        if(nrow(out_data) > 0){ return(out_data) }
+
+        if(nrow(out_data) == 0){ message("Empty dataframe downloaded, retrying") }
+
+      }#if
 
 
     # send message if giving up
+
       if(n_attempts == max_attempts){
 
         message("Reached maximum download attempts for station ", station,
@@ -179,7 +196,12 @@ robust_get_GSOD <- function(years, station, max_attempts=10){
         }
 
     # if it failed increment
+
       n_attempts = n_attempts + 1
+
+    # sleep if needed
+
+      Sys.sleep(sleep_time)
 
 
   } #while loop

@@ -16,6 +16,7 @@ library(dygraphs)
 
 #library(stantargets)
 source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
+source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_upload.R")
 # source all files in R folder
 lapply(list.files("R",pattern="[.]R",full.names = T)[-4], source)
 
@@ -79,9 +80,10 @@ list(
    tar_age(name = gsod_data,
            command = update_climate_data_gsod(parks,
                                          temp_directory = "data/temp/gsod",
-                                         sleep_time = 1,
+                                         sleep_time = 10,
                                          max_attempts = 10),
-           age = as.difftime(1, units = "days")
+           age = as.difftime(7, units = "days") #weekly updates
+           #age = as.difftime(1, units = "days") #daily updates
            #age = as.difftime(0, units = "hours") #will update whenever run
    ),
 
