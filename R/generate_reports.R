@@ -151,6 +151,28 @@ generate_reports <- function(output_directory = "reports/",
       pull(file_name)%>%
       as_date() -> most_recent_ndvi_date
 
+  # Get mean NDVI
+
+    robust_pb_download(file = "mean_ndvi.tif",
+                       dest = file.path(temp_directory),
+                       repo = "AdamWilsonLab/emma_envdata",
+                       tag = "current",
+                       max_attempts = max_attempts,
+                       sleep_time = sleep_time)
+
+  # Load the mean NDVI raster
+
+    mean_ndvi_raster <- terra::rast(file.path(temp_directory,"mean_ndvi.tif"))
+
+  # Fix the mean NDVI values
+
+    mean_ndvi_raster <- (mean_ndvi_raster/100)-1
+    mean_ndvi_raster %>%
+      terra::mask(mask = mean_ndvi_raster,
+                  maskvalue = 0) -> mean_ndvi_raster
+
+  # Create delta NDVI raster
+
   # MODIS NDWI
 
       robust_pb_download(file = "ndwi.tif",
