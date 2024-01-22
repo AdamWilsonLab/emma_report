@@ -51,7 +51,6 @@ library(dygraphs)
                 st_buffer(dist = 10000)) ->
         focal_fires
       
-      
       park_no_spaces <- gsub(pattern = " ",replacement = "_",x = park_name)
 
       focal_fires %>%
@@ -200,6 +199,13 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
                            #domain =  values(most_recent_ndvi_raster),
                            domain =  c(-1,0,1),
                            na.color = "transparent")
+  
+  max_delta_ndvi <- max(abs(values(delta_ndvi_raster)),na.rm = TRUE)
+
+  delta_ndvi_pal <- colorNumeric(palette = c( "brown", "white","forestgreen"),
+                                 #domain =  values(most_recent_ndvi_raster),
+                                 domain =  c(max_delta_ndvi*-1,max_delta_ndvi),
+                                 na.color = "transparent")
 
   ndwi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
                            #domain =  values(terra::rast(ndwi_rast)),
@@ -219,8 +225,6 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
 bbox <- st_bbox(focal_wgs) %>%
   as.vector()
 
-
-
 ```
 
 
@@ -234,7 +238,6 @@ bbox <- st_bbox(focal_wgs) %>%
                                 st_union()%>%
                                 st_centroid())
     
-
     closest_stations <- 
       data.frame(station = stations_sf$STNID,
                  name = stations_sf$NAME,
@@ -262,7 +265,6 @@ bbox <- st_bbox(focal_wgs) %>%
     
     if(exists("to_rm")){rm(to_rm)}
     
-  
   #Hack in case some of the files aren't downloaded correctly.  
     closest_stations  <- intersect(closest_stations,
                                    list.files(temp_directory))
@@ -436,7 +438,7 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
               group = "Park") %>%
   addRasterImage(x = raster::raster(most_recent_ndvi_raster),
                  group = "NDVI",
-                 colors = ndvi_pal)%>%
+                 colors = ndvi_pal) %>%
   addPolygons(data = fires_wgs_truncated,
               color = "red",
               fill = TRUE,
@@ -474,7 +476,36 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 ```
 
-Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data is is from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Fire data for the park are available at: `r park_fires_file`.
+Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Fire data for the park are available at: `r park_fires_file`.
+
+```{r delta_ndvi, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+  leaflet(data = focal_wgs) %>%
+  addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+  addPolygons(color = "black",
+              stroke = TRUE,
+              fill = FALSE,
+              group = "Park") %>%
+  addRasterImage(x = raster::raster(delta_ndvi_raster),
+                 group = "delta NDVI",
+                 colors = delta_ndvi_pal) %>%
+  leaflet::addLegend(position = "bottomright",
+            pal = delta_ndvi_pal,          
+            values = ~values(delta_ndvi_raster),
+            #values = ~c(-1,1),
+            opacity = 1,
+            title = "delta NDVI") %>%
+    addLayersControl(
+    baseGroups = c("World Imagery","NatGeo"),
+    overlayGroups = c("delta NDVI", "Park"),
+    options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
+  fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
+
+```
+
+Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI and expected NDVI (i.e., the long-term mean).  NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. 
 
 
 ## Weather Data
@@ -647,9 +678,15 @@ require(ggplot2)
     as.data.frame() %>%
     .[stations_to_keep$station_name] %>%
      mutate_if(is.character, as.numeric)-> focal_spi_data
+  
+  
+  # Only use the mean estimates if those are the only complete ones
 
-  focal_spi_data %>%
-    dplyr::select(!mean) -> focal_spi_data
+      focal_spi_data %>%
+      dplyr::select(!mean) -> focal_spi_data
+      
+      
+    if(ncol(focal_spi_data)>0){
   
     #calculate spi at different temporal windows
 
@@ -692,6 +729,8 @@ plot(spi_3)+
 
 plot(spi_12)+
   ggtitle('12 Month SPI')
+
+}else{print ("Weather data insufficient for SPI calcualtion")}
 
 
 

@@ -83,8 +83,8 @@ list(
                                          sleep_time = 10,
                                          max_attempts = 10),
            #age = as.difftime(7, units = "days") #weekly updates
-           #age = as.difftime(1, units = "days") #daily updates
-           age = as.difftime(0, units = "hours") #will update whenever run
+           age = as.difftime(1, units = "days") #daily updates
+           # age = as.difftime(0, units = "hours") #will update whenever run
    ),
 
 

@@ -119,7 +119,7 @@ generate_reports <- function(output_directory = "reports/",
   # get most recent NDVI data
 
     env_files %>%
-      filter(tag == "raw_ndvi_modis") %>%
+      filter(tag == "clean_ndvi_modis") %>%
       filter(grepl(pattern = ".tif",x = file_name)) %>%
       mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
@@ -173,6 +173,53 @@ generate_reports <- function(output_directory = "reports/",
 
   # Create delta NDVI raster
 
+     delta_ndvi_raster <- (most_recent_ndvi_raster - mean_ndvi_raster)
+
+     if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(mean_ndvi_raster,proj=TRUE)){
+
+       stop("NDVI CRS mismatch")
+
+     }
+
+     if(terra::ext(most_recent_ndvi_raster) != terra::ext(mean_ndvi_raster)){
+
+       stop("NDVI extent mismatch")
+
+     }
+
+
+  if(crs(delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
+
+    crs(delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
+  }
+
+  # Double check projections
+
+     if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+       crs(mean_ndvi_raster, proj = TRUE)){
+       stop("NDVI layers have different projections")
+     }
+
+     if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+        crs(delta_ndvi_raster, proj = TRUE)){
+       stop("NDVI layers have different projections")
+     }
+
+  # Write delta NDVI layer
+
+     delta_ndvi_raster %>%
+     writeRaster(filename = file.path(temp_directory,"delta_NDVI.tif"))
+
+
+  # Upload delta NDVI in case anyone wants it
+
+    robust_pb_upload(file = file.path(temp_directory,"delta_NDVI.tif"),
+                      repo = "AdamWilsonLab/emma_report",
+                      tag = "current",max_attempts = 10,
+                      sleep_time = 10,
+                      temp_directory = temp_directory,
+                      overwrite = TRUE)
+
   # MODIS NDWI
 
       robust_pb_download(file = "ndwi.tif",
@@ -191,7 +238,6 @@ generate_reports <- function(output_directory = "reports/",
         filter(file_name == "ndwi.tif")%>%
         pull(timestamp) %>%
         as_date() -> most_recent_ndwi_date
-
 
   # Other drought layers?
 
