@@ -60,6 +60,9 @@ update_climate_data <- function(parks,
     class(bb1) <- "numeric"
 
 
+    # update station metadata
+      update_station_list_nonint()
+
     #update station metadata
       stations <- isd_stations_search(bbox = bb1)
 
