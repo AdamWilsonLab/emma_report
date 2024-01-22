@@ -19,15 +19,19 @@ update_climate_data_gsod <- function(parks,
 
       }
 
-    #Create temp directory if needed
+    # Create temp directory if needed
 
       if(!dir.exists(temp_directory)){
         dir.create(temp_directory,recursive = TRUE)}
 
-    #create subdir within the temp dir
+    # create subdir within the temp dir
 
       if(!dir.exists(file.path(temp_directory,"/upload_check/"))){
         dir.create(file.path(temp_directory,"/upload_check/"),recursive = TRUE)}
+
+    # update station md
+
+      update_station_list_nonint()
 
     # Get list of stations
 
