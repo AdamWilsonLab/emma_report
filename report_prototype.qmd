@@ -507,6 +507,98 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
 
 Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI and expected NDVI (i.e., the long-term mean).  NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
+## Vegetation Ages
+
+
+```{r vegetation ages, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+  
+
+  # set NA values to 21 (we'll reset anything higher than 20 to 20+ for visualization)
+  # mask years since fire raster to the park
+
+  ysf_masked <- years_since_fire_raster
+  ysf_masked[is.na(ysf_masked)] <- 21
+  ysf_masked %>%
+  mask(focal_park) -> ysf_masked
+
+  # library(tidyterra)
+  # ggplot()+
+  #   geom_sf(data = focal_park)+
+  #   geom_spatraster(data = ysf_masked %>%
+  #                     crop(ext(focal_park)),
+  #                   mapping = aes(fill = lyr.1))+
+  #   coord_sf(crs=crs(ysf_masked))+
+  #   scale_fill_terrain_c()
+  
+  data.frame(Vegetation_Age = values(ysf_masked) %>%
+               as.vector()) %>%
+    filter(!is.na(Vegetation_Age)) %>%
+    mutate( Vegetation_Age = case_when(Vegetation_Age > 20 ~ 20,
+                                       .default = Vegetation_Age)) %>%
+    mutate(Vegetation_Age = round(x = Vegetation_Age, digits = 2))-> test
+  
+  
+    km2_per_pixel <- res(ysf_masked)[1]*res(ysf_masked)[2]*1e-6
+    
+    
+    
+    test %>%
+    ggplot(mapping = aes(x = Vegetation_Age))+
+    geom_histogram()+
+    xlab("Vegetation Age (years)")+
+    scale_x_continuous(breaks = c(0,5,10,15,20),
+    labels = c(0,5,10,15,"20(+)"),
+    limits = c(0,21),
+    expand = c(0,0))+
+      #convert to km2
+    scale_y_continuous(expand = c(0,0),
+                       labels = function(x){
+                         round(x * res(ysf_masked)[1] * res(ysf_masked)[2] * 1e-6,
+                                                  digits = 0)})+
+      ylab(expression(paste("Area ", (km^2) )))+
+    theme_bw()
+    
+
+    #Alternative density plot
+    # 
+    # test %>%
+    # ggplot(mapping = aes(x = Vegetation_Age))+
+    # geom_density(fill="red")+
+    # xlab("Vegetation Age")+
+    # scale_x_continuous(breaks = c(0,5,10,15,20),
+    # labels = c(0,5,10,15,"20(+)"),
+    # limits = c(0,21),
+    # expand = c(0,0))+
+    # scale_y_continuous(expand=c(0,0))+
+    # theme_bw()
+  
+    #Another density plot option    
+    # library(ggridges)
+
+    # test %>%
+    # mutate(dummy = "dummy") %>%
+    # ggplot(mapping = aes(x = Vegetation_Age,y=dummy,fill=..x..))+
+    # geom_density_ridges_gradient(color=NA)+
+    # scale_fill_gradient(low="lightgreen", high="darkred")+
+    # xlab("Vegetation Age")+
+    # scale_x_continuous(breaks = c(0,5,10,15,20),
+    # labels = c(0,5,10,15,"20(+)"),
+    # limits = c(0,21),
+    # expand = c(0,0))+
+    # scale_y_discrete(expand = expansion(mult = c(0, 0)))+
+    # ylab(NULL)+
+    # guides(y = "none")+
+    # theme_bw()+
+    # theme(legend.position="none")
+    # 
+    
+
+    
+
+
+
+```
+Figure 3. Histogram of vegetation ages.  For the purposes of this plot, any vegetation known to either be 20 years old or older, or for which we have no recorded records of fire, has been assigned an age of 20(+) years. The area shown was calculated by mutliplying counts of MODIS pixels at each age with the area of each pixel in square kilometers.
 
 ## Weather Data
 
@@ -573,7 +665,7 @@ Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI a
 
 ```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
 #| fig-cap: 
-#|   - "Figure 2. Climate Data from GSOD.  Mean data is a long-term average for each day of the year across these weather stations."
+#|   - "Figure 4. Climate Data from GSOD.  Mean data is a long-term average for each day of the year across these weather stations."
   #This code chunk plots the targets visualization.
   # I do this in two steps to avoid errors that otherwise can occur
 
@@ -584,7 +676,7 @@ Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI a
 
 ```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
 #| fig-cap: 
-#|   - "Figure 2. Climate Data from GSOD.  Mean data is a long-term average for each day of the year across these weather stations."
+#|   - "Figure 5. Climate Data from GSOD.  Mean data is a long-term average for each day of the year across these weather stations."
 
 
   #This code chunk plots the targets visualization.
@@ -638,7 +730,7 @@ library(leafem)
 
 ```
 
-The Normalized Difference Water Index [(NDWI)](https://en.wikipedia.org/wiki/Normalized_difference_water_index) is a measure of the water content of leaves ranging between -1 (no water) and 1 (water). The NDWI data were last updated on `r most_recent_ndwi_date` (although they may be older than the update date).
+Figure 6. The Normalized Difference Water Index [(NDWI)](https://en.wikipedia.org/wiki/Normalized_difference_water_index) is a measure of the water content of leaves ranging between -1 (no water) and 1 (water). The NDWI data were last updated on `r most_recent_ndwi_date` (although they may be older than the update date).
 
 Interpreting NDWI:
 
