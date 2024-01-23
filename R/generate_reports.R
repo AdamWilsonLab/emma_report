@@ -102,6 +102,18 @@ generate_reports <- function(output_directory = "reports/",
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
 
+  # release the years since fire raster
+    years_since_fire_raster %>%
+      writeRaster(filename = file.path(temp_directory,"years_since_fire.tif"))
+
+    robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
+                     repo = "AdamWilsonLab/emma_report",
+                     tag = "current",
+                     max_attempts = 10,
+                     sleep_time = 10,
+                     temp_directory = temp_directory,
+                     overwrite = TRUE)
+
   # crop years since fire raster to the remnants
 
     remnants <- terra::rast("data/misc/remnants.tif")
