@@ -9,7 +9,6 @@ library(SPEI)
 library(ggplot2)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
-source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
 
 #tar_load(model_results)
 #tar_load(model_prediction)
@@ -31,6 +30,28 @@ generate_reports <- function(output_directory = "reports/",
                              verbose=FALSE,
                              ...
 ){
+
+
+  #ensure directories are empty
+
+  if(dir.exists(file.path(output_directory))){
+
+    unlink(file.path(output_directory),recursive = TRUE,force = TRUE)
+
+  }
+
+  if(dir.exists(file.path(temp_directory))){
+
+    unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+
+  }
+
+  if(dir.exists(file.path(temp_directory_ndvi))){
+
+    unlink(file.path(temp_directory_ndvi),recursive = TRUE,force = TRUE)
+
+  }
+
 
   #create directories if needed
 
@@ -112,12 +133,13 @@ generate_reports <- function(output_directory = "reports/",
                  })
 
   # release the years since fire raster
+
     years_since_fire_raster %>%
       writeRaster(filename = file.path(temp_directory,"years_since_fire.tif"))
 
     robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
                      repo = "AdamWilsonLab/emma_report",
-                     tag = "current",
+                     tag = tag,
                      max_attempts = 10,
                      sleep_time = 10,
                      temp_directory = temp_directory,
@@ -231,7 +253,8 @@ generate_reports <- function(output_directory = "reports/",
         # Write delta NDVI layer
 
            delta_ndvi_raster %>%
-           writeRaster(filename = file.path(temp_directory_ndvi,"delta_NDVI.tif"))
+           writeRaster(filename = file.path(temp_directory_ndvi,"delta_NDVI.tif"),
+                       overwrite=TRUE)
 
 
         # Upload delta NDVI in case anyone wants it
@@ -315,7 +338,8 @@ generate_reports <- function(output_directory = "reports/",
             # Write delta NDVI layer
 
             quarterly_delta_ndvi_raster %>%
-              writeRaster(filename = file.path(temp_directory_ndvi,"quarterly_delta_NDVI.tif"))
+              writeRaster(filename = file.path(temp_directory_ndvi,"quarterly_delta_NDVI.tif"),
+                          overwrite = TRUE)
 
 
             # Upload delta NDVI in case anyone wants it
