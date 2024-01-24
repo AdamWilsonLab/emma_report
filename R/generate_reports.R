@@ -16,6 +16,7 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 #tar_load(spatial_outputs)
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
+                             temp_directory_ndvi = "data/temp/ndvi",
                              #report_location = "report_prototype.rmd",
                              report_location = "report_prototype.qmd",
                              park_data_tag = "park_data",
@@ -46,6 +47,14 @@ generate_reports <- function(output_directory = "reports/",
       dir.create(file.path(temp_directory),recursive = TRUE)
 
     }
+
+
+  if(!dir.exists(file.path(temp_directory_ndvi))){
+
+    dir.create(file.path(temp_directory_ndvi),recursive = TRUE)
+
+  }
+
 
   # Get outputs from model
 
@@ -138,7 +147,7 @@ generate_reports <- function(output_directory = "reports/",
       slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
 
     robust_pb_download(file = most_recent_ndvi_file$file_name,
-                dest = file.path(temp_directory),
+                dest = file.path(temp_directory_ndvi),
                 repo = "AdamWilsonLab/emma_envdata",
                 tag = most_recent_ndvi_file$tag,
                 max_attempts = max_attempts,
@@ -146,7 +155,7 @@ generate_reports <- function(output_directory = "reports/",
 
   # Load the NDVI raster
 
-    most_recent_ndvi_raster <- terra::rast(file.path(temp_directory,
+    most_recent_ndvi_raster <- terra::rast(file.path(temp_directory_ndvi,
                                                      most_recent_ndvi_file$file_name))
 
   # Fix the NDVI values
@@ -163,74 +172,161 @@ generate_reports <- function(output_directory = "reports/",
       pull(file_name)%>%
       as_date() -> most_recent_ndvi_date
 
-  # Get mean NDVI
+  # Long term mean NDVI
 
-    robust_pb_download(file = "mean_ndvi.tif",
-                       dest = file.path(temp_directory),
-                       repo = "AdamWilsonLab/emma_envdata",
-                       tag = "current",
-                       max_attempts = max_attempts,
-                       sleep_time = sleep_time)
+        # Get mean NDVI
 
-  # Load the mean NDVI raster
+          robust_pb_download(file = "mean_ndvi.tif",
+                             dest = file.path(temp_directory_ndvi),
+                             repo = "AdamWilsonLab/emma_envdata",
+                             tag = "current",
+                             max_attempts = max_attempts,
+                             sleep_time = sleep_time)
 
-    mean_ndvi_raster <- terra::rast(file.path(temp_directory,"mean_ndvi.tif"))
+        # Load the mean NDVI raster
 
-  # Fix the mean NDVI values
+          mean_ndvi_raster <- terra::rast(file.path(temp_directory_ndvi,"mean_ndvi.tif"))
 
-    mean_ndvi_raster <- (mean_ndvi_raster/100)-1
-    mean_ndvi_raster %>%
-      terra::mask(mask = mean_ndvi_raster,
-                  maskvalue = 0) -> mean_ndvi_raster
+        # Fix the mean NDVI values
 
-  # Create delta NDVI raster
+          mean_ndvi_raster <- (mean_ndvi_raster/100)-1
+          mean_ndvi_raster %>%
+            terra::mask(mask = mean_ndvi_raster,
+                        maskvalue = 0) -> mean_ndvi_raster
 
-     delta_ndvi_raster <- (most_recent_ndvi_raster - mean_ndvi_raster)
+        # Create delta NDVI raster
 
-     if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(mean_ndvi_raster,proj=TRUE)){
+           delta_ndvi_raster <- (most_recent_ndvi_raster - mean_ndvi_raster)
 
-       stop("NDVI CRS mismatch")
+           if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(mean_ndvi_raster,proj=TRUE)){
 
-     }
+             stop("NDVI CRS mismatch")
 
-     if(terra::ext(most_recent_ndvi_raster) != terra::ext(mean_ndvi_raster)){
+           }
 
-       stop("NDVI extent mismatch")
+           if(terra::ext(most_recent_ndvi_raster) != terra::ext(mean_ndvi_raster)){
 
-     }
+             stop("NDVI extent mismatch")
 
-
-  if(crs(delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
-
-    crs(delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
-  }
-
-  # Double check projections
-
-     if(crs(most_recent_ndvi_raster, proj = TRUE) !=
-       crs(mean_ndvi_raster, proj = TRUE)){
-       stop("NDVI layers have different projections")
-     }
-
-     if(crs(most_recent_ndvi_raster, proj = TRUE) !=
-        crs(delta_ndvi_raster, proj = TRUE)){
-       stop("NDVI layers have different projections")
-     }
-
-  # Write delta NDVI layer
-
-     delta_ndvi_raster %>%
-     writeRaster(filename = file.path(temp_directory,"delta_NDVI.tif"))
+           }
 
 
-  # Upload delta NDVI in case anyone wants it
+        if(crs(delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
 
-    robust_pb_upload(file = file.path(temp_directory,"delta_NDVI.tif"),
-                      repo = "AdamWilsonLab/emma_report",
-                      tag = "current",max_attempts = 10,
-                      sleep_time = 10,
-                      temp_directory = temp_directory,
-                      overwrite = TRUE)
+          crs(delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
+        }
+
+        # Double check projections
+
+           if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+             crs(mean_ndvi_raster, proj = TRUE)){
+             stop("NDVI layers have different projections")
+           }
+
+           if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+              crs(delta_ndvi_raster, proj = TRUE)){
+             stop("NDVI layers have different projections")
+           }
+
+        # Write delta NDVI layer
+
+           delta_ndvi_raster %>%
+           writeRaster(filename = file.path(temp_directory_ndvi,"delta_NDVI.tif"))
+
+
+        # Upload delta NDVI in case anyone wants it
+
+          robust_pb_upload(file = file.path(temp_directory_ndvi,"delta_NDVI.tif"),
+                            repo = "AdamWilsonLab/emma_report",
+                            tag = "current",max_attempts = 10,
+                            sleep_time = 10,
+                            temp_directory = temp_directory,
+                            overwrite = TRUE)
+
+  # 3 month mean NDVI
+
+          # get most recent NDVI data
+
+          env_files %>%
+            filter(tag == "clean_ndvi_modis") %>%
+            filter(grepl(pattern = ".tif",x = file_name)) %>%
+            mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
+            mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
+            filter(Sys.Date()-as_date(file_date) < 90) %>%
+            filter(!file_name %in% most_recent_ndvi_file$file_name) -> most_recent_quarter_ndvi_file
+
+          robust_pb_download(file = most_recent_quarter_ndvi_file$file_name,
+                             dest = file.path(temp_directory_ndvi),
+                             repo = "AdamWilsonLab/emma_envdata",
+                             tag = most_recent_ndvi_file$tag,
+                             max_attempts = max_attempts,
+                             sleep_time = sleep_time)
+
+          # Load the NDVI raster
+
+          most_recent_quarter_ndvi_raster <- terra::rast(file.path(temp_directory_ndvi,
+                                                           most_recent_quarter_ndvi_file$file_name))
+
+          # Fix the NDVI values
+
+            most_recent_quarter_ndvi_raster <- (most_recent_quarter_ndvi_raster/100)-1
+
+            most_recent_quarter_ndvi_raster %>%
+              terra::mask(mask = most_recent_quarter_ndvi_raster,
+                          maskvalue = 0) -> most_recent_quarter_ndvi_raster
+
+          # Take mean value
+
+            most_recent_quarter_ndvi_raster <-
+              terra::app(x = most_recent_quarter_ndvi_raster,
+                fun = function(x){mean(x, na.rm = TRUE)}
+                )
+
+            # Create quarterly delta NDVI raster
+
+            quarterly_delta_ndvi_raster <- (most_recent_ndvi_raster - most_recent_quarter_ndvi_raster)
+
+            if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(quarterly_delta_ndvi_raster,proj=TRUE)){
+
+              stop("NDVI CRS mismatch")
+
+            }
+
+            if(terra::ext(most_recent_ndvi_raster) != terra::ext(quarterly_delta_ndvi_raster)){
+
+              stop("NDVI extent mismatch")
+
+            }
+
+
+            if(crs(quarterly_delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
+
+              crs(quarterly_delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
+            }
+
+            # Double check projections
+
+            if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+               crs(quarterly_delta_ndvi_raster, proj = TRUE)){
+              stop("NDVI layers have different projections")
+            }
+
+
+            # Write delta NDVI layer
+
+            quarterly_delta_ndvi_raster %>%
+              writeRaster(filename = file.path(temp_directory_ndvi,"quarterly_delta_NDVI.tif"))
+
+
+            # Upload delta NDVI in case anyone wants it
+
+            robust_pb_upload(file = file.path(temp_directory_ndvi,"quarterly_delta_NDVI.tif"),
+                             repo = "AdamWilsonLab/emma_report",
+                             tag = "current",max_attempts = 10,
+                             sleep_time = 10,
+                             temp_directory = temp_directory,
+                             overwrite = TRUE)
+
 
   # MODIS NDWI
 
@@ -329,6 +425,8 @@ generate_reports <- function(output_directory = "reports/",
 
     #clean up temp directory
       unlink(file.path(temp_directory), recursive = TRUE, force = TRUE)
+      unlink(file.path(temp_directory_ndvi), recursive = TRUE, force = TRUE)
+
 
 
 }#end fx

@@ -488,18 +488,22 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
               stroke = TRUE,
               fill = FALSE,
               group = "Park") %>%
-  addRasterImage(x = raster::raster(delta_ndvi_raster),
-                 group = "delta NDVI",
+    addRasterImage(x = raster::raster(delta_ndvi_raster),
+                 group = "delta NDVI<br/>(long-term)",
                  colors = delta_ndvi_pal) %>%
+    addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
+                 group = "delta NDVI<br/>(quarterly)",
+                 colors = delta_ndvi_pal) %>%
+    hideGroup("delta NDVI<br/>(quarterly)") %>%
   leaflet::addLegend(position = "bottomright",
             pal = delta_ndvi_pal,          
             values = ~values(delta_ndvi_raster),
             #values = ~c(-1,1),
             opacity = 1,
-            title = "delta NDVI") %>%
+            title = "delta<br/>NDVI") %>%
     addLayersControl(
     baseGroups = c("World Imagery","NatGeo"),
-    overlayGroups = c("delta NDVI", "Park"),
+    overlayGroups = c("delta NDVI<br/>(long-term)","delta NDVI<br/>(quarterly)", "Park"),
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
