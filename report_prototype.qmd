@@ -746,7 +746,7 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
 
 
 
-```{r calc_spi, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r calc_spi_1, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 library(SPEI)
 require(ggplot2)
@@ -816,14 +816,32 @@ require(ggplot2)
 plot(spi_1)+
   ggtitle('1 Month SPI')
 
-plot(spi_3)+
-  ggtitle('3 Month SPI')
-
-plot(spi_12)+
-  ggtitle('12 Month SPI')
 
 }else{print ("Weather data insufficient for SPI calcualtion")}
 
+
+
+```
+
+```{r calc_spi_3, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+  if(ncol(focal_spi_data)>0){
+
+    plot(spi_3)+
+      ggtitle('3 Month SPI')
+    
+  }
+
+
+```
+
+```{r calc_spi_12, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+
+    if(ncol(focal_spi_data)>0){
+      plot(spi_12)+
+        ggtitle('12 Month SPI')
+    }
 
 
 ```
