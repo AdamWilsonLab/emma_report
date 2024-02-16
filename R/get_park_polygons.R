@@ -11,7 +11,8 @@ library(dplyr)
 get_park_polygons <- function(temp_directory = "data/temp/parks",
                               sacad_filename = "data/manual_downloads/protected_areas/SACAD_OR_2021_Q4.shp",
                               sapad_filename = "data/manual_downloads/protected_areas/SAPAD_OR_2021_Q4.shp",
-                              cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp"){
+                              cape_nature_filename = "data/manual_downloads/protected_areas/Provincial_Nature_Reserves/CapeNature_Reserves_gw.shp",
+                              park_data_tag = "park_data"){
 
   # Pull in different protected areas
 
@@ -99,17 +100,32 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
       st_transform(x = cn,
                    crs = st_crs(template))
 
-  # cleanup
-    unlink(file.path(temp_directory),
-           recursive = TRUE,
-           force = TRUE)
-
-
   # make output
 
     out <-
       list("cape_nature" = cn,
          "national_parks" = all_pas)
+
+    # write to a gpkg
+
+    bind_rows(cn,all_pas)%>%
+      st_write(dsn = file.path(temp_directory, "protected_areas.gpkg"),
+               append=FALSE,
+               quiet = TRUE
+               )
+
+    # release gpkg
+
+      robust_pb_upload(file = file.path(temp_directory, "protected_areas.gpkg"),
+                       repo = "AdamWilsonLab/emma_report",
+                       tag = park_data_tag)
+
+      file.remove(file.path(temp_directory, "protected_areas.gpkg"))
+
+  # cleanup
+      unlink(file.path(temp_directory),
+             recursive = TRUE,
+             force = TRUE)
 
   # return data product
     return(out)
