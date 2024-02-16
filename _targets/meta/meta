@@ -1,35 +1,35 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|8cd7087bc4747419|||||||||||||||
+.Random.seed|object|c7df38556e416795|||||||||||||||
 clean_up|function|08bcf9ecea369349|||||||||||||||
 create_spatial_outputs|function|a2e2e9f6e48f4565|||||||||||||||
 create_stan_data|function|7c6e224a02e15f45|||||||||||||||
 find_long_records|function|4daf399e64ddd46b|||||||||||||||
 generate_reports|function|4b1d61ca55dd88ca|||||||||||||||
 get_model_data|function|08fec7d94781ace7|||||||||||||||
-get_park_polygons|function|eece94dc2ce1eda6|||||||||||||||
+get_park_polygons|function|8e9210fb62243b09|||||||||||||||
 get_release_ndwi_modis|function|bbff24c27a6d4e7d|||||||||||||||
 get_remnants_polygons|function|5a885c69d9f96267|||||||||||||||
 get_remnants_raster|function|8dc84da102419cfc|||||||||||||||
 github_files|function|87a1757263d12051|||||||||||||||
 good_max|function|d93feaf4abe9f8eb|||||||||||||||
 good_mean|function|37479be04005688b|||||||||||||||
-gsod_data|stem|2ef7828953deb7b5|8d2304ddcdac91ac|a5cf2c03c0541ec3|-1808884257||t19769.0223161821s|b2c2d69496a0fbf4|63|rds|local|vector|||905.388|This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. No data downloaded|
-index|stem|888a75c97b13cda6|c01d5277708ade71|057c52ad780740f2|1251051853||t19769.051968048s|e655bbbdcbba1d63|81|rds|local|vector|||1.946||
-model_prediction|stem|36517e9d6f24f3e4|4af6374459a311cc|5b264e4e72da3550|-2084382576||t19769.0112974835s|398220bcdbf0d81d|564013|rds|local|vector|||10.489||
-model_results|stem|0ce52aa833340c8b|72019223cd81982c|5b264e4e72da3550|1320109886||t19769.0118370619s|b89629f0ecbfc482|5585415|rds|local|vector|||10.618||
-model_summary|stem|649014b49ae9519d|89dc60a17ac37e7c|55d06f0c870a1502|1662441368||t19769.0223188209s|bb4e721372eac6a0|88|rds|local|vector|||0.22||
+gsod_data|stem|2ef7828953deb7b5|8d2304ddcdac91ac|a5cf2c03c0541ec3|-1808884257||t19769.0746281256s|b2c2d69496a0fbf4|63|rds|local|vector|||761.269|This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. This station, 68718099999, only provides data for years 1973 to 2023.Please send a request that falls within these years.. No data downloaded|
+index|stem|888a75c97b13cda6|c01d5277708ade71|057c52ad780740f2|1251051853||t19769.1044565968s|e655bbbdcbba1d63|81|rds|local|vector|||1.915||
+model_prediction|stem|36517e9d6f24f3e4|4af6374459a311cc|5b264e4e72da3550|-2084382576||t19769.0652475268s|398220bcdbf0d81d|564013|rds|local|vector|||10.488||
+model_results|stem|0ce52aa833340c8b|72019223cd81982c|5b264e4e72da3550|1320109886||t19769.0658170202s|b89629f0ecbfc482|5585415|rds|local|vector|||10.568||
+model_summary|stem|649014b49ae9519d|89dc60a17ac37e7c|55d06f0c870a1502|1662441368||t19769.0746309034s|bb4e721372eac6a0|88|rds|local|vector|||0.235||
 ndwi|stem|28157d137ad31573|c30e9c6e62f4db0a|8fdb73ee57bc9cda|62726435||t19381.0087803654s|b2c2d69496a0fbf4|63|rds|local|vector|||230.639||
 noaa_data|stem|34410c6397dcec0e|390f67f326c53cbf|36cfb1236851299a|1392023248||t19570.0922750312s|e0224cf10db1a05d|62|rds|local|vector|||4828.585|attribute variables are assumed to be spatially constant throughout all geometries. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684240.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684380.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 684420.gz.parquet not found in repo AdamWilsonLabemma_report. files 68442|
-parks|stem|a008e4ebbc750b44|d1458414f42e244a|8e36c262fb1e3352|1019802448||t19769.0115554902s|af81871c37d6fdb2|717793|rds|local|vector|||22.219||
+parks|stem|a008e4ebbc750b44|d1458414f42e244a|e6a21f79a5d3e789|1019802448||t19769.0655333615s|af81871c37d6fdb2|717793|rds|local|vector|||24.624||
 release_posteriors|function|e85e8a50366c3522|||||||||||||||
-remnants|stem|17656ca132f3e9f7|f59abf2e521e357b|ae51ad81129c9733|726602040||t19769.0111748458s|a1c456b03adbfbf8|44|rds|local|vector|||10.306||
-report_location|stem|e48043bafbb41cd7|87d32c46dc33ec46|ef46db3751d8e999|698831900|report_prototype.qmd|t19769.0104156868s|d61351d6a31c2301|29565|file|local|vector|||4.072||
-reports|stem|c127ec8d9b9f3b76|6f5cd758efa9d48f|e9189d41f5fd4098|589188868||t19769.0519454556s|44989414465ff33d|49|rds|local|vector|||2559.736||
+remnants|stem|17656ca132f3e9f7|f59abf2e521e357b|ae51ad81129c9733|726602040||t19769.0651249337s|a1c456b03adbfbf8|44|rds|local|vector|||10.448||
+report_location|stem|e48043bafbb41cd7|87d32c46dc33ec46|ef46db3751d8e999|698831900|report_prototype.qmd|t19769.0642621058s|d61351d6a31c2301|29565|file|local|vector|||4.072||
+reports|stem|c127ec8d9b9f3b76|6f5cd758efa9d48f|e9189d41f5fd4098|589188868||t19769.1044343745s|44989414465ff33d|49|rds|local|vector|||2575.016||
 robust_get_GSOD|function|c7d2f794f15a8597|||||||||||||||
 robust_pb_download|function|c9145002d00cc12e|||||||||||||||
 robust_pb_download_solo|function|a40beb94c364506a|||||||||||||||
 robust_pb_upload|function|8add7893ee8c8fa3|||||||||||||||
-spatial_outputs|stem|e9d7414cee68f410|8b04e8b38e843dd5|5b264e4e72da3550|-324580159||t19769.0117055351s|9243b71744020338|29071445|rds|local|vector|||11.374||
+spatial_outputs|stem|e9d7414cee68f410|8b04e8b38e843dd5|5b264e4e72da3550|-324580159||t19769.0656860011s|9243b71744020338|29071445|rds|local|vector|||11.607||
 summarize_model_output|function|50f2b753a815b00e|||||||||||||||
 summarize_predictions|function|561550e942ee3728|||||||||||||||
 sync_envdata|function|83b7dcf7ef02c3c6|||||||||||||||
