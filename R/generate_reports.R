@@ -18,6 +18,8 @@ generate_reports <- function(output_directory = "reports/",
                              temp_directory_ndvi = "data/temp/ndvi",
                              #report_location = "report_prototype.rmd",
                              report_location = "report_prototype.qmd",
+                             monthly_mean_ndvi = monthly_mean_ndvi,
+                             most_recent_ndvi_date= most_recent_ndvi_date,
                              park_data_tag = "park_data",
                              time_window_days = 120,
                              n_stations = 3,
@@ -193,6 +195,71 @@ generate_reports <- function(output_directory = "reports/",
       mutate(file_name = gsub(pattern = ".tif",replacement="",x=file_name))%>%
       pull(file_name)%>%
       as_date() -> most_recent_ndvi_date
+
+  # Monthly mean NDVI
+
+    robust_pb_download(file = monthly_mean_ndvi$filename,
+                       dest = file.path(temp_directory_ndvi),
+                       repo = monthly_mean_ndvi$repo,
+                       tag = monthly_mean_ndvi$tag,
+                       overwrite = TRUE,
+                       max_attempts = max_attempts,
+                       sleep_time = sleep_time)
+
+    monthly_mean_ndvi_raster <- terra::rast(file.path(temp_directory_ndvi,monthly_mean_ndvi$filename))
+
+
+    # Create delta NDVI raster
+
+    monthly_delta_ndvi_raster <- (most_recent_ndvi_raster - monthly_mean_ndvi_raster)
+
+    if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(monthly_mean_ndvi_raster,proj=TRUE)){
+
+      stop("NDVI CRS mismatch")
+
+    }
+
+    if(terra::ext(most_recent_ndvi_raster) != terra::ext(monthly_mean_ndvi_raster)){
+
+      stop("NDVI extent mismatch")
+
+    }
+
+
+    if(crs(monthly_delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
+
+      crs(monthly_delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
+    }
+
+    # Double check projections
+
+    if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+       crs(monthly_mean_ndvi_raster, proj = TRUE)){
+      stop("NDVI layers have different projections")
+    }
+
+    if(crs(most_recent_ndvi_raster, proj = TRUE) !=
+       crs(monthly_delta_ndvi_raster, proj = TRUE)){
+      stop("NDVI layers have different projections")
+    }
+
+    # Write monthly delta NDVI layer
+
+    monthly_delta_ndvi_raster %>%
+      writeRaster(filename = file.path(temp_directory_ndvi,"monthly_delta_NDVI.tif"),
+                  overwrite=TRUE)
+
+
+    # Upload delta NDVI in case anyone wants it
+
+    robust_pb_upload(file = file.path(temp_directory_ndvi,"monthly_delta_NDVI.tif"),
+                     repo = "AdamWilsonLab/emma_report",
+                     tag = "current",max_attempts = 10,
+                     sleep_time = 10,
+                     temp_directory = temp_directory,
+                     overwrite = TRUE)
+
+
 
   # Long term mean NDVI
 
