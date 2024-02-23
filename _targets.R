@@ -77,16 +77,31 @@ list(
     #         #age = as.difftime(0, units = "hours") #will update whenever run
     # ),
 
-   tar_age(name = gsod_data,
-           command = update_climate_data_gsod(parks,
-                                         temp_directory = "data/temp/gsod",
-                                         sleep_time = 10,
-                                         max_attempts = 10),
+   # tar_age(name = gsod_data,
+   #         command = update_climate_data_gsod(parks,
+   #                                       temp_directory = "data/temp/gsod",
+   #                                       sleep_time = 10,
+   #                                       max_attempts = 10),
+   #         #age = as.difftime(7, units = "days") #weekly updates
+   #         age = as.difftime(1, units = "days") #daily updates
+   #         # age = as.difftime(0, units = "hours") #will update whenever run
+   # ),
+
+
+   tar_age(name = most_recent_ndvi_date,
+           command = get_most_recent_ndvi_date(),
            #age = as.difftime(7, units = "days") #weekly updates
            age = as.difftime(1, units = "days") #daily updates
            # age = as.difftime(0, units = "hours") #will update whenever run
-   ),
+           ),
 
+   tar_target(name = current_month,
+           command = lubridate::month(most_recent_ndvi_date)
+           ),
+
+   tar_target(name = monthly_mean_ndvi,
+              command = get_monthly_mean_ndvi(temp_directory = "data/temp/",
+                                              current_month = current_month)),
 
    # the target below is used so that things are re-run if the qmd changes
    tar_target(name = report_location,
@@ -98,6 +113,8 @@ list(
                                          temp_directory = "data/temp/reports/",
                                          temp_directory_ndvi = "data/temp/ndvi",
                                          report_location = report_location,
+                                         monthly_mean_ndvi = monthly_mean_ndvi,
+                                         most_recent_ndvi_date = most_recent_ndvi_date,
                                          tag = "current",
                                          park_data_tag = "park_data",
                                          time_window_days = 365,

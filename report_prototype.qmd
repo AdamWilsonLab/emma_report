@@ -200,8 +200,9 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
                            domain =  c(-1,0,1),
                            na.color = "transparent")
   
-  max_delta_ndvi <- max(abs(values(delta_ndvi_raster)),na.rm = TRUE)
-
+  #max_delta_ndvi <- max(abs(values(delta_ndvi_raster)),na.rm = TRUE)
+  max_delta_ndvi <- max(abs(values(monthly_delta_ndvi_raster)),na.rm = TRUE)
+  
   delta_ndvi_pal <- colorNumeric(palette = c( "brown", "white","forestgreen"),
                                  #domain =  values(most_recent_ndvi_raster),
                                  domain =  c(max_delta_ndvi*-1,max_delta_ndvi),
@@ -491,8 +492,11 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
     addRasterImage(x = raster::raster(delta_ndvi_raster),
                  group = "delta NDVI<br/>(long-term)",
                  colors = delta_ndvi_pal) %>%
-    addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
-                 group = "delta NDVI<br/>(quarterly)",
+    # addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
+    #              group = "delta NDVI<br/>(quarterly)",
+    #              colors = delta_ndvi_pal) %>%
+    addRasterImage(x = raster::raster(monthly_delta_ndvi_raster),
+                 group = "delta NDVI<br/>(monthly)",
                  colors = delta_ndvi_pal) %>%
     hideGroup("delta NDVI<br/>(quarterly)") %>%
   leaflet::addLegend(position = "bottomright",
@@ -503,13 +507,16 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
             title = "delta<br/>NDVI") %>%
     addLayersControl(
     baseGroups = c("World Imagery","NatGeo"),
-    overlayGroups = c("delta NDVI<br/>(long-term)","delta NDVI<br/>(quarterly)", "Park"),
+    overlayGroups = c("delta NDVI<br/>(long-term)",
+                      #"delta NDVI<br/>(quarterly)",
+                      "delta NDVI<br/>(monthly)",
+                      "Park"),
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
 ```
 
-Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Quarterly delta NDVI is calculated relative to the mean NDVI of the most recent 90 days while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
+Figure 2. Leaflet map showing delta NDVI, the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
 ## Vegetation Ages
 

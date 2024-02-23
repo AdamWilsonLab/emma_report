@@ -1,5 +1,8 @@
 name|type|parent|branches|progress
-report_location|stem|report_location|0|skipped
+report_location|stem|report_location|0|dispatched
+report_location|stem|report_location|0|completed
+most_recent_ndvi_date|stem|most_recent_ndvi_date|0|dispatched
+most_recent_ndvi_date|stem|most_recent_ndvi_date|0|completed
 remnants|stem|remnants|0|dispatched
 remnants|stem|remnants|0|completed
 model_prediction|stem|model_prediction|0|dispatched
@@ -10,10 +13,12 @@ spatial_outputs|stem|spatial_outputs|0|dispatched
 spatial_outputs|stem|spatial_outputs|0|completed
 model_results|stem|model_results|0|dispatched
 model_results|stem|model_results|0|completed
-gsod_data|stem|gsod_data|0|dispatched
-gsod_data|stem|gsod_data|0|completed
+current_month|stem|current_month|0|dispatched
+current_month|stem|current_month|0|completed
 model_summary|stem|model_summary|0|dispatched
 model_summary|stem|model_summary|0|completed
+monthly_mean_ndvi|stem|monthly_mean_ndvi|0|dispatched
+monthly_mean_ndvi|stem|monthly_mean_ndvi|0|completed
 reports|stem|reports|0|dispatched
 reports|stem|reports|0|completed
 index|stem|index|0|dispatched
