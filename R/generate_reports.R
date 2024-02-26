@@ -16,7 +16,6 @@ source("R/get_park_polygons.R")
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
                              temp_directory_ndvi = "data/temp/ndvi",
-                             #report_location = "report_prototype.rmd",
                              report_location = "report_prototype.qmd",
                              monthly_mean_ndvi = monthly_mean_ndvi,
                              most_recent_ndvi_date= most_recent_ndvi_date,
@@ -185,6 +184,7 @@ generate_reports <- function(output_directory = "reports/",
   # Fix the NDVI values
 
     most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
+
     most_recent_ndvi_raster %>%
       terra::mask(mask = most_recent_ndvi_raster,
                   maskvalue = 0) -> most_recent_ndvi_raster
@@ -249,7 +249,6 @@ generate_reports <- function(output_directory = "reports/",
       writeRaster(filename = file.path(temp_directory_ndvi,"monthly_delta_NDVI.tif"),
                   overwrite=TRUE)
 
-
     # Upload delta NDVI in case anyone wants it
 
     robust_pb_upload(file = file.path(temp_directory_ndvi,"monthly_delta_NDVI.tif"),
@@ -258,8 +257,6 @@ generate_reports <- function(output_directory = "reports/",
                      sleep_time = 10,
                      temp_directory = temp_directory,
                      overwrite = TRUE)
-
-
 
   # Long term mean NDVI
 
@@ -279,6 +276,7 @@ generate_reports <- function(output_directory = "reports/",
         # Fix the mean NDVI values
 
           mean_ndvi_raster <- (mean_ndvi_raster/100)-1
+
           mean_ndvi_raster %>%
             terra::mask(mask = mean_ndvi_raster,
                         maskvalue = 0) -> mean_ndvi_raster
@@ -322,7 +320,6 @@ generate_reports <- function(output_directory = "reports/",
            delta_ndvi_raster %>%
            writeRaster(filename = file.path(temp_directory_ndvi,"delta_NDVI.tif"),
                        overwrite=TRUE)
-
 
         # Upload delta NDVI in case anyone wants it
 
@@ -428,7 +425,7 @@ generate_reports <- function(output_directory = "reports/",
                          max_attempts = max_attempts,
                          sleep_time = sleep_time)
 
-      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif")))%>%
+      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif"))) %>%
         round(digits = 2) #round to save memory
 
     # MODIS NDWI date
@@ -463,6 +460,17 @@ generate_reports <- function(output_directory = "reports/",
     stations_sf <- st_as_sf(stations,coords = c("LON","LAT"))
     st_crs(stations_sf) <- st_crs("EPSG:4326")
     stations_sf <- st_transform(stations_sf, crs = st_crs(parks$cape_nature))
+
+  # Get invasive species data
+
+    robust_pb_download(file = "current_inat_records.gpkg",
+                       dest = file.path(temp_directory),
+                       repo = "AdamWilsonLab/emma_report",
+                       tag = "current",
+                       max_attempts = max_attempts,
+                       sleep_time = sleep_time)
+
+    invasives <- st_read(file.path(temp_directory,"current_inat_records.gpkg"))
 
   # Generate the National Park reports via a for loop
 
