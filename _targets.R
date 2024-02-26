@@ -104,19 +104,19 @@ list(
               command = get_monthly_mean_ndvi(temp_directory = "data/temp/",
                                               current_month = current_month)),
 
-   tar_age(name = inat_data,
-              command = get_inat_data(inat_data_location = "data/manual_downloads/inat_project/observations-405358.csv",
-                                      temp_directory = "data/temp/inat/",
-                                      max_attemps = 10,
-                                      sleep_time=10,
-                                      oldest_date = "2020-01-01",
-                                      sa_parks = parks,
-                                      park_buffer = 10000,
-                                      verbose=TRUE),
-           # age = as.difftime(7, units = "days") #weekly updates
-           # age = as.difftime(1, units = "days") #daily updates
-            age = as.difftime(28, units = "days") #will update monthly
-           ),
+   # tar_age(name = inat_data,
+   #            command = get_inat_data(inat_data_location = "data/manual_downloads/inat_project/observations-405358.csv",
+   #                                    temp_directory = "data/temp/inat/",
+   #                                    max_attemps = 10,
+   #                                    sleep_time=10,
+   #                                    oldest_date = "2020-01-01",
+   #                                    sa_parks = parks,
+   #                                    park_buffer = 10000,
+   #                                    verbose=FALSE),
+   #         # age = as.difftime(7, units = "days") #weekly updates
+   #         # age = as.difftime(1, units = "days") #daily updates
+   #          age = as.difftime(28, units = "days") #will update monthly
+   #         ),
 
    # the target below is used so that things are re-run if the qmd changes
    tar_target(name = report_location,
