@@ -427,6 +427,16 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
     
 ```
 
+
+```{r crop invasives, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+invasives %>%
+      st_crop(y = focal_wgs %>%
+                st_buffer(dist = 1000)) -> focal_invasives
+
+```
+
+
 ```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
   leaflet(data = focal_wgs) %>%
@@ -481,36 +491,40 @@ Figure 1. Leaflet map showing NDVI and the number of years since the most recent
 
 ```{r delta_ndvi, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
-  leaflet(data = focal_wgs) %>%
+leaflet(data = focal_wgs) %>%
   addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
   addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
-    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+  #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
   addPolygons(color = "black",
               stroke = TRUE,
               fill = FALSE,
               group = "Park") %>%
-    addRasterImage(x = raster::raster(delta_ndvi_raster),
+  addRasterImage(x = raster::raster(delta_ndvi_raster),
                  group = "delta NDVI<br/>(long-term)",
                  colors = delta_ndvi_pal) %>%
-    # addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
-    #              group = "delta NDVI<br/>(quarterly)",
-    #              colors = delta_ndvi_pal) %>%
-    addRasterImage(x = raster::raster(monthly_delta_ndvi_raster),
+  # addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
+  #              group = "delta NDVI<br/>(quarterly)",
+  #              colors = delta_ndvi_pal) %>%
+  addRasterImage(x = raster::raster(monthly_delta_ndvi_raster),
                  group = "delta NDVI<br/>(monthly)",
                  colors = delta_ndvi_pal) %>%
-    hideGroup("delta NDVI<br/>(quarterly)") %>%
+  hideGroup("delta NDVI<br/>(quarterly)") %>%
+  addMarkers(data = focal_invasives,
+             label = focal_invasives$scientific_name,
+             group = "Invasives") %>%
   leaflet::addLegend(position = "bottomright",
-            pal = delta_ndvi_pal,          
-            values = ~values(delta_ndvi_raster),
-            #values = ~c(-1,1),
-            opacity = 1,
-            title = "delta<br/>NDVI") %>%
-    addLayersControl(
+                     pal = delta_ndvi_pal,          
+                     values = ~values(delta_ndvi_raster),
+                     #values = ~c(-1,1),
+                     opacity = 1,
+                     title = "delta<br/>NDVI") %>%
+  addLayersControl(
     baseGroups = c("World Imagery","NatGeo"),
     overlayGroups = c("delta NDVI<br/>(long-term)",
                       #"delta NDVI<br/>(quarterly)",
                       "delta NDVI<br/>(monthly)",
-                      "Park"),
+                      "Park",
+                      "Invasives"),
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
