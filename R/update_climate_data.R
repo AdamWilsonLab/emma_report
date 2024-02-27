@@ -337,7 +337,7 @@ update_climate_data <- function(parks,
     }#if there are things to update
   # clean up cache
 
-    rnoaa::isd_cache$delete_all(force = TRUE)
+    #rnoaa::isd_cache$delete_all(force = TRUE) #commented out since rnoaa is no longer on cran
 
   # clean up temp files
     unlink(file.path(temp_directory),
