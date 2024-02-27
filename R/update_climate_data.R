@@ -1,4 +1,4 @@
-library(rnoaa)
+#library(rnoaa) #commented out as rnoaa is no longer on cran as of feb 27, 2024, causing errors in github actions
 library(piggyback)
 library(arrow)
 library(tidyverse)
