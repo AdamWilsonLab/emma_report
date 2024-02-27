@@ -10,9 +10,13 @@ library(ggplot2)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
 
-#tar_load(model_results)
-#tar_load(model_prediction)
-#tar_load(spatial_outputs)
+#tar_load(monthly_mean_ndvi)
+#tar_load(most_recent_ndvi_date)
+#tar_load(parks)
+#tar_load(remnants)
+#source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
+#source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_upload.R")
+
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
                              temp_directory_ndvi = "data/temp/ndvi",
@@ -253,8 +257,9 @@ generate_reports <- function(output_directory = "reports/",
 
     robust_pb_upload(file = file.path(temp_directory_ndvi,"monthly_delta_NDVI.tif"),
                      repo = "AdamWilsonLab/emma_report",
-                     tag = "current",max_attempts = 10,
-                     sleep_time = 10,
+                     tag = "current",
+                     max_attempts = max_attempts,
+                     sleep_time = sleep_time,
                      temp_directory = temp_directory,
                      overwrite = TRUE)
 
@@ -324,9 +329,10 @@ generate_reports <- function(output_directory = "reports/",
         # Upload delta NDVI in case anyone wants it
 
           robust_pb_upload(file = file.path(temp_directory_ndvi,"delta_NDVI.tif"),
-                            repo = "AdamWilsonLab/emma_report",
-                            tag = "current",max_attempts = 10,
-                            sleep_time = 10,
+                           repo = "AdamWilsonLab/emma_report",
+                           tag = "current",
+                           max_attempts = max_attempts,
+                            sleep_time = sleep_time,
                             temp_directory = temp_directory,
                             overwrite = TRUE)
 
@@ -417,23 +423,25 @@ generate_reports <- function(output_directory = "reports/",
 
 
   # MODIS NDWI
+            ## Commenting NDWI out for now, as gee hasn't updated to the new version yet.
+            ## uncomment below and adjust the corresponding bits of report_prototype.qmd if this changes
 
-      robust_pb_download(file = "ndwi.tif",
-                         tag = tag,
-                         dest = file.path(temp_directory),
-                         repo = "AdamWilsonLab/emma_envdata",
-                         max_attempts = max_attempts,
-                         sleep_time = sleep_time)
-
-      ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif"))) %>%
-        round(digits = 2) #round to save memory
+      # robust_pb_download(file = "ndwi.tif",
+      #                    tag = tag,
+      #                    dest = file.path(temp_directory),
+      #                    repo = "AdamWilsonLab/emma_envdata",
+      #                    max_attempts = max_attempts,
+      #                    sleep_time = sleep_time)
+      #
+      # ndwi_rast <- raster::raster(terra::rast(file.path(temp_directory,"ndwi.tif"))) %>%
+      #   round(digits = 2) #round to save memory
 
     # MODIS NDWI date
 
-      env_files %>%
-        filter(file_name == "ndwi.tif")%>%
-        pull(timestamp) %>%
-        as_date() -> most_recent_ndwi_date
+      # env_files %>%
+      #   filter(file_name == "ndwi.tif")%>%
+      #   pull(timestamp) %>%
+      #   as_date() -> most_recent_ndwi_date
 
   # Other drought layers?
 
