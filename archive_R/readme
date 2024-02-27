@@ -1,0 +1,3 @@
+# Readme
+
+The files in this folder are old .R files that we are no longer using.  I have changed the file extensions so that they will be ignored by the R function qscan, which is used to install all packages used by .R files.
