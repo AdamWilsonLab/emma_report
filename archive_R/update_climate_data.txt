@@ -1,4 +1,4 @@
-#library(rnoaa) #commented out as rnoaa is no longer on cran as of feb 27, 2024, causing errors in github actions
+library(rnoaa)
 library(piggyback)
 library(arrow)
 library(tidyverse)
@@ -337,7 +337,7 @@ update_climate_data <- function(parks,
     }#if there are things to update
   # clean up cache
 
-    #rnoaa::isd_cache$delete_all(force = TRUE) #commented out since rnoaa is no longer on cran
+    rnoaa::isd_cache$delete_all(force = TRUE) #commented out since rnoaa is no longer on cran
 
   # clean up temp files
     unlink(file.path(temp_directory),
