@@ -521,16 +521,92 @@ invasives %>%
     options = layersControlOptions(collapsed = FALSE),position = "topleft") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
+
+
+
                       
 
 ```
 
-Figure 1. Leaflet map showing NDVI and the number of years since the most recent fire.  NA values in the NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif
+Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
-Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.).  NDVI data are from `r most_recent_ndvi_date`. The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
 ## Vegetation Ages
 
+## Vegetation ages over time
+
+```{r vegetation ages over time, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+
+# Subset park_fire_history to only the focal park
+
+  # use the ndvi raster as a template to get cells in park
+
+    most_recent_ndvi_raster %>%
+      terra::extract(y = vect(focal_park),
+                     cells = TRUE,
+                     touches = TRUE) %>%
+    dplyr::select(cell) -> focal_cells
+
+  # subset fire data
+
+  focal_fires <-
+    park_fire_history %>%
+    filter(cellID %in% focal_cells$cell)
+  
+  # tile plot
+    # 
+    # ggplot()+
+    # geom_tile(data =     focal_fires %>%
+    #             mutate(cellID = as.factor(cellID),
+    #                    years_since_fire = days_since_fire/365.25) %>%
+    #               filter(years_since_fire >= 0)%>%
+    #             mutate(date = as_date(date)),
+    #             mapping = aes(x=date,y=cellID,fill=years_since_fire))+
+    #   scale_x_date(date_labels = "%Y",
+    #                expand = c(0,0))+
+    #   scale_y_discrete(expand = c(0,0))+
+    #   theme(axis.text.y = element_blank(),
+    #         axis.ticks.y = element_blank())
+    
+
+  # joyplot attempts
+
+  library(ggridges)  
+    
+  # dealing with missing cells/ages
+  
+    focal_fires %>%
+      pivot_wider(names_from = date,
+                  values_from = days_since_fire) %>%
+      full_join(y = focal_cells,
+                by = c("cellID"="cell")) %>%
+      pivot_longer(cols = !1, # make sure this ncol is pointing to the correct thing
+                   names_to = "date",
+                   values_to = "days_since_fire") %>%
+                mutate(cellID = as.factor(cellID),
+                       years_since_fire = days_since_fire/365.25,
+                       date =as.numeric(date))%>%
+                    mutate(date = as_date(date),
+                       year = year(date))%>%
+      mutate(years_since_fire = case_when(is.na(years_since_fire) ~ 20,
+                                          years_since_fire >= 0 ~ years_since_fire,
+                                          years_since_fire < 0 ~ 20)) -> ff2
+  
+        ggplot(data = ff2 %>%
+                 mutate(year=as.factor(year)),
+                mapping = aes(x=years_since_fire,
+                              y=year,
+                              fill=after_stat(x)))+
+          geom_density_ridges_gradient()+
+          labs(fill = "Age")+
+          xlab("Vegetation Age")
+
+```
+Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
+
+
+## Current Vegetation Age Distribution
 
 ```{r vegetation ages, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
   
