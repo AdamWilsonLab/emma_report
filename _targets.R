@@ -64,17 +64,6 @@ list(
    ,
 
 
-    # tar_age(name = noaa_data,
-    #         command = update_climate_data(parks = parks,
-    #                                       temp_directory = "data/temp/noaa",
-    #                                       sleep_time = 30,
-    #                                       max_attempts = 10,
-    #                                       reset_all = FALSE, #set this to TRUE to re-download everything, rather than only updating
-    #                                       batch = TRUE, #if batch = TRUE, the argument 'batches' will be used to decide what fraction of records to update that day (e.g., 2 batches will update half of the records each day)
-    #                                       batches = 2),
-    #         age = as.difftime(7, units = "days")
-    #         #age = as.difftime(0, units = "hours") #will update whenever run
-    # ),
 
    # tar_age(name = gsod_data,
    #         command = update_climate_data_gsod(parks,
@@ -117,7 +106,18 @@ list(
    #          age = as.difftime(28, units = "days") #will update monthly
    #         ),
 
+   tar_age(name = park_fire_history,
+              command = get_fire_history(temp_directory = "data/temp/fire_history",
+                                         max_attempts = 10,
+                                         sleep_time = 10,
+                                         parks = parks),
+           # age = as.difftime(7, units = "days") #weekly updates
+           # age = as.difftime(1, units = "days") #daily updates
+            age = as.difftime(28, units = "days") #will update monthly
+           ),
+
    # the target below is used so that things are re-run if the qmd changes
+
    tar_target(name = report_location,
               command = "report_prototype.qmd",
               format = "file"),
@@ -135,8 +135,11 @@ list(
                                          min_date = "2010-01-01",
                                          n_stations = 3,
                                          parks = parks,
+                                         park_fire_history = park_fire_history,
+                                         remnants = remnants,
                                          sleep_time = 10,
                                          max_attempts = 10,
+                                         verbose = TRUE,
                                          ... = ndwi,
                                          ... = gsod_data))
    ,
