@@ -1,6 +1,5 @@
 name|type|parent|branches|progress
-report_location|stem|report_location|0|dispatched
-report_location|stem|report_location|0|completed
+report_location|stem|report_location|0|skipped
 most_recent_ndvi_date|stem|most_recent_ndvi_date|0|dispatched
 most_recent_ndvi_date|stem|most_recent_ndvi_date|0|completed
 remnants|stem|remnants|0|dispatched
