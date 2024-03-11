@@ -511,7 +511,8 @@ generate_reports <- function(output_directory = "reports/",
 
 
     # Generate the Cape Nature reports via a for loop
-      #park_name <- unique(parks$cape_nature$COMPLEX)[33]
+      # park_name <- unique(parks$cape_nature$COMPLEX)[33]
+      # park_name <- unique(parks$cape_nature$COMPLEX)[18]
 
     for (park_name in unique(parks$cape_nature$COMPLEX)){
 

@@ -37,7 +37,7 @@ library(dygraphs)
 
 # CREATE wgs84 version of the park polygon
 
-    focal_park %>% 
+    focal_park %>%
     st_transform(crs = st_crs(4326)) -> focal_wgs
 
 # Create buffered fire age polygon
@@ -553,6 +553,19 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
   focal_fires <-
     park_fire_history %>%
     filter(cellID %in% focal_cells$cell)
+  
+  
+  # if empty, fill in NAs
+  
+    if(nrow(focal_fires) == 0){
+      
+      focal_fires <- expand.grid(cellID = focal_cells$cell,
+                                 date = unique(park_fire_history$date),
+                                 days_since_fire = NA)  
+      
+      
+    }
+  
   
   # tile plot
     # 
