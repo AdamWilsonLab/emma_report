@@ -38,7 +38,7 @@ generate_reports <- function(output_directory = "reports/",
                              min_date = "1970-01-01",
                              invasive_age_months = 3,
                              invasive_taxa = c("Acacia", "Pinus", "Hakea", "Eucalyptus", "Leptospermum"),
-                             verbose=FALSE,
+                             verbose=TRUE,
                              ...
 ){
 

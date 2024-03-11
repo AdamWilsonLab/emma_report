@@ -437,6 +437,16 @@ old_invasives %>%
       st_crop(y = focal_wgs %>%
                 st_buffer(dist = 1000)) -> focal_old_invasives
 
+
+# if there are no data, make a dataframe with NAs so that leaflet doesn't fail (will still throw error)
+
+if(nrow(focal_invasives)==0){
+  
+  focal_invasives = st_sfc(lapply(1:nrows, function(x) st_point())) %>%
+    st_as_sf()
+
+}
+
 ```
 
 
