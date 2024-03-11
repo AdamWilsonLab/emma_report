@@ -18,7 +18,8 @@ source("R/get_park_polygons.R")
 #tar_load(park_fire_history)
 #source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
 #source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_upload.R")
-
+#' @param invasive_age_months The number of months for which to include inat data as points.  Older data are converted to hex bins.
+#' @param invasive_taxa Taxa names to filter the inat data by.  Works by str_detect, so Genera or partial names are fine. If NULL will use all taxa
 generate_reports <- function(output_directory = "reports/",
                              temp_directory = "data/temp/reports",
                              temp_directory_ndvi = "data/temp/ndvi",
@@ -35,6 +36,8 @@ generate_reports <- function(output_directory = "reports/",
                              max_attempts = 10,
                              tag = "current",
                              min_date = "1970-01-01",
+                             invasive_age_months = 3,
+                             invasive_taxa = c("Acacia", "Pinus", "Hakea", "Eucalyptus", "Leptospermum"),
                              verbose=FALSE,
                              ...
 ){
@@ -482,6 +485,31 @@ generate_reports <- function(output_directory = "reports/",
                        sleep_time = sleep_time)
 
     invasives <- st_read(file.path(temp_directory,"current_inat_records.gpkg"))
+
+    # filter invasives by taxa if provided
+
+      if(!is.null(invasive_taxa)){
+
+        invasives <-
+        invasives %>%
+          filter(str_detect(string = scientific_name ,
+                            pattern = paste(invasive_taxa, collapse="|")))
+
+      }
+
+
+    # divide invasives data temporally
+
+      max_inv_date <- Sys.Date() %m-% months(invasive_age_months)
+
+    invasives <-
+      invasives %>%
+      filter(observed_on >= max_inv_date)
+
+    old_invasives <-
+      invasives %>%
+      filter(observed_on < max_inv_date)
+
 
   # Generate the National Park reports via a for loop
 

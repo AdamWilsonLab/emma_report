@@ -433,6 +433,10 @@ invasives %>%
       st_crop(y = focal_wgs %>%
                 st_buffer(dist = 1000)) -> focal_invasives
 
+old_invasives %>%
+      st_crop(y = focal_wgs %>%
+                st_buffer(dist = 1000)) -> focal_old_invasives
+
 ```
 
 
@@ -459,9 +463,17 @@ invasives %>%
                  group = "delta NDVI<br/>(monthly)",
                  colors = delta_ndvi_pal) %>%
   hideGroup("delta NDVI<br/>(quarterly)") %>%
-  addMarkers(data = focal_invasives,
+  
+  # Add recent invasive species
+   
+  addCircleMarkers(data = focal_invasives,
              label = focal_invasives$scientific_name,
-             group = "Invasives") %>%
+             group = "Invasives (new)",
+             stroke = FALSE,
+             fillOpacity = 1,
+             fillColor = "darkgrey",
+             radius = 5) %>%
+  
   addPolygons(data = fires_wgs_truncated,
               color = "red",
               fill = TRUE,
@@ -479,8 +491,11 @@ invasives %>%
     addMarkers(data = focal_stations_sf,
                label = focal_stations_sf$station_name,
                group = "Stations") %>%
+    
+    # turn off some layers by default
+  
     hideGroup("Stations") %>%
-    hideGroup("Invasives") %>%
+    hideGroup("Invasives (new)") %>%
     hideGroup("NDVI") %>%
     hideGroup("delta NDVI<br/>(long-term)") %>%
   
@@ -516,15 +531,10 @@ invasives %>%
                       "NDVI",
                       "Fire Outlines",
                       "Fires",
-                      "Invasives"
+                      "Invasives (new)"
                       ),
     options = layersControlOptions(collapsed = FALSE),position = "topleft") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
-
-
-
-
-                      
 
 ```
 
@@ -536,7 +546,6 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
 ## Vegetation ages over time
 
 ```{r vegetation ages over time, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
-
 
 # Subset park_fire_history to only the focal park
 
