@@ -10,10 +10,12 @@ library(ggplot2)
 #webshot::install_phantomjs()
 source("R/get_park_polygons.R")
 
+#library(targets)
 #tar_load(monthly_mean_ndvi)
 #tar_load(most_recent_ndvi_date)
 #tar_load(parks)
 #tar_load(remnants)
+#tar_load(park_fire_history)
 #source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_download.R")
 #source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robust_pb_upload.R")
 
