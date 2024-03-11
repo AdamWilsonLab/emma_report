@@ -502,13 +502,14 @@ generate_reports <- function(output_directory = "reports/",
 
       max_inv_date <- Sys.Date() %m-% months(invasive_age_months)
 
-    invasives <-
-      invasives %>%
-      filter(observed_on >= max_inv_date)
+      old_invasives <-
+        invasives %>%
+        filter(observed_on < max_inv_date)
 
-    old_invasives <-
-      invasives %>%
-      filter(observed_on < max_inv_date)
+      invasives <-
+        invasives %>%
+        filter(observed_on >= max_inv_date)
+
 
 
   # Generate the National Park reports via a for loop

@@ -438,13 +438,27 @@ old_invasives %>%
                 st_buffer(dist = 1000)) -> focal_old_invasives
 
 
+    # invasives <-
+    #   invasives %>%
+    #   filter(observed_on >= max_inv_date)
+    # 
+    # old_invasives <-
+    #   invasives %>%
+    #   filter(observed_on < max_inv_date)
+
+
+
 # if there are no data, make a dataframe with NAs so that leaflet doesn't fail (will still throw error)
 
-if(nrow(focal_invasives)==0){
+if(nrow(focal_invasives) == 0){
   
-  focal_invasives = st_sfc(lapply(1:nrows, function(x) st_point())) %>%
-    st_as_sf()
 
+  invasive_labels <- NULL
+  
+}else{
+  
+  invasive_labels <- focal_invasives$scientific_name
+  
 }
 
 ```
@@ -477,7 +491,7 @@ if(nrow(focal_invasives)==0){
   # Add recent invasive species
    
   addCircleMarkers(data = focal_invasives,
-             label = focal_invasives$scientific_name,
+             label = invasive_labels,
              group = "Invasives (new)",
              stroke = FALSE,
              fillOpacity = 1,
