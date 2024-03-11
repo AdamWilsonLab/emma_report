@@ -593,17 +593,50 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
                                           years_since_fire >= 0 ~ years_since_fire,
                                           years_since_fire < 0 ~ 20)) -> ff2
   
-        ggplot(data = ff2 %>%
-                 mutate(year=as.factor(year)),
-                mapping = aes(x=years_since_fire,
-                              y=year,
-                              fill=after_stat(x)))+
-          geom_density_ridges_gradient()+
-          labs(fill = "Age")+
-          xlab("Vegetation Age")
+        # ggplot(data = ff2 %>%
+        #          mutate(year=as.factor(year)),
+        #         mapping = aes(x=years_since_fire,
+        #                       y=year,
+        #                       fill=after_stat(x)))+
+        #   geom_density_ridges_gradient()+
+        #   labs(fill = "Age")+
+        #   xlab("Vegetation Age")
 
+  #year gte20     n total fraction      
+        
+ff2 %>%
+  mutate(gte20 = years_since_fire >= 20) %>%
+  group_by(year,gte20) %>%
+  count()%>%
+  ungroup()%>%
+  group_by(year)%>%
+  mutate(total=sum(n))%>%
+  mutate(fraction = n/total)%>%
+  filter(gte20)-> unburned_summary        
+        
+ff2 %>%
+  filter(years_since_fire<20)%>%
+  mutate(year=as.factor(year))%>%
+ggplot(mapping = aes(x=years_since_fire,
+                     y=year,
+                     fill=after_stat(x)))+
+  geom_density_ridges_gradient()+
+  labs(fill = "Age")+
+  xlab("Vegetation Age")+
+  theme_bw()+
+  theme(legend.position = "none")+
+  geom_text(data = unburned_summary,
+            aes(label = paste(round(fraction,2)*100,"%"),
+                y=as.factor(year),
+                x = max(ff2$years_since_fire)), 
+            position = position_stack(),
+            inherit.aes = F)+
+  scale_y_discrete(expand = c(.05, 0.2)) -> p1
+        
+p1        
+        
 ```
-Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
+Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Percentages shown represent amount of vegetation that is 20 years old or older. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
 
 
 ## Current Vegetation Age Distribution
