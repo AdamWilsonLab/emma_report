@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "EMMA Report",
+    "section": "",
+    "text": "Page last updated at 2024-09-12 12:54:31.107205.\n\nModel Overview\nWe estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it’s age. An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. More details are available here.\n\n\nPark Information\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n  \n    \n      Park\n    \n  \n  \n    Agulhas National Park\n\n    Anysberg Nature Reserve\n\n    Swartberg Nature Reserve Complex\n\n    Table Mountain National Park"
+  },
+  {
+    "objectID": "model_summary.html",
+    "href": "model_summary.html",
+    "title": "EMMA Model Summary",
+    "section": "",
+    "text": "Model last updated at 2024-09-12 12:54:36.638431."
+  },
+  {
+    "objectID": "model_summary.html#results",
+    "href": "model_summary.html#results",
+    "title": "EMMA Model Summary",
+    "section": "Results",
+    "text": "Results\n\nEnvironmental Controls on Ecosystem Recovery\nThese parameters represent the relationship of the following environmental variables to the recovery trajectory."
+  },
+  {
+    "objectID": "model_summary.html#recovery-trajectories",
+    "href": "model_summary.html#recovery-trajectories",
+    "title": "EMMA Model Summary",
+    "section": "Recovery Trajectories",
+    "text": "Recovery Trajectories\nThe plot below illustrates some example recovery trajectories. It currently just shows the top 20 cells with the most observations."
+  },
+  {
+    "objectID": "model_summary.html#spatial-predictions",
+    "href": "model_summary.html#spatial-predictions",
+    "title": "EMMA Model Summary",
+    "section": "Spatial Predictions",
+    "text": "Spatial Predictions\nMaps of spatial parameters in the model."
+  }
+]
