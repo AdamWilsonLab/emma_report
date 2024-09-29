@@ -1,6 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
 clean_up|function|d1d5cd6b8b61e2c8
-.Random.seed|object|2a0080785b46e38c
+.Random.seed|object|0ae1f8a3d9f978a4
 robust_pb_upload|function|bf296132f5183235
 summarize_predictions|function|0c38569aaeb9255b
 robust_get_GSOD|function|13b31e1446164456
@@ -27,16 +27,16 @@ get_park_polygons|function|cd13b5b3c3ccd632
 get_inat_data|function|3a49d1783b81e9a3
 get_fire_history|function|e67dee74ff8e2a85
 sync_envdata|function|23c66e1c22ca3193
-report_location|stem|4ee7ec3eb9ebc319|cca3736b930ad1b4|2c530c1562a7fbd1|-708004005|report_prototype.qmd|t19994.0130515114s|1ca955b82a1ca7ff|34666|file|local|vector|||1.746||
-most_recent_ndvi_date|stem|435c20ec41113286|9ccfab45fc5c6730|8887fa61bad9bf1b|-97961177||t19994.0138984529s|87bbe5f41aaaedf6|80|rds|local|vector|||25.247||
-remnants|stem|95c869582cc88ef6|ee47194fd1e169c6|ade6d1aa85b97c76|-2133618822||t19994.0139683032s|e255484007059372|43|rds|local|vector|||6.031||
-model_prediction|stem|25267c121849c95d|2da97a5eec286659|7d452dcb98144b67|-1355680761||t19994.0140932582s|8c61450293699551|564015|rds|local|vector|||10.692||
-parks|stem|025538349aa8b4a6|b5fd0a868f1b7664|8f5ff44bd54363fa|-1011990950||t19994.0144030068s|ad266373628c1f1e|717793|rds|local|vector|||26.689||
-spatial_outputs|stem|5b5ed87a2882d3fe|5a005fea9c7c2c44|7d452dcb98144b67|-167883086||t19994.0145600918s|25c070fa241d08fc|29071434|rds|local|vector|||11.983||
-model_results|stem|04130766422db79a|220c4bdcb3cdc3c4|7d452dcb98144b67|-1523611067||t19994.0146948503s|53d119e0c89bdf9e|5585415|rds|local|vector|||10.887||
-current_month|stem|c401c877e4310da7|080b8008c9f00a10|addfb8ba87dbbec9|1733484960||t19994.0146951976s|4b5db3c5a8219e22|50|rds|local|vector|||0.001||
-park_fire_history|stem|9a215c9cce72ebd6|9b2b578570bf52fa|ad6ff634a3e0d02f|-1459196363||t19994.016995836s|8f5f43c3d69cf24e|35266098|rds|local|vector|||191.606|attribute variables are assumed to be spatially constant throughout all geometries|
-model_summary|stem|a91404823dc1e1d0|6ce991c004fefdcd|745cb314f5809d4e|-1088889063||t19994.0169991577s|96f99064b4288aae|87|rds|local|vector|||0.245||
-monthly_mean_ndvi|stem|be782883fb726c49|8b58642ecc066a98|75e80e2ed0d2c5d0|-287465404||t19994.0175071612s|1fa23b41a00fb676|188|rds|local|vector|||43.887||
-reports|stem|65acb75e9ed680ca|6d3ef2525f4292cc|5bf435eb991e52f9|536393307||t19994.0420776257s|d3a7b4f13c88e37f|47|rds|local|vector|||2122.884||
-index|stem|376b7f8c66f3e2cd|cf1c72bec2426be5|f59776c377471057|554519753||t19994.042101781s|87bbe5f41aaaedf6|80|rds|local|vector|||2.084||
+report_location|stem|4ee7ec3eb9ebc319|cca3736b930ad1b4|2c530c1562a7fbd1|-708004005|report_prototype.qmd|t19995.0147033281s|1ca955b82a1ca7ff|34666|file|local|vector|||2.061||
+most_recent_ndvi_date|stem|435c20ec41113286|9ccfab45fc5c6730|8887fa61bad9bf1b|-97961177||t19995.0158416693s|87bbe5f41aaaedf6|80|rds|local|vector|||35.948||
+remnants|stem|95c869582cc88ef6|ee47194fd1e169c6|ade6d1aa85b97c76|-2133618822||t19995.0158667619s|e255484007059372|43|rds|local|vector|||2.164||
+model_prediction|stem|25267c121849c95d|2da97a5eec286659|7d452dcb98144b67|-1355680761||t19995.0159972129s|8c61450293699551|564015|rds|local|vector|||11.163||
+parks|stem|025538349aa8b4a6|b5fd0a868f1b7664|8f5ff44bd54363fa|-1011990950||t19995.016325985s|ad266373628c1f1e|717793|rds|local|vector|||28.331||
+spatial_outputs|stem|5b5ed87a2882d3fe|5a005fea9c7c2c44|7d452dcb98144b67|-167883086||t19995.0164971418s|25c070fa241d08fc|29071434|rds|local|vector|||13.195||
+model_results|stem|04130766422db79a|220c4bdcb3cdc3c4|7d452dcb98144b67|-1523611067||t19995.0166347803s|53d119e0c89bdf9e|5585415|rds|local|vector|||11.136||
+current_month|stem|c401c877e4310da7|080b8008c9f00a10|addfb8ba87dbbec9|1733484960||t19995.0166352432s|4b5db3c5a8219e22|50|rds|local|vector|||0.001||
+park_fire_history|stem|b54a1c71573ed35d|9b2b578570bf52fa|ad6ff634a3e0d02f|-1459196363||t19995.0218221821s|c2041b67b83a4eea|35218223|rds|local|vector|||440.92|attribute variables are assumed to be spatially constant throughout all geometries|
+model_summary|stem|a91404823dc1e1d0|6ce991c004fefdcd|745cb314f5809d4e|-1088889063||t19995.0218255964s|96f99064b4288aae|87|rds|local|vector|||0.25||
+monthly_mean_ndvi|stem|be782883fb726c49|8b58642ecc066a98|75e80e2ed0d2c5d0|-287465404||t19995.0229697598s|1fa23b41a00fb676|188|rds|local|vector|||98.851||
+reports|stem|65acb75e9ed680ca|6d3ef2525f4292cc|93a254219af6661f|536393307||t19995.0489842714s|d3a7b4f13c88e37f|47|rds|local|vector|||2247.649||
+index|stem|376b7f8c66f3e2cd|cf1c72bec2426be5|f59776c377471057|554519753||t19995.049009607s|87bbe5f41aaaedf6|80|rds|local|vector|||2.185||
