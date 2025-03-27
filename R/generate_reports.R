@@ -378,7 +378,7 @@ generate_reports <- function(output_directory = "reports/",
 
             most_recent_quarter_ndvi_raster <-
               terra::app(x = most_recent_quarter_ndvi_raster,
-                fun = function(x){mean(x, na.rm = TRUE)}
+                fun = mean, na.rm=T #function(x){mean(x, na.rm = TRUE)}
                 )
 
             # Create quarterly delta NDVI raster
