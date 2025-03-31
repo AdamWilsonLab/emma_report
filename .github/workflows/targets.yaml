@@ -32,6 +32,7 @@ on:
       - main
       - master
       - dev-adam
+      - 2025_website
 
 # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -73,8 +74,8 @@ jobs:
         run: |-
           Rscript -e "update.packages(ask = FALSE)"
           Rscript -e "questionr::qscan(list.files(pattern='*.R',recursive=T), load = TRUE, detail = TRUE)" # this scans all scripts and installs any needed packages
-      - name: Authorize Github for R
-        run: |-
+      #- name: Authorize Github for R
+      #   run: |-
       # - name: Cache packages
       #   uses: actions/cache@v1
       #   with:

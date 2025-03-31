@@ -1,14 +1,6 @@
 ---
 title: "EMMA Model Summary"
 description: Modeling vegetation postfire recovery data
-author:
-  - name: Adam Wilson & Glenn Moncrieff & Brian Maitner
-editor_options: 
-  chunk_output_type: console
-output:
-    html_document:
-      toc: true
-      toc_depth: 2
 ---
 
 Model last updated at `r lubridate::now()`.
@@ -32,18 +24,15 @@ library(gt)
 
 # Model Overview
 
-The details are given in [@slingsby_near-real_2020;@wilson_climatic_2015], but in short what we do is estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. For this we use a negative exponential curve with the following form:
+The details are given in [@slingsby_near-real_2020; @wilson_climatic_2015], but in short what we do is estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. For this we use a negative exponential curve with the following form:
 
 $$\mu_{i,t}=\alpha_i+\gamma_i\Big(1-e^{-\frac{age_{i,t}}{\lambda_i}}\Big)$$
 
 where $\mu_{i,t}$ is the expected NDVI for site $i$ at time $t$
 
-The observed greenness $NDVI_{i,t}$  is assumed to follow a normal distribution with mean $\mu_{i,t}$
-$$NDVI_{i,t}\sim\mathcal{N}(\mu_{i,t},\sigma_)$$
+The observed greenness $NDVI_{i,t}$ is assumed to follow a normal distribution with mean $\mu_{i,t}$ $$NDVI_{i,t}\sim\mathcal{N}(\mu_{i,t},\sigma_)$$
 
-An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. The full model also includes a sinusoidal term to capture seasonal variation, but lets keep it simple here.  
-
-
+An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves.
 
 ## Results
 
@@ -51,7 +40,8 @@ An additional level models the parameters of the negative exponential curve as a
 
 These parameters represent the relationship of the following environmental variables to the recovery trajectory.
 
-```{r p1, echo=F, eval=FALSE, warning=F, message=FALSE}
+```{r p1, echo=F, eval=TRUE, warning=F, message=FALSE}
+tar_load(model_results)
 betas=model_results %>% 
   filter(type=="beta")
 
@@ -66,12 +56,12 @@ ggplotly(p1)
 
 ```
 
-
 ## Recovery Trajectories
 
 The plot below illustrates some example recovery trajectories. It currently just shows the top 20 cells with the most observations.
 
-```{r plot, echo=F, eval=FALSE, message=FALSE,fig.height=12}
+```{r plot, echo=F, eval=TRUE, message=FALSE,fig.height=12}
+tar_load(model_prediction)
 cells_with_long_records<-
   model_prediction %>% 
   group_by(cellID) %>% 
@@ -92,11 +82,12 @@ model_prediction %>%
 
 ## Spatial Predictions
 
-Maps of spatial parameters in the model.  
+Maps of spatial parameters in the model.
 
 ```{r compare_data, echo=F, eval=FALSE, warning=F, message=FALSE}
-
-rast <- projectRaster(spatial_outputs,crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
+tar_load(spatial_outputs)
+rast <- projectRaster(spatial_outputs,
+                      crs = "+proj=merc +a=6378137 +b=6378137 +lat_ts=0 +lon_0=0 +x_0=0 +y_0=0 +k=1 +units=m +nadgrids=@null +wktext +no_defs +type=crs")
 
 leaflet() %>% setView(lng = 18.577, lat = -33.998707, zoom = 10) %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 

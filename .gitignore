@@ -42,6 +42,7 @@ vignettes/*.pdf
 
 # Targets files
 data/envdata*
+data/misc/
 .DS_Store
 _targets
 index.html
@@ -49,5 +50,7 @@ index.md
 index_files
 network.html
 img/
-
+reports/
 notes.md
+_site/
+/.quarto/

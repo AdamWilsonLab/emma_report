@@ -1,34 +1,15 @@
 ---
-title: "EMMA Report"
+title: "parks"
 ---
 
+Park Information
 
-```{r, echo=F, message=F,include=F, results="hide", eval=F}
-#description: Modeling vegetation postfire recovery data
-#Page last updated at `r lubridate::now()`.
+```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
 library(targets)
-library(tarchetypes)
 library(tidyverse)
-library(doParallel)
-library(raster)
-library(lubridate)
-library(sf)
-library(plotly)
 library(leaflet)
+library(sf)
 library(gt)
-
-# load data saved in the pipeline
-#tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-
-```
-
-# Model Overview
-
-We estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. More details are available <a href=model_summary.html>here.</a>
-
-# Park Information
-
-```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE, eval=F}
 
   tar_load(parks) #This apparently is no longer allowed per a new update of targets
 
@@ -74,17 +55,15 @@ We estimate the age of a site by calculating the years since the last fire. We t
 
   bbox <- st_bbox(parks_sf) %>%
   as.vector()
-
-
 ```
 
-```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=F}
+```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 
   leaflet(data = parks_sf) %>%
-    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
-    addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
     #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+    addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
   addPolygons(color = "black",
               stroke = TRUE,
               fill = TRUE,
@@ -95,4 +74,14 @@ We estimate the age of a site by calculating the years since the last fire. We t
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
+
+
+
+
+
+    reports%>%
+    dplyr::select(park)%>%
+    rename(Park = park)%>%
+    gt()%>%
+  cols_align(align = "left")
 ```

@@ -7,7 +7,7 @@ library(plotly)
 library(leaflet)
 library(gt)
 library(dygraphs)
-
+library(quarto)
 #remotes::install_github("ropensci/stantargets")
 # if(!"basemapR" %in% rownames(installed.packages())){
 #   devtools::install_github('Chrisjb/basemapR')
@@ -24,7 +24,7 @@ options(clustermq.scheduler = "multicore")
 
 tar_option_set(packages = c("piggyback","cmdstanr", "posterior", "bayesplot", "tidyverse",
                             "stringr","knitr","sf","stars","units","arrow","lubridate","stantargets",
-                            "doParallel","raster"),
+                            "doParallel","raster","quarto","tarchetypes"),
                deployment="main")
 
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction,parks))
@@ -118,45 +118,57 @@ list(
 
    # the target below is used so that things are re-run if the qmd changes
 
-   tar_target(name = report_location,
-              command = "report_prototype.qmd",
-              format = "file"),
+   # tar_target(name = report_location,
+   #            command = "report_prototype.qmd",
+   #            format = "file"),
 
-   tar_target(name = reports,
-              command = generate_reports(output_directory = "reports/",
-                                         temp_directory = "data/temp/reports/",
-                                         temp_directory_ndvi = "data/temp/ndvi",
-                                         report_location = report_location,
-                                         monthly_mean_ndvi = monthly_mean_ndvi,
-                                         most_recent_ndvi_date = most_recent_ndvi_date,
-                                         tag = "current",
-                                         park_data_tag = "park_data",
-                                         time_window_days = 365,
-                                         min_date = "2010-01-01",
-                                         n_stations = 3,
-                                         parks = parks,
-                                         park_fire_history = park_fire_history,
-                                         remnants = remnants,
-                                         sleep_time = 10,
-                                         max_attempts = 10,
-                                         verbose = TRUE,
-                                         ... = ndwi,
-                                         ... = gsod_data))
-   ,
+   # tar_target(name = reports,
+   #            command = generate_reports(output_directory = "reports/",
+   #                                       temp_directory = "data/temp/reports/",
+   #                                       temp_directory_ndvi = "data/temp/ndvi",
+   #                                       report_location = report_location,
+   #                                       monthly_mean_ndvi = monthly_mean_ndvi,
+   #                                       most_recent_ndvi_date = most_recent_ndvi_date,
+   #                                       tag = "current",
+   #                                       park_data_tag = "park_data",
+   #                                       time_window_days = 365,
+   #                                       min_date = "2010-01-01",
+   #                                       n_stations = 3,
+   #                                       parks = parks,
+   #                                       park_fire_history = park_fire_history,
+   #                                       remnants = remnants,
+   #                                       sleep_time = 10,
+   #                                       max_attempts = 10,
+   #                                       verbose = TRUE,
+   #                                       ... = ndwi,
+   #                                       ... = gsod_data))
+   # ,
 
-   tar_target(name = model_summary,
-              command = workflow(call = rmarkdown::render(input = "model_summary.qmd"),
-                                 ... = model_results,
-                                 ... = model_prediction,
-                                 ... = spatial_outputs)),
+   # tar_target(name = model_summary,
+   #            command = workflow(call = rmarkdown::render(input = "model_summary.qmd"),
+   #                               ... = model_results,
+   #                               ... = model_prediction,
+   #                               ... = spatial_outputs)),
 
-   tar_target(name = index,
-              command = workflow(call = rmarkdown::render(input = "index.qmd"),
-                                 ... = parks,
-                                 ... = reports,
-                                 ... = model_summary))
+# tar_target(name = index_file,
+#              command = "index.qmd",
+#              format = "file"),
+
+#tar_render(website, c("index2.qmd"))
+tar_quarto(website,quiet=F)
 
 
+#   tar_target(name = index,
+#              command = workflow(call = rmarkdown::render(input = "index.qmd"),
+#                                 ... = parks,
+#                                 ... = reports,
+#                                 ... = model_summary))
 
+# fix the error in this target
+#tar_target(name = index,
+#           command = workflow(call = quarto::quarto_preview()))#,
+#                              ... = parks,
+#                              ... = reports,
+#                              ... = model_summary))
 
 )
