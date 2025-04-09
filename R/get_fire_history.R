@@ -9,17 +9,17 @@ get_fire_history <- function(temp_directory = "data/temp/fire_history",
 
   #ensure directories are empty
 
-    if(dir.exists(file.path(temp_directory))){
-
-      unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
-
-    }
-
-    if(!dir.exists(file.path(temp_directory))){
-
-      dir.create(file.path(temp_directory), recursive = TRUE)
-
-    }
+    # if(dir.exists(file.path(temp_directory))){
+    #
+    #   unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    #
+    # }
+    #
+    # if(!dir.exists(file.path(temp_directory))){
+    #
+    #   dir.create(file.path(temp_directory), recursive = TRUE)
+    #
+    # }
 
   # Grab fire data
 
@@ -79,7 +79,7 @@ get_fire_history <- function(temp_directory = "data/temp/fire_history",
 
   # Cleanup
 
-    unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    # unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
 
   # Return data
 

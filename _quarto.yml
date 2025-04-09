@@ -1,5 +1,10 @@
 project:
   type: website
+  render:
+    - "*.qmd"
+    - "!report_prototype.qmd" #just the template - the final ones are generated in /reports
+  execute-dir: "project"
+  output-dir: "_site"
 
 website:
   title: "Ecosystem Monitoring for Management Application (EMMA)"

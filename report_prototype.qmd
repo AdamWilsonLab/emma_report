@@ -1,18 +1,15 @@
 ---
-title: "EMMA Report Prototype"
-description: Modeling vegetation postfire recovery data
-author:
-  - name: Adam Wilson & Glenn Moncrieff & Brian Maitner
-editor_options: 
-  chunk_output_type: console
-output:
-    html_document:
-      toc: true
-      toc_depth: 2
+title: "Park Report"
+params:
+  focal_park_name: "Table Mountain National Park"
 ---
 
-Page last updated at `r lubridate::now()`.
 
+
+
+| Data            | Date | Download |
+|-----------------|----------------------|-----------------|
+| Website updated | `r lubridate::now()|> format("%H:%M on %B %d, %Y")`               | 39.2            |
 
 ```{r, echo=F, message = F, results = "hide"}
 library(targets)
@@ -25,15 +22,59 @@ library(xts)
 library(plotly)
 library(leaflet)
 library(dygraphs)
+library(terra)
 
 ```
 
+```{r load_targets, echo=F}
+tar_load(parks)
+#tar_load(most_recent_fire_raster)
+tar_load(park_fire_history)
+tar_load(temp_directory)
+tar_load(years_since_fire_raster)
+tar_load(fires_wgs)
+tar_load(most_recent_ndvi_raster)
+tar_load(most_recent_ndvi_date)
+tar_load(monthly_mean_ndvi_raster)
+tar_load(monthly_delta_ndvi_raster)
+tar_load(weather_data)
+#tar_load(mean_ndvi_raster)
+#tar_load(delta_ndvi_raster)
+#tar_load(most_recent_quarter_ndvi_file)
+#tar_load(quarterly_delta_ndvi_raster)
+tar_load(stations)
+tar_load(inat_data)
 
+
+time_window_days=90
+
+```
+
+# Report Details
+
+```{r, echo=F}
+
+dates <- bind_rows(
+  data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
+  data.frame(Description = "NDVI", Date = format(most_recent_ndvi_date, "%Y-%b-%d"))
+)
+
+dates
+ 
+```
 # Park-specific Information
 
 ## NDVI and Time Since Fire
 
 ```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE,include=FALSE}
+
+
+# get focal park from yaml
+focal_park_name <- params$focal_park_name
+# get sf geometry for park
+tar_load(parks)
+focal_park=filter(parks$national_parks,CUR_NME==focal_park_name)
+
 
 # CREATE wgs84 version of the park polygon
 
@@ -50,24 +91,24 @@ library(dygraphs)
                 st_buffer(dist = 10000)) ->
         focal_fires
       
-      park_no_spaces <- gsub(pattern = " ",replacement = "_",x = park_name)
+      park_no_spaces <- gsub(pattern = " ",replacement = "_",x = focal_park_name)
 
-      focal_fires %>%
-        st_write(dsn = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
-                 append=FALSE,
-                 quiet = TRUE
-                 )
-
-      robust_pb_upload(file = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
-                       repo = "AdamWilsonLab/emma_report",
-                       tag = park_data_tag)
-      
-      file.remove(file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")))
+      # focal_fires %>%
+      #   st_write(dsn = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
+      #            append=FALSE,
+      #            quiet = TRUE
+      #            )
+      # 
+      # robust_pb_upload(file = file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")),
+      #                  repo = "AdamWilsonLab/emma_report",
+      #                  tag = park_data_tag)
+      # 
+      # file.remove(file.path(temp_directory, paste(park_no_spaces,"fires.gpkg",sep = "_")))
       
 
 # Park-specific file link
-    park_fires_file  <- paste("https://github.com/AdamWilsonLab/emma_report/releases/download/park_data/",
-                              paste(park_no_spaces,"fires.gpkg",sep= "_"),sep = "")
+#    park_fires_file  <- paste("https://github.com/AdamWilsonLab/emma_report/releases/download/park_data/",
+#                              paste(park_no_spaces,"fires.gpkg",sep= "_"),sep = "")
 
 # Create a truncated version of the fire maps (ranging from 1-20)
 
@@ -227,11 +268,10 @@ bbox <- st_bbox(focal_wgs) %>%
 
 ```
 
-
 ```{r identify_closest_stations, echo = FALSE, warning = FALSE, message = FALSE}
 
 # Process the station and weather data
-
+n_stations=3 # number of stations to show
   # Get data for closest weather stations
   
     cent <- suppressWarnings( focal_park %>%
@@ -239,48 +279,43 @@ bbox <- st_bbox(focal_wgs) %>%
                                 st_centroid())
     
     closest_stations <- 
-      data.frame(station = stations_sf$STNID,
-                 name = stations_sf$NAME,
-               distance = as.numeric(st_distance(cent,stations_sf)))
+      data.frame(station = stations$STNID,
+                 name = stations$NAME,
+               distance = as.numeric(st_distance(cent,stations)))
     
     closest_stations <- closest_stations[order(closest_stations$distance),]
     
     closest_stations <- closest_stations$station[1:n_stations]
     
-    closest_stations %>%
-          gsub(pattern = "/",replacement = "",fixed = TRUE)%>% #what kind of sadist puts a slash in a name?
-          gsub(pattern = " ",replacement = "_") %>%
-          gsub(pattern = ")",replacement = "_",fixed = TRUE) %>%
-          gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
-          paste(.,".gz.parquet",sep = "")-> closest_stations
-    
+    # closest_stations %>%
+    #       gsub(pattern = "/",replacement = "",fixed = TRUE)%>% #what kind of sadist puts a slash in a name?
+    #       gsub(pattern = " ",replacement = "_") %>%
+    #       gsub(pattern = ")",replacement = "_",fixed = TRUE) %>%
+    #       gsub(pattern = "(",replacement = "_",fixed = TRUE) %>%
+    #       paste(.,".gz.parquet",sep = "")-> closest_stations
+    # 
 
-    robust_pb_download(file = closest_stations,
-                dest = temp_directory,
-                repo = "AdamWilsonLab/emma_report",
-                tag = "GSOD",
-                max_attempts = max_attempts,
-                sleep_time = sleep_time,
-                show_progress=FALSE) -> to_rm
-    
-    if(exists("to_rm")){rm(to_rm)}
+    # robust_pb_download(file = closest_stations,
+    #             dest = temp_directory,
+    #             repo = "AdamWilsonLab/emma_report",
+    #             tag = "GSOD",
+    #             max_attempts = max_attempts,
+    #             sleep_time = sleep_time,
+    #             show_progress=FALSE) -> to_rm
+    # 
+    # if(exists("to_rm")){rm(to_rm)}
     
   #Hack in case some of the files aren't downloaded correctly.  
-    closest_stations  <- intersect(closest_stations,
-                                   list.files(temp_directory))
+    # closest_stations  <- intersect(closest_stations,
+    #                                list.files(temp_directory))
 
-```
+    focal_weather=weather_data |> 
+      filter(STNID%in%closest_stations)
 
-```{r load_weather_dataset, echo = FALSE, warning = FALSE, message = FALSE}
-
-  focal_weather  <- open_dataset(file.path(temp_directory, closest_stations))
-  
-  focal_weather %>% collect() -> focal_weather
-  
   if(nrow(focal_weather) < 1){stop("No weather data loaded")}
   
-```  
-  
+```
+
 ```{r reformat_to_match_noaa, echo = FALSE, warning = FALSE, message = FALSE}
 
   #fix station names in focal weather (missing in many case)
@@ -323,17 +358,17 @@ bbox <- st_bbox(focal_wgs) %>%
     dplyr::filter(!is.na(date_time)) -> focal_weather
 
 ```
-  
+
 ```{r filter_old_weather_data, echo = FALSE, warning = FALSE, message = FALSE}
   
   #Filter out oldest data
-  
+  min_date = "1970-01-01"
   focal_weather <- 
     focal_weather %>%
     dplyr::filter(date_time > as_datetime(min_date,tz =tz(focal_weather$date_time)))
 
 ```
-  
+
 ```{r generate_precip_dataset, echo = FALSE, warning = FALSE, message = FALSE}
   
   #Generate precip dataset
@@ -405,7 +440,6 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
 
 ```
 
-
 ```{r generate_sf_of_stations, echo = FALSE, warning = FALSE, message = FALSE}
   
   
@@ -418,7 +452,7 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
   #   st_transform(st_crs(fires_wgs_truncated))
 
   focal_stations_sf <-
-  stations_sf %>%
+  stations %>%
     filter(STNID %in% gsub(pattern = ".gz.parquet",
                           replacement = "",
                           x = closest_stations)) %>%
@@ -426,26 +460,20 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
     
 ```
 
-
 ```{r crop invasives, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
-invasives %>%
+inat_data %>%
+  filter(invasive==T & 
+           as_date(observed_on)>(today()-as.difftime(900, units = "days"))) |> 
       st_crop(y = focal_wgs %>%
                 st_buffer(dist = 1000)) -> focal_invasives
 
-old_invasives %>%
+
+inat_data %>%
+  filter(invasive==T & 
+           as_date(observed_on)<=(today()-as.difftime(900, units = "days"))) |> 
       st_crop(y = focal_wgs %>%
                 st_buffer(dist = 1000)) -> focal_old_invasives
-
-
-    # invasives <-
-    #   invasives %>%
-    #   filter(observed_on >= max_inv_date)
-    # 
-    # old_invasives <-
-    #   invasives %>%
-    #   filter(observed_on < max_inv_date)
-
 
 
 # if there are no data, make a dataframe with NAs so that leaflet doesn't fail (will still throw error)
@@ -463,7 +491,6 @@ if(nrow(focal_invasives) == 0){
 
 ```
 
-
 ```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
   leaflet(data = focal_wgs) %>%
@@ -477,9 +504,9 @@ if(nrow(focal_invasives) == 0){
   addRasterImage(x = raster::raster(most_recent_ndvi_raster),
                  group = "NDVI",
                  colors = ndvi_pal) %>%
-    addRasterImage(x = raster::raster(delta_ndvi_raster),
-                 group = "delta NDVI<br/>(long-term)",
-                 colors = delta_ndvi_pal) %>%
+    # addRasterImage(x = raster::raster(delta_ndvi_raster),
+    #              group = "delta NDVI<br/>(long-term)",
+    #              colors = delta_ndvi_pal) %>%
   # addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
   #              group = "delta NDVI<br/>(quarterly)",
   #              colors = delta_ndvi_pal) %>%
@@ -527,7 +554,7 @@ if(nrow(focal_invasives) == 0){
   
     leaflet::addLegend(position = "topright",
                      pal = delta_ndvi_pal,          
-                     values = ~values(delta_ndvi_raster),
+                     values = ~values(monthly_delta_ndvi_raster),
                      #values = ~c(-1,1),
                      opacity = 1,
                      title = "delta<br/>NDVI") %>%
@@ -562,8 +589,7 @@ if(nrow(focal_invasives) == 0){
 
 ```
 
-Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20.  The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
-
+Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20. The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `#r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
 ## Vegetation Ages
 
@@ -682,8 +708,8 @@ ggplot(mapping = aes(x=years_since_fire,
 p1        
         
 ```
-Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Percentages shown represent amount of vegetation that is 20 years old or older. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
 
+Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Percentages shown represent amount of vegetation that is 20 years old or older. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
 
 ## Current Vegetation Age Distribution
 
@@ -775,7 +801,8 @@ Figure 2. Ridgeplot showing vegetation age distributions within the park over ti
 
 
 ```
-Figure 3. Histogram of vegetation ages.  For the purposes of this plot, any vegetation known to either be 20 years old or older, or for which we have no recorded records of fire, has been assigned an age of 20(+) years. The area shown was calculated by mutliplying counts of MODIS pixels at each age with the area of each pixel in square kilometers.
+
+Figure 3. Histogram of vegetation ages. For the purposes of this plot, any vegetation known to either be 20 years old or older, or for which we have no recorded records of fire, has been assigned an age of 20(+) years. The area shown was calculated by mutliplying counts of MODIS pixels at each age with the area of each pixel in square kilometers.
 
 ## Weather Data
 
@@ -838,8 +865,6 @@ Figure 3. Histogram of vegetation ages.  For the purposes of this plot, any vege
 
 ```
 
-
-
 ```{r plot_precip, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
 #| fig-cap: 
 #|   - "Figure 4. Climate Data from GSOD.  Mean data is a long-term average for each day of the year across these weather stations."
@@ -849,7 +874,6 @@ Figure 3. Histogram of vegetation ages.  For the purposes of this plot, any vege
   precip_graph
 
 ```
-
 
 ```{r plot_temp, echo=F, eval = TRUE, message = F, fig.width = 10, fig.height = 6}
 #| fig-cap: 
@@ -917,13 +941,9 @@ library(leafem)
 
 ```
 
-  
 ### SPI
 
-
 The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research/subseasonal/atlas/SPI-html/SPI-description.html#:~:text=The%20SPI%20is%20used%20for,from%20subseasonal%20to%20interannual%20scales.) is a drought index ranging from -3 (very dry) to +3 (very wet).
-
-
 
 ```{r calc_spi_1, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 

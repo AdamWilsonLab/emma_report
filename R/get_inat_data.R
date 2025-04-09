@@ -12,6 +12,8 @@ library(rinat)
 #' @param oldest_date Date as character (yyyy-mm-dd format). Any records older than this will be discarded
 # function to pull invasive species records from inaturalist
 get_inat_data <- function(inat_data_location = "data/manual_downloads/inat_project/observations-405358.csv",
+                          invasive_age_months = 3,
+                          invasive_taxa = c("Acacia", "Pinus", "Hakea", "Eucalyptus", "Leptospermum"),
                           temp_directory = "data/temp/inat/",
                           max_attemps = 10,
                           sleep_time=10,
@@ -80,16 +82,19 @@ get_inat_data <- function(inat_data_location = "data/manual_downloads/inat_proje
 
     full_records <-NULL
 
+    # Get all species in invasive taxa
+    invasive_species=grep(species_list, pattern = paste(invasive_taxa, collapse="|"),value=T)
+
 
   if(verbose){message("Starting for loop for downloading new inat data")}
 
-  for(i in 1:length(species_list)){
+  for(i in 1:length(invasive_species)){
 
-    message("Getting data for species ", i, " of ", length(species_list))
+    message("Getting data for species ", i, " of ", length(invasive_species))
 
     # get data
 
-    data_i <-   tryCatch(expr =get_inat_obs(taxon_name = species_list[i],
+    data_i <-   tryCatch(expr =get_inat_obs(taxon_name = invasive_species[i],
                                                  bounds = domain,
                                                  maxresults = 10000),error = function(e){e})
 
@@ -134,28 +139,37 @@ get_inat_data <- function(inat_data_location = "data/manual_downloads/inat_proje
 
   }
 
+    # add flag for invasive species of interest - use the str_detect if you are downloading all species above.
+
+    full_records <- full_records |>
+      mutate(invasive = T)
+    #str_detect(string = scientific_name ,
+    #                               pattern = paste(invasive_taxa, collapse="|")))
+
 
     # Save output as spatial output
 
-      full_records %>%
-        st_write(dsn = file.path(temp_directory,"current_inat_records.gpkg"))
+      return(full_records)
 
-    # Upload output
-
-      robust_pb_upload(file = file.path(temp_directory,"current_inat_records.gpkg"),
-                       repo = "AdamWilsonLab/emma_report",
-                       tag = "current")
-
-    # cleanup
-
-      unlink(temp_directory,recursive = TRUE,force = TRUE)
-
-      gc()
-
-    # end
-
-      return(Sys.Date())
-
+    # full_records%>%
+    #     st_write(dsn = file.path(temp_directory,"current_inat_records.gpkg"))
+    #
+    # # Upload output
+    #
+    #   robust_pb_upload(file = file.path(temp_directory,"current_inat_records.gpkg"),
+    #                    repo = "AdamWilsonLab/emma_report",
+    #                    tag = "current")
+    #
+    # # cleanup
+    #
+    #   unlink(temp_directory,recursive = TRUE,force = TRUE)
+    #
+    #   gc()
+    #
+    # # end
+    #
+    #   return(Sys.Date())
+    #
 
 }
 
