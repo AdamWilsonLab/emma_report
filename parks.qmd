@@ -11,10 +11,7 @@ library(leaflet)
 library(sf)
 library(gt)
 
-  tar_load(parks) #This apparently is no longer allowed per a new update of targets
-
-  #parks <- read_rds("_targets/objects/parks")
-
+tar_load(parks) 
 # need to merge each complex into a single geometry
 
 
@@ -57,7 +54,7 @@ library(gt)
   as.vector()
 ```
 
-```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r park_map, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 
   leaflet(data = parks_sf) %>%

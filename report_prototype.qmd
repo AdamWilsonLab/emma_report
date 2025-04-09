@@ -53,6 +53,7 @@ time_window_days=90
 # Report Details
 
 ```{r, echo=F}
+# build table of dates when products were last updated
 
 dates <- bind_rows(
   data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
