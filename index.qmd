@@ -48,7 +48,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
   # tar_load(old_invasives)
 ```
 
-```{r}
+```{r, echo=F}
 
 # need to merge each complex into a single geometry
 
@@ -93,7 +93,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
 
 ```
 
-```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=F}
+```{r park_map, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 
   leaflet(data = parks_sf) %>%

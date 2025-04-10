@@ -62,7 +62,7 @@ return(output_directory)
       # park_name <- unique(parks$cape_nature$COMPLEX)[33]
       # park_name <- unique(parks$cape_nature$COMPLEX)[18]
 
-#     for (park_name in unique(parks$cape_nature$COMPLEX)[1]){. # remove [1] to process them all!
+#     for (park_name in unique(parks$cape_nature$COMPLEX)[1:3]){. # remove [1] to process them all!
 #
 #       gc()
 #
