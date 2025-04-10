@@ -20,6 +20,18 @@ library(gt)
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
 
+# need to include all necessary targets here otherwise they aren't dependencies with tar_quarto()
+tar_load(parks)
+tar_load(park_fire_history)
+tar_load(temp_directory)
+tar_load(years_since_fire_raster)
+tar_load(fires_wgs)
+tar_load(most_recent_ndvi_raster)
+tar_load(most_recent_ndvi_date)
+tar_load(monthly_mean_ndvi_raster)
+tar_load(monthly_delta_ndvi_raster)
+tar_load(weather_data)
+
 ```
 
 # Model Overview
