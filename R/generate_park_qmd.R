@@ -13,7 +13,7 @@ source("R/get_park_polygons.R")
 #tar_load(parks)
 
 generate_park_qmds <- function(
-    parks,
+    protected_areas,
     report_location,
     output_directory="reports"){
 
@@ -30,7 +30,7 @@ if(!dir.exists(file.path(output_directory))){
 park_name="Table Mountain National Park"
 park_name="West Coast National Park"
 
-for (park_name in unique(parks$national_parks$CUR_NME)[1:3]){# remove [1] to process them all!
+for (park_name in unique(protected_areas$name)){# remove [1] to process them all!
   templ <- readLines("report_prototype.qmd")
 
     writeLines(

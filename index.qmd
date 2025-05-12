@@ -10,7 +10,11 @@ Page last updated at `r lubridate::now()`.
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
-
+library(targets)
+library(tidyverse)
+library(sf)
+library(terra)
+library(leaflet)
 # need to include all necessary targets here otherwise they aren't dependencies with tar_quarto()
 tar_load(protected_areas)
 tar_load(park_fire_history)
@@ -37,23 +41,26 @@ We estimate the age of a site by calculating the years since the last fire. We t
 #update to use the new quarto docs
 
   base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
+  base_url <- "reports/" #keep relative paths?
   
     reports <- 
   data.frame(report = list.files("reports/")) %>%
-    mutate(url = paste(base_url,report,sep = ""),
+    mutate(url = paste(base_url,gsub(pattern = ".qmd",replacement = ".html",x = report),sep = ""),
            park_name = gsub(pattern = "report.",replacement = "",x = report),
            park_name = gsub(pattern = ".html",replacement = "",x = park_name),
+           park_name = gsub(pattern = ".qmd",replacement = "",x = park_name),
            park_name = gsub(pattern = "_",replacement = " ",x = park_name)) %>%
       mutate(
           park = glue::glue("[{park_name}]({url})"),
           park = map(park, gt::md))
   
-  parks_sf <-
-  parks_sf %>%
+  protected_areas <-
+  protected_areas %>%
+    st_as_sf() |> 
     inner_join(y = reports,
-               by = c("Park"="park_name"))%>% 
+               by = c("name"="park_name"))%>% 
     st_transform(crs = st_crs(4326))%>% 
-   mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
+   mutate(tag = paste0("Park: <a href=", url,">",name , "</a>"))
 
   bbox <- st_bbox(protected_areas) %>%
   as.vector()

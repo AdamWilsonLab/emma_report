@@ -27,7 +27,7 @@ library(terra)
 ```
 
 ```{r load_targets, echo=F}
-tar_load(parks)
+tar_load(protected_areas)
 #tar_load(most_recent_fire_raster)
 tar_load(park_fire_history)
 tar_load(temp_directory)
@@ -72,9 +72,10 @@ dates
 
 # get focal park from yaml
 focal_park_name <- params$focal_park_name
-# get sf geometry for park
-tar_load(parks)
-focal_park=filter(parks$national_parks,CUR_NME==focal_park_name)
+
+focal_park=protected_areas |> 
+  st_as_sf() |> 
+  filter(name==focal_park_name)
 
 
 # CREATE wgs84 version of the park polygon
