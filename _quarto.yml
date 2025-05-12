@@ -14,6 +14,8 @@ website:
         text: Home
       - href: model_summary.qmd
         text: Model Summary
+      - href: about.qmd
+        text: About
 
 format:
   html:

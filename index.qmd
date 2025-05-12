@@ -1,8 +1,10 @@
 ---
-title: "EMMA Report"
+title: "Project Overview"
 ---
 
-Page last updated at `r lubridate::now()`.
+
+# Summary
+The EMMA project is building new tools to monitor the health of shrubland ecosystems in near real-time. Focusing on the fire-prone Cape Floristic Region of South Africa—a biodiversity hotspot—our system combines satellite data, field observations, and modeling to track changes in vegetation, identify threats like fires or invasive species, and support better conservation decisions. In partnership with the South African Environmental Observation Network (SAEON), EMMA aims to provide reliable, up-to-date information that helps protect these critical landscapes.
 
 ```{r, echo=F, message=F,include=F, results="hide", eval=T}
 #description: Modeling vegetation postfire recovery data
@@ -15,6 +17,8 @@ library(tidyverse)
 library(sf)
 library(terra)
 library(leaflet)
+library(forcats)
+
 # need to include all necessary targets here otherwise they aren't dependencies with tar_quarto()
 tar_load(protected_areas)
 tar_load(park_fire_history)
@@ -30,16 +34,65 @@ tar_load(report_qmd_dir) # forces park qmds to run first
   
 ```
 
-# Model Overview
 
-We estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. More details are available <a href=model_summary.html>here.</a>
+# Regional Overview
 
-# Park Information
+```{r}
+protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi_raster,protected_areas,fun=quantile,na.rm=T) |> 
+  as_tibble() |> 
+  select(-1) |> #drop the index
+  rename("Q0"="NDVI","Q25"="NDVI.1","Q50"="NDVI.2","Q75"="NDVI.3","Q100"="NDVI.4") |> 
+  bind_cols(name=protected_areas$name)
+
+```
+
+```{r}
+protected_areas_monthly_delta_ndvi |> 
+  #gather(quantile,value,-name) |> 
+  ggplot(aes(xmin=Q25,xmax=Q75,x=Q50,y=name))+
+    geom_errorbarh()
+
+```
+
+```{r}
+years_since_fire <- extract(years_since_fire_raster,protected_areas,fun=quantile,na.rm=T) |> 
+  as_tibble() |> 
+  select(-1) |> #drop the index
+  rename("Q0"="lyr.1","Q25"="lyr.1.1","Q50"="lyr.1.2","Q75"="lyr.1.3","Q100"="lyr.1.4") |> 
+  bind_cols(name=protected_areas$name)
+
+```
+# Stand Age distributions
+```{r}
+years_since_fire |> 
+  mutate(name = fct_reorder(as.factor(name), Q50)) |>
+  filter(!is.na(Q50)) |> 
+  ggplot(aes(y=name))+
+    geom_segment(aes(x=Q0,xend=Q100),col=grey(.7))+
+    geom_segment(aes(x=Q25,xend=Q75),col=grey(.4))+
+    geom_point(aes(x=Q50))
+
+years_since_fire |> 
+  filter(!is.na(Q50)) |> 
+  mutate(name = fct_reorder(as.factor(name), Q50)) |> 
+  ggplot(aes(y = name)) +
+    # Full range (min to max)
+    geom_segment(aes(x = Q0, xend = Q100, yend = name), color = "grey70", size = .5) +
+    # Interquartile range (Q25 to Q75)
+    geom_segment(aes(x = Q25, xend = Q75, yend = name), color = "grey40", size = 1) +
+    # Median point
+    geom_point(aes(x = Q50), size = 2, color = "black") +
+    labs(
+      x = "Years Since Fire",
+      y = NULL,
+      title = "Distribution of Time Since Fire by Site",
+      subtitle = "Showing full range (Q0–Q100), IQR (Q25–Q75), and median (Q50)"
+    ) 
+
+```
 
 
 ```{r, echo=F}
-#update to use the new quarto docs
-
   base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
   base_url <- "reports/" #keep relative paths?
   
@@ -86,3 +139,6 @@ We estimate the age of a site by calculating the years since the last fire. We t
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
 ```
+
+Page last updated at `r lubridate::now()`.
+
