@@ -1,11 +1,13 @@
-#tar_load(parks)
+
 library(GSODR)
 library(tidyverse)
 library(lubridate)
 
+# load for interactive testing
+if(F) tar_load(temp_directory,protected_areas)
 
 # Get the weather station metadata
-get_stations_data <- function(temp_directory, parks){
+get_stations_data <- function(temp_directory, protected_areas){
 
   # update station md
   update_station_list_nonint()
@@ -37,27 +39,21 @@ get_stations_data <- function(temp_directory, parks){
 
   st_crs(isd_history) <- st_crs("WGS84")
 
-  parks$cape_nature %>%
+  park_buffer <- st_as_sf(protected_areas) %>%
     st_buffer(dist = 100000) %>%
-    st_union()-> cn_buffer
-
-  parks$national_parks %>%
-    st_buffer(dist = 100000) %>%
-    st_union()-> np_buffer
-
-  st_union(np_buffer,cn_buffer) -> park_buffer
+    st_union()
 
   isd_history %>%
     st_filter(y = park_buffer %>%
                 st_transform(st_crs(isd_history))) -> isd_history
 
-  rm(np_buffer,cn_buffer,park_buffer)
+  rm(park_buffer)
 
 
   #update station metadata
 #  stations_sf <- st_transform(stations_sf, crs = st_crs(parks$cape_nature))
  stations <- isd_history |>
-    st_transform(st_crs(parks$cape_nature)) |>
+    st_transform(st_crs(protected_areas)) |>
     st_make_valid()
 
    return(stations)
@@ -65,7 +61,7 @@ get_stations_data <- function(temp_directory, parks){
 }
 
 
-update_climate_data_gsod <- function(parks,stations, temp_directory){
+update_climate_data_gsod <- function(protected_areas,stations, temp_directory){
 
     # # Download station data
       for(i in 1:nrow(stations)){

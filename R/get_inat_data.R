@@ -18,10 +18,11 @@ get_inat_data <- function(inat_data_location = "data/manual_downloads/inat_proje
                           max_attemps = 10,
                           sleep_time=10,
                           oldest_date = "2020-01-01",
-                          sa_parks = parks,
+                          protected_areas = protected_areas,
                           park_buffer = 10000,
                           verbose=TRUE){
 
+protected_areas <- st_as_sf(protected_areas)
 
   #ensure directories are empty
 
@@ -61,7 +62,7 @@ get_inat_data <- function(inat_data_location = "data/manual_downloads/inat_proje
 
     if(verbose){message("Combining park shapefiles")}
 
-    st_union(sa_parks$cape_nature, sa_parks$national_parks) %>%
+    st_union(protected_areas) %>%
       st_combine() %>%
       st_simplify(dTolerance = 1000) %>%
       st_transform(st_crs(domain)) %>%

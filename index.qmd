@@ -6,22 +6,13 @@ Page last updated at `r lubridate::now()`.
 
 ```{r, echo=F, message=F,include=F, results="hide", eval=T}
 #description: Modeling vegetation postfire recovery data
-library(targets)
-library(tarchetypes)
-library(tidyverse) 
-library(doParallel)
-library(raster)
-library(lubridate)
-library(sf)
-library(plotly)
-library(leaflet)
-library(gt)
+
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
 
 # need to include all necessary targets here otherwise they aren't dependencies with tar_quarto()
-tar_load(parks)
+tar_load(protected_areas)
 tar_load(park_fire_history)
 tar_load(temp_directory)
 tar_load(years_since_fire_raster)
@@ -31,7 +22,8 @@ tar_load(most_recent_ndvi_date)
 tar_load(monthly_mean_ndvi_raster)
 tar_load(monthly_delta_ndvi_raster)
 tar_load(weather_data)
-
+tar_load(report_qmd_dir) # forces park qmds to run first
+  
 ```
 
 # Model Overview
@@ -40,46 +32,10 @@ We estimate the age of a site by calculating the years since the last fire. We t
 
 # Park Information
 
-```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE, eval=T}
-
-  tar_load(parks) #This apparently is no longer allowed per a new update of targets
-  tar_load(report_qmd_dir) # forces park qmds to run first
-  # tar_load(most_recent_fire_raster)
-  # tar_load(years_since_fire_raster)
-  # tar_load(fires_wgs)
-  # tar_load(most_recent_ndvi_raster)
-  # tar_load(most_recent_ndvi_date)
-  # tar_load(monthly_mean_ndvi_raster)
-  # tar_load(monthly_delta_NDVI)
-  # tar_load(mean_ndvi_raster)
-  # tar_load(delta_ndvi_raster)
-  # tar_load(most_recent_quarter_ndvi_file)
-  # tar_load(quarterly_delta_ndvi_raster)
-  # tar_load(stations_sf)
-  # tar_load(invasives)
-  # tar_load(old_invasives)
-```
 
 ```{r, echo=F}
+#update to use the new quarto docs
 
-# need to merge each complex into a single geometry
-
-  cn <- parks$cape_nature%>%
-      group_by(COMPLEX)%>%
-      summarise() %>%
-  rename(Park = COMPLEX)
-
-  np <- parks$national_parks%>%
-    group_by(CUR_NME)%>%
-    summarise() %>%
-    rename(Park = CUR_NME)
-  
-  
-  parks_sf <- bind_rows(cn,np)
-  
-  rm(np,cn)
-  
-  
   base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
   
     reports <- 
@@ -99,7 +55,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
     st_transform(crs = st_crs(4326))%>% 
    mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
 
-  bbox <- st_bbox(parks_sf) %>%
+  bbox <- st_bbox(protected_areas) %>%
   as.vector()
 
 
@@ -108,7 +64,7 @@ We estimate the age of a site by calculating the years since the last fire. We t
 ```{r park_map, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 
-  leaflet(data = parks_sf) %>%
+  leaflet(data = protected_areas) %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
     addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
     #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
