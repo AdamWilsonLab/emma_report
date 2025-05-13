@@ -1,5 +1,7 @@
 ---
 title: "EMMA Report"
+execute: 
+  cache: true
 ---
 
 

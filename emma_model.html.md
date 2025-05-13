@@ -1,5 +1,7 @@
 ---
 title: "EMMA Model Overview"
+execute: 
+  cache: true
 ---
 
 

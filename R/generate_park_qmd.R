@@ -30,6 +30,14 @@ if(!dir.exists(file.path(output_directory))){
 park_name="Table Mountain National Park"
 park_name="West Coast National Park"
 
+
+## filter to just a few for testing
+if(F){
+protected_areas <- protected_areas |>
+  st_as_sf() |>
+  filter(name%in%c("Table Mountain National Park","West Coast National Park","Cederberg Nature Reserve Complex","Anysberg Nature Reserve","Addo-Elephant National Park"))
+}
+
 for (park_name in unique(protected_areas$name)){# remove [1] to process them all!
   templ <- readLines("report_prototype.qmd")
 
