@@ -80,8 +80,10 @@ focal_park=protected_areas |>
 
 # CREATE wgs84 version of the park polygon
 
-    focal_park %>%
-    st_transform(crs = st_crs(4326)) -> focal_wgs
+    focal_park |> 
+    st_transform(crs = st_crs(4326)) |> 
+    st_make_valid() -> 
+    focal_wgs
 
 # Create buffered fire age polygon
 

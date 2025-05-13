@@ -181,6 +181,6 @@ tar_age(name = inat_data,
    #                               ... = spatial_outputs)),
 
 
-    tar_quarto(website)
+    tar_quarto(website, debug=T, quiet=F)
 
 )
