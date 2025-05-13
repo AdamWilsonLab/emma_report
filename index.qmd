@@ -1,7 +1,5 @@
 ---
 title: "Project Overview"
-execute: 
-  cache: true
 ---
 
 
@@ -66,14 +64,6 @@ years_since_fire <- extract(years_since_fire_raster,protected_areas,fun=quantile
 ```
 # Stand Age distributions
 ```{r, echo=F}
-years_since_fire |> 
-  mutate(name = fct_reorder(as.factor(name), Q50)) |>
-  filter(!is.na(Q50)) |> 
-  ggplot(aes(y=name))+
-    geom_segment(aes(x=Q0,xend=Q100),col=grey(.7))+
-    geom_segment(aes(x=Q25,xend=Q75),col=grey(.4))+
-    geom_point(aes(x=Q50))
-
 years_since_fire |> 
   filter(!is.na(Q50)) |> 
   mutate(name = fct_reorder(as.factor(name), Q50)) |> 

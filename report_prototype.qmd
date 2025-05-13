@@ -364,19 +364,19 @@ n_stations=3 # number of stations to show
   
   #Generate precip dataset
   
-focal_weather %>%
-  group_by(station_name,year,month)%>%
-  summarise(monthly_precip_mm = sum(na.omit(mean_precip_mm)))%>%
-  ungroup() %>%
-  mutate(date_time = paste(year,month,01,sep = "-"))%>%
-  mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
-  mutate(date_time = lubridate::floor_date(date_time)-1)%>%
-  dplyr::filter(!is.na(date_time))%>%
-  dplyr::select(date_time,station_name, monthly_precip_mm) %>%
-   filter(date_time>as_date("2000-01-01")) |> 
-  pivot_wider(values_from = monthly_precip_mm,
-              names_from = station_name,
-              values_fn = mean) %>%
+# focal_weather %>%
+#   group_by(station_name,year,month)%>%
+#   summarise(monthly_precip_mm = sum(na.omit(mean_precip_mm)))%>%
+#   ungroup() %>%
+#   mutate(date_time = paste(year,month,01,sep = "-"))%>%
+#   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
+#   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
+#   dplyr::filter(!is.na(date_time))%>%
+#   dplyr::select(date_time,station_name, monthly_precip_mm) %>%
+#    filter(date_time>as_date("2000-01-01")) |> 
+#   pivot_wider(values_from = monthly_precip_mm,
+#               names_from = station_name,
+#               values_fn = mean) %>%
 #    mutate(doy =  lubridate::yday(date_time) ) %>%
 #    left_join(x=.,
 #              y  = group_by(., doy) %>%
@@ -384,8 +384,73 @@ focal_weather %>%
 #                                          na.rm=TRUE))
 #              ) %>%
 #  dplyr::select(-doy)%>%
-  xts::xts(order.by = .$date_time) -> focal_precip
+#   xts::xts(order.by = .$date_time) -> focal_precip
   
+
+library(zoo)
+# Set the rolling window size (must be odd for centering)
+window_size <- 61  # e.g., ±15 days = 31 total
+
+# Step 1: Prepare the daily data
+focal_precip <- focal_weather %>%
+  filter(!is.na(mean_precip_mm)) %>%
+  select(station_name,date_time,mean_precip_mm) %>%
+  mutate(date_time = as_date(date_time)) %>%
+#  filter(date_time > as_date("2000-01-01")) %>%
+  pivot_wider(
+    names_from = station_name,
+    values_from = mean_precip_mm,
+    values_fn = mean
+  ) %>%
+  mutate(doy = yday(date_time))
+
+# Step 2: Compute the daily climatology using all years
+# Average across stations by DOY
+focal_precip_climatology <- focal_precip %>%
+  group_by(doy) %>%
+  summarise(clim_mean = mean(c_across(where(is.numeric)), na.rm = TRUE), .groups = "drop") %>%
+  arrange(doy)
+
+# Step 3: Apply rolling mean (wrap around to handle year start/end)
+# Pad the data for wrap-around
+extended <- bind_rows(
+  focal_precip_climatology %>% filter(doy > (366 - window_size)),
+  focal_precip_climatology,
+  focal_precip_climatology %>% filter(doy <= window_size)
+)
+
+# Compute the rolling mean twice to smooth it out
+extended$roll_mean <- zoo::rollmean(extended$clim_mean, k = window_size, fill = NA, align = "center") |> 
+  zoo::rollmean(k = window_size, fill = NA, align = "center")
+
+# Step 4: Remove padding and match back to original DOY
+rolling_climatology <- extended %>%
+  slice((window_size + 1):(n() - window_size)) %>%
+  select(doy, mean = roll_mean)
+
+# Step 5: Join back to the daily weather data
+focal_precip %>%
+  left_join(rolling_climatology, by = "doy") %>%
+  select(-doy) %>%
+   xts::xts(x=select(.,-date_time), order.by = .$date_time) -> focal_precip
+
+
+# calculate monthly totals
+  bind_cols(date_time=time(focal_precip),as.data.frame(focal_precip)) |> 
+    mutate(year=year(as_date(date_time)),month=month(as_date(date_time))) |> 
+    pivot_longer(-c(date_time,month,year),names_to="station",values_to="precip") |> 
+    group_by(station,year,month) |> 
+      summarize(precip=sum(precip,na.omit=T)) |> 
+      arrange(station,year,month) |> 
+    ungroup() |> 
+    mutate(date_time=ymd(paste(year,month,15))) |> 
+    select(-year,-month) |> 
+    pivot_wider(id_cols="date_time",names_from=station,values_from=precip)-> 
+    focal_precip_monthly
+  
+  focal_precip_monthly_xts <- xts::xts(x=select(focal_precip_monthly,-date_time), order.by = focal_precip_monthly$date_time) 
+
+
 ```
 
 ```{r generate_temp_dataset, echo = FALSE, warning = FALSE, message = FALSE}
@@ -403,13 +468,13 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
   pivot_wider(values_from = daily_temp_C,
               names_from = station_name,
               values_fn = mean) %>%
-#    mutate(doy =  lubridate::yday(date_time) ) %>%
-#    left_join(x=.,
-#              y  = group_by(., doy) %>%
-#                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
-#                                          na.rm=TRUE))
-#              ) %>%
-#   dplyr::select(-doy)%>%
+   mutate(doy =  lubridate::yday(date_time) ) %>%
+   left_join(x=.,
+             y  = group_by(., doy) %>%
+               summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+                                         na.rm=TRUE))
+             ) %>%
+  dplyr::select(-doy)%>%
     xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
 
 ```
@@ -572,7 +637,7 @@ if(nrow(focal_invasives) == 0){
 
 Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20. The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `#r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
-## Vegetation ages over time
+## Area burned and vegetation ages
 
 ```{r vegetation ages over time, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
@@ -740,19 +805,43 @@ Figure 3. Histogram of vegetation ages. For the purposes of this plot, any veget
 
   # see: https://rstudio.github.io/dygraphs/
 
+# Define a shared group name
+shared_group <- "weather_group"
+
+focal_precip_df <- as.data.frame(focal_precip) |> 
+   mutate(across(where(is.numeric) & !any_of("date_time"), function(x) log1p(ifelse(x<0.001,0,x))))
+
+focal_precip_trans <- ts(focal_precip_df,
+                         start = start(focal_precip),
+                         frequency = frequency(focal_precip))
+
+dygraph(focal_precip_trans,
+        main = "Precipitation (log1p-transformed)",
+        xlab = "Date",
+        ylab = "log1p(Precip mm)",
+       group = shared_group) %>%
+      dyAxis("y",
+         label = "Precip. (mm)",
+         axisLabelFormatter = JS(
+           "function(value, granularity, opts, dygraph) {
+              return Math.round(Math.exp(value) - 1);
+            }"
+         ),
+         valueFormatter = JS(
+    "function(num, opts, seriesName, g, row, col) {
+       return (Math.exp(num) - 1).toFixed(2);
+     }"
+  ))  |> 
+  dySeries() %>%
+  dyRangeSelector() ->
+  precip_graph
 
 
-  dygraph(data = focal_precip[,colnames(focal_precip)[which(colnames(focal_precip)!="date_time")]],
-          main = "Precipitation",
-          xlab = "Date",
-          ylab = "Precip. (mm)") %>%
-    dySeries()%>%
-    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> precip_graph
-  
       dygraph(data = focal_mean_daily_temp[,colnames(focal_mean_daily_temp)[which(colnames(focal_mean_daily_temp)!="date_time")]],
           main = "Temperature",
           xlab = "Date",
-          ylab = "Temp. (C)") %>%
+          ylab = "Temp. (C)",
+          group = shared_group) %>%
     dySeries() %>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
 
@@ -835,8 +924,7 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
   #Make a dataset with only mostly complete data
 
   stations_to_keep <-
-  focal_precip %>%
-    as.data.frame()%>%
+    bind_cols(date_time=time(focal_precip_monthly_xts),focal_precip_monthly_xts)%>%
     pivot_longer(cols = !date_time,
                  names_to = "station_name",
                  values_to = "monthly_precip_mm") %>%
@@ -846,20 +934,21 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
     dplyr::select(station_name)
 
   
-  focal_precip %>%
+  focal_precip_monthly_xts %>%
      as.data.frame() %>%
     .[stations_to_keep$station_name] %>%
      mutate_if(is.character, as.numeric) -> focal_spi_data
-  
+
   
   # Only use the mean estimates if those are the only complete ones
 
-#      focal_spi_data %>%
-#      dplyr::select(!mean) -> focal_spi_data
+    #focal_spi_data %>%
+    #dplyr::select(!mean) -> focal_spi_data
       
       
     if(ncol(focal_spi_data)>0){
   
+      spi_window=6 # number of months of moving window
 
 spi <- spi(data = ts(focal_spi_data,
                            frequency = 12,
@@ -867,18 +956,18 @@ spi <- spi(data = ts(focal_spi_data,
                                        substr(start = 0,stop = 4),
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
-                 scale =  6,
+                 scale =  spi_window,
                  verbose = FALSE,
                  na.rm = TRUE)
 
 spi2 <- as_tibble(spi$fitted) %>%
   mutate(date = as.Date(as.yearmon(time(spi$fitted)))) %>%
   relocate(date) %>%
-  pivot_longer(-date, names_to = "station", values_to = "spei") |> 
-  mutate(       # Create a new column to separate positive and negative SPEI
-    spei_pos = ifelse(spei > 0, spei, 0),
-    spei_neg = ifelse(spei < 0, spei, 0)
-  )
+  pivot_longer(-date, names_to = "station", values_to = "spei") #|> 
+ # mutate(       # Create a new column to separate positive and negative SPEI
+#    spei_pos = ifelse(spei > 0, spei, 0),
+#    spei_neg = ifelse(spei < 0, spei, 0)
+#  )
 
 
 
@@ -915,13 +1004,26 @@ ggplot(spi2, aes(x = date)) +
   geom_hline(yintercept = 0, color = grey(0.6)) +
   geom_line(aes(y = spei,col=station)) + 
   geom_smooth(aes(y = spei), span = 0.3, se = TRUE,col="black") +
-  ggtitle("Standardized Precipitation Index (SPI with 6 Month window)") +
+  ggtitle(paste0("Standardized Precipitation Index (SPI with ",spi_window," Month window)")) +
   scale_color_viridis_d()+
   ylab("Standardized Precipitation Index (SPI)")+
   xlab("Date") +
   theme_minimal()  -> p_spi
 
     p_spi
+    
+    spi2 |> 
+      pivot_wider(names_from = station,values_from = spei) |> 
+      dygraph(
+          main = "Standardized Precipitation Index (SPI with 6 Month window)",
+          xlab = "Date",
+          ylab = "SPI",
+          group = shared_group) %>%
+    dySeries() %>%
+    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> spi_graph
+    
+    
+  spi_graph
     
 }
 ```
