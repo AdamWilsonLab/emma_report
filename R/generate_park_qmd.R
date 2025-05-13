@@ -32,7 +32,7 @@ park_name="West Coast National Park"
 
 
 ## filter to just a few for testing
-if(T){
+if(F){
 protected_areas <- protected_areas |>
   st_as_sf() |>
   filter(name%in%c("Table Mountain National Park","West Coast National Park","Cederberg Nature Reserve Complex","Anysberg Nature Reserve","Addo-Elephant National Park"))

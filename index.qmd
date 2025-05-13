@@ -112,6 +112,9 @@ years_since_fire |>
 
 
 ```
+# Park-level Summaries
+
+Click on a park below to view park specific reports.
 
 ```{r park_map, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
@@ -132,5 +135,20 @@ years_since_fire |>
 
 ```
 
-Page last updated at `r lubridate::now()`.
+# Data Overview
 
+See table below for dates each dataset was last updated and download links.
+
+```{r, echo=F, results='asis'}
+# build table of dates when products were last updated
+
+dates <- bind_rows(
+  data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
+  data.frame(Description = "NDVI", Date = format(most_recent_ndvi_date, "%Y-%b-%d")),
+  data.frame(Description = "Weather", Date = format(max(weather_data$YEARMODA), "%Y-%b-%d"))
+) |> 
+  select(Description, "Date last updated"=Date)
+
+knitr::kable(dates)
+ 
+```
