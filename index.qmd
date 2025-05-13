@@ -1,5 +1,7 @@
 ---
 title: "Project Overview"
+execute: 
+  cache: true
 ---
 
 
@@ -37,7 +39,7 @@ tar_load(report_qmd_dir) # forces park qmds to run first
 
 # Regional Overview
 
-```{r}
+```{r, echo=F, warning=F}
 protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi_raster,protected_areas,fun=quantile,na.rm=T) |> 
   as_tibble() |> 
   select(-1) |> #drop the index
@@ -46,7 +48,7 @@ protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi_raster,protecte
 
 ```
 
-```{r}
+```{r, echo=F, warning=F}
 protected_areas_monthly_delta_ndvi |> 
   #gather(quantile,value,-name) |> 
   ggplot(aes(xmin=Q25,xmax=Q75,x=Q50,y=name))+
@@ -54,7 +56,7 @@ protected_areas_monthly_delta_ndvi |>
 
 ```
 
-```{r}
+```{r, echo=F, warning=F}
 years_since_fire <- extract(years_since_fire_raster,protected_areas,fun=quantile,na.rm=T) |> 
   as_tibble() |> 
   select(-1) |> #drop the index
@@ -63,7 +65,7 @@ years_since_fire <- extract(years_since_fire_raster,protected_areas,fun=quantile
 
 ```
 # Stand Age distributions
-```{r}
+```{r, echo=F}
 years_since_fire |> 
   mutate(name = fct_reorder(as.factor(name), Q50)) |>
   filter(!is.na(Q50)) |> 
@@ -77,9 +79,9 @@ years_since_fire |>
   mutate(name = fct_reorder(as.factor(name), Q50)) |> 
   ggplot(aes(y = name)) +
     # Full range (min to max)
-    geom_segment(aes(x = Q0, xend = Q100, yend = name), color = "grey70", size = .5) +
+    geom_segment(aes(x = Q0, xend = Q100, yend = name), color = "grey70", linewidth = .5) +
     # Interquartile range (Q25 to Q75)
-    geom_segment(aes(x = Q25, xend = Q75, yend = name), color = "grey40", size = 1) +
+    geom_segment(aes(x = Q25, xend = Q75, yend = name), color = "grey40", linewidth = 1) +
     # Median point
     geom_point(aes(x = Q50), size = 2, color = "black") +
     labs(

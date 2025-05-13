@@ -55,3 +55,6 @@ notes.md
 _site/
 /.quarto/
 /data
+docs/*
+site_libs/*
+*.html.md

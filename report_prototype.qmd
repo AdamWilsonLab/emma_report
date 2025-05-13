@@ -5,12 +5,6 @@ params:
 ---
 
 
-
-
-| Data            | Date | Download |
-|-----------------|----------------------|-----------------|
-| Website updated | `r lubridate::now()|> format("%H:%M on %B %d, %Y")`               | 39.2            |
-
 ```{r, echo=F, message = F, results = "hide"}
 library(targets)
 library(tidyverse)
@@ -23,10 +17,16 @@ library(plotly)
 library(leaflet)
 library(dygraphs)
 library(terra)
+library(cowplot)
+library(ggridges)  
+library(dygraphs)
+library(mapview)
+library(leafem)
+library(SPEI)
 
 ```
 
-```{r load_targets, echo=F}
+```{r load_targets, echo=F, message=FALSE}
 tar_load(protected_areas)
 #tar_load(most_recent_fire_raster)
 tar_load(park_fire_history)
@@ -46,32 +46,19 @@ tar_load(stations)
 tar_load(inat_data)
 
 
-time_window_days=90
+time_window_days=365
 
 ```
 
-# Report Details
-
-```{r, echo=F}
-# build table of dates when products were last updated
-
-dates <- bind_rows(
-  data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
-  data.frame(Description = "NDVI", Date = format(most_recent_ndvi_date, "%Y-%b-%d"))
-)
-
-dates
- 
-```
-# Park-specific Information
-
-## NDVI and Time Since Fire
 
 ```{r data_prep, echo = FALSE, warning = FALSE, message = FALSE,include=FALSE}
 
-
 # get focal park from yaml
 focal_park_name <- params$focal_park_name
+
+# set for testing
+if(F) focal_park_name <- "Table Mountain National Park"
+
 
 focal_park=protected_areas |> 
   st_as_sf() |> 
@@ -386,35 +373,18 @@ focal_weather %>%
   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
   dplyr::filter(!is.na(date_time))%>%
   dplyr::select(date_time,station_name, monthly_precip_mm) %>%
+   filter(date_time>as_date("2000-01-01")) |> 
   pivot_wider(values_from = monthly_precip_mm,
               names_from = station_name,
               values_fn = mean) %>%
-    mutate(doy =  lubridate::yday(date_time) ) %>%
-    left_join(x=.,
-              y  = group_by(., doy) %>%
-                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
-                                          na.rm=TRUE))
-              ) %>%
-  dplyr::select(-doy)%>%
+#    mutate(doy =  lubridate::yday(date_time) ) %>%
+#    left_join(x=.,
+#              y  = group_by(., doy) %>%
+#                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+#                                          na.rm=TRUE))
+#              ) %>%
+#  dplyr::select(-doy)%>%
   xts::xts(order.by = .$date_time) -> focal_precip
-
-
-  
-  # focal_weather %>%
-  #   dplyr::select(date_time, usaf_station, mean_precip_mm) %>%
-  # pivot_wider(values_from = mean_precip_mm,
-  #               names_from = usaf_station,
-  #             values_fn = mean) %>%
-  #   xts::xts(order.by = .$date_time) -> focal_precip
-  
-  # Generate temp dataset
-  
-  # focal_weather%>%
-  #   dplyr::select(date_time, station_name, temp_c) %>%
-  #   pivot_wider(values_from = temp_c,
-  #               names_from = station_name,
-  #               values_fn = mean) %>%
-  #   xts::xts(order.by = .$date_time) -> focal_temp
   
 ```
 
@@ -422,7 +392,7 @@ focal_weather %>%
 
     #mean daily temp dataset
 
-    focal_weather%>%
+  focal_weather%>%
   group_by(station_name,year,month,day)%>%
   summarise(daily_temp_C = mean(na.omit(temp_c)))%>%
   ungroup() %>%
@@ -433,13 +403,13 @@ mutate(date_time = paste(year,month,day,sep = "-"))%>%
   pivot_wider(values_from = daily_temp_C,
               names_from = station_name,
               values_fn = mean) %>%
-    mutate(doy =  lubridate::yday(date_time) ) %>%
-    left_join(x=.,
-              y  = group_by(., doy) %>%
-                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
-                                          na.rm=TRUE))
-              ) %>%
-  dplyr::select(-doy)%>%
+#    mutate(doy =  lubridate::yday(date_time) ) %>%
+#    left_join(x=.,
+#              y  = group_by(., doy) %>%
+#                summarize(mean = mean(c_across(!contains(c("doy","date_time"))),
+#                                          na.rm=TRUE))
+#              ) %>%
+#   dplyr::select(-doy)%>%
     xts::xts(order.by = .$date_time) -> focal_mean_daily_temp
 
 ```
@@ -494,6 +464,13 @@ if(nrow(focal_invasives) == 0){
 }
 
 ```
+
+
+# `r focal_park_name`
+
+
+## NDVI and Time Since Fire
+
 
 ```{r ndvi_and_burns, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
@@ -595,8 +572,6 @@ if(nrow(focal_invasives) == 0){
 
 Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20. The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `#r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
 
-## Vegetation Ages
-
 ## Vegetation ages over time
 
 ```{r vegetation ages over time, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
@@ -629,26 +604,6 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
       
     }
   
-  
-  # tile plot
-    # 
-    # ggplot()+
-    # geom_tile(data =     focal_fires %>%
-    #             mutate(cellID = as.factor(cellID),
-    #                    years_since_fire = days_since_fire/365.25) %>%
-    #               filter(years_since_fire >= 0)%>%
-    #             mutate(date = as_date(date)),
-    #             mapping = aes(x=date,y=cellID,fill=years_since_fire))+
-    #   scale_x_date(date_labels = "%Y",
-    #                expand = c(0,0))+
-    #   scale_y_discrete(expand = c(0,0))+
-    #   theme(axis.text.y = element_blank(),
-    #         axis.ticks.y = element_blank())
-    
-
-  # joyplot attempts
-
-  library(ggridges)  
     
   # dealing with missing cells/ages
   
@@ -669,16 +624,6 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
                                           years_since_fire >= 0 ~ years_since_fire,
                                           years_since_fire < 0 ~ 20)) -> ff2
   
-        # ggplot(data = ff2 %>%
-        #          mutate(year=as.factor(year)),
-        #         mapping = aes(x=years_since_fire,
-        #                       y=year,
-        #                       fill=after_stat(x)))+
-        #   geom_density_ridges_gradient()+
-        #   labs(fill = "Age")+
-        #   xlab("Vegetation Age")
-
-  #year gte20     n total fraction      
         
 ff2 %>%
   mutate(gte20 = years_since_fire >= 20) %>%
@@ -698,7 +643,8 @@ ggplot(mapping = aes(x=years_since_fire,
                      fill=after_stat(x)))+
   geom_density_ridges_gradient()+
   labs(fill = "Age")+
-  xlab("Vegetation Age")+
+  xlab("Vegetation Age Distribution")+
+  ylab("Year")+
   theme_bw()+
   theme(legend.position = "none")+
   geom_text(data = unburned_summary,
@@ -707,18 +653,32 @@ ggplot(mapping = aes(x=years_since_fire,
                 x = max(ff2$years_since_fire)), 
             position = position_stack(),
             inherit.aes = F)+
-  scale_y_discrete(expand = c(.05, 0.2)) -> p1
+  scale_y_discrete(expand = c(.05, 0.2))+
+  coord_flip() -> p1
         
-p1        
-        
+
+focal_fires |> 
+  mutate(year=year(as_date(date))) |> 
+  group_by(year) |> 
+  summarize(area_burned=sum(ifelse(days_since_fire<45,1,0))) |>
+  ggplot(aes(x=year,y=area_burned))+
+  geom_line()+
+  ylab("Area Burned")+
+  xlab("")+
+   scale_x_continuous(
+      breaks = seq(min(year(as_date(focal_fires$date))), max(year(as_date(focal_fires$date))), by = 1)) ->  # One tick per year
+  p_burnedarea
+
+plot_grid(p_burnedarea, p1, ncol=1, align = "v", labels = "AUTO",rel_heights = c(0.3,0.7),label_size = 0) 
+     
 ```
 
-Figure 2. Ridgeplot showing vegetation age distributions within the park over time. Percentages shown represent amount of vegetation that is 20 years old or older. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
+Figure 2. Top: Total area burned each year in the park.  Bottom: Ridgeplot histogram showing vegetation age distributions within the park over time. Percentages shown represent amount of vegetation that is 20 years old or older. Note that areas where fires are not known to have occurred have been assigned a vegetation age of 20 years.
 
-## Current Vegetation Age Distribution
 
-```{r vegetation ages, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r vegetation ages, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=F}
   
+## Current Vegetation Age Distribution
 
   # set NA values to 21 (we'll reset anything higher than 20 to 20+ for visualization)
   # mask years since fire raster to the park
@@ -766,47 +726,13 @@ Figure 2. Ridgeplot showing vegetation age distributions within the park over ti
     theme_bw()
     
 
-    #Alternative density plot
-    # 
-    # test %>%
-    # ggplot(mapping = aes(x = Vegetation_Age))+
-    # geom_density(fill="red")+
-    # xlab("Vegetation Age")+
-    # scale_x_continuous(breaks = c(0,5,10,15,20),
-    # labels = c(0,5,10,15,"20(+)"),
-    # limits = c(0,21),
-    # expand = c(0,0))+
-    # scale_y_continuous(expand=c(0,0))+
-    # theme_bw()
-  
-    #Another density plot option    
-    # library(ggridges)
-
-    # test %>%
-    # mutate(dummy = "dummy") %>%
-    # ggplot(mapping = aes(x = Vegetation_Age,y=dummy,fill=..x..))+
-    # geom_density_ridges_gradient(color=NA)+
-    # scale_fill_gradient(low="lightgreen", high="darkred")+
-    # xlab("Vegetation Age")+
-    # scale_x_continuous(breaks = c(0,5,10,15,20),
-    # labels = c(0,5,10,15,"20(+)"),
-    # limits = c(0,21),
-    # expand = c(0,0))+
-    # scale_y_discrete(expand = expansion(mult = c(0, 0)))+
-    # ylab(NULL)+
-    # guides(y = "none")+
-    # theme_bw()+
-    # theme(legend.position="none")
-    # 
     
-
-    
+Figure 3. Histogram of vegetation ages. For the purposes of this plot, any vegetation known to either be 20 years old or older, or for which we have no recorded records of fire, has been assigned an age of 20(+) years. The area shown was calculated by mutliplying counts of MODIS pixels at each age with the area of each pixel in square kilometers.
 
 
 
 ```
 
-Figure 3. Histogram of vegetation ages. For the purposes of this plot, any vegetation known to either be 20 years old or older, or for which we have no recorded records of fire, has been assigned an age of 20(+) years. The area shown was calculated by mutliplying counts of MODIS pixels at each age with the area of each pixel in square kilometers.
 
 ## Weather Data
 
@@ -815,9 +741,6 @@ Figure 3. Histogram of vegetation ages. For the purposes of this plot, any veget
   # see: https://rstudio.github.io/dygraphs/
 
 
-    library(dygraphs)
-  
-  
 
   dygraph(data = focal_precip[,colnames(focal_precip)[which(colnames(focal_precip)!="date_time")]],
           main = "Precipitation",
@@ -826,46 +749,12 @@ Figure 3. Histogram of vegetation ages. For the purposes of this plot, any veget
     dySeries()%>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> precip_graph
   
-# 
-#   dygraph(data = focal_temp[,colnames(focal_temp)[which(colnames(focal_precip)!="date_time")]],
-#           main = "Temperature",
-#           xlab = "Date",
-#           ylab = "Temp. (C)") %>%
-#     dySeries()%>%
-#     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
-# 
-
       dygraph(data = focal_mean_daily_temp[,colnames(focal_mean_daily_temp)[which(colnames(focal_mean_daily_temp)!="date_time")]],
           main = "Temperature",
           xlab = "Date",
           ylab = "Temp. (C)") %>%
     dySeries() %>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
-
-  #mean temp dataset
-#     focal_weather%>%
-#   group_by(station_name,year,month)%>%
-#   summarise(monthly_temp_C = mean(na.omit(temp_c)))%>%
-#   ungroup() %>%
-# mutate(date_time = paste(year,month,01,sep = "-"))%>%
-#   mutate(date_time = strptime(date_time,format = "%Y-%m-%d"))%>%
-#   mutate(date_time = lubridate::floor_date(date_time)-1)%>%
-#   dplyr::filter(!is.na(date_time))%>%
-#   dplyr::select(date_time,station_name, monthly_temp_C) %>%
-#   pivot_wider(values_from = monthly_temp_C,
-#               names_from = station_name,
-#               values_fn = mean)%>%
-#     xts::xts(order.by = .$date_time) -> focal_mean_temp
-#   
-#     
-#       dygraph(data = focal_mean_temp[,colnames(focal_mean_temp)[which(colnames(focal_mean_temp)!="date_time")]],
-#           main = "Temperature",
-#           xlab = "Date",
-#           ylab = "Temp. (C)") %>%
-#     dySeries()%>%
-#     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> temp_graph
-# 
-
 
 ```
 
@@ -895,14 +784,6 @@ Figure 3. Histogram of vegetation ages. For the purposes of this plot, any veget
 ## Drought Indices
 
 ```{r NDWI_plot, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=FALSE, include=FALSE}
-
-library(raster)
-library(mapview)
-library(leaflet)
-library(leafem)
-
-
-  
   leaflet(data = focal_wgs) %>%
   addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
     #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
@@ -951,10 +832,6 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
 
 ```{r calc_spi_1, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
-library(SPEI)
-require(ggplot2)
-
-
   #Make a dataset with only mostly complete data
 
   stations_to_keep <-
@@ -963,88 +840,106 @@ require(ggplot2)
     pivot_longer(cols = !date_time,
                  names_to = "station_name",
                  values_to = "monthly_precip_mm") %>%
-    group_by(station_name) %>%
-    summarize(fraction_na = sum(is.na(monthly_precip_mm))/length(monthly_precip_mm)) %>%
+    group_by(station_name) %>% 
+    summarize(fraction_na = sum(is.na(monthly_precip_mm))/length(monthly_precip_mm)) %>% 
     filter(fraction_na < 0.05) %>%
     dplyr::select(station_name)
 
   
   focal_precip %>%
-    as.data.frame() %>%
+     as.data.frame() %>%
     .[stations_to_keep$station_name] %>%
-     mutate_if(is.character, as.numeric)-> focal_spi_data
+     mutate_if(is.character, as.numeric) -> focal_spi_data
   
   
   # Only use the mean estimates if those are the only complete ones
 
-      focal_spi_data %>%
-      dplyr::select(!mean) -> focal_spi_data
+#      focal_spi_data %>%
+#      dplyr::select(!mean) -> focal_spi_data
       
       
     if(ncol(focal_spi_data)>0){
   
-    #calculate spi at different temporal windows
 
-    spi_1 <- spi(data = ts(focal_spi_data,
+spi <- spi(data = ts(focal_spi_data,
                            frequency = 12,
                            start = c(rownames(focal_spi_data)[1]%>%
                                        substr(start = 0,stop = 4),
                                      rownames(focal_spi_data)[1]%>%
                                        substr(start = 6,stop = 7))),
-                 scale =  1,
-                 verbose = FALSE,
-                 na.rm = TRUE)
-    
-    
-    spi_3 <- spi(data = ts(focal_spi_data,
-                           frequency = 12,
-                           start = c(rownames(focal_spi_data)[1]%>%
-                                       substr(start = 0,stop = 4),
-                                     rownames(focal_spi_data)[1]%>%
-                                       substr(start = 6,stop = 7))),
-                 scale =  3,
-                 verbose = FALSE,
-                 na.rm = TRUE)
-    
-    spi_12 <- spi(data = ts(focal_spi_data,
-                           frequency = 12,
-                           start = c(rownames(focal_spi_data)[1]%>%
-                                       substr(start = 0,stop = 4),
-                                     rownames(focal_spi_data)[1]%>%
-                                       substr(start = 6,stop = 7))),
-                 scale =  12,
+                 scale =  6,
                  verbose = FALSE,
                  na.rm = TRUE)
 
-plot(spi_1)+
-  ggtitle('1 Month SPI')
+spi2 <- as_tibble(spi$fitted) %>%
+  mutate(date = as.Date(as.yearmon(time(spi$fitted)))) %>%
+  relocate(date) %>%
+  pivot_longer(-date, names_to = "station", values_to = "spei") |> 
+  mutate(       # Create a new column to separate positive and negative SPEI
+    spei_pos = ifelse(spei > 0, spei, 0),
+    spei_neg = ifelse(spei < 0, spei, 0)
+  )
 
 
-}else{print ("Weather data insufficient for SPI calcualtion")}
 
 
-
+    }
+      
 ```
 
-```{r calc_spi_3, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+```{r spiplot, eval = TRUE, fig.width = 10, fig.height = 10, echo = FALSE, warning = FALSE, message = FALSE}
 
   if(ncol(focal_spi_data)>0){
 
-    plot(spi_3)+
-      ggtitle('3 Month SPI')
+# # Plot with separate fill colors for positive and negative values
+# ggplot(spi2, aes(x = date)) +
+#   geom_hline(yintercept = 0, color = grey(0.6)) +
+# #  geom_line(aes(y = spei), col="transparent") + #for plotly to return simple value?
+#   geom_area(aes(y = spei_pos), fill = "darkblue") +
+#   geom_area(aes(y = spei_neg), fill = "darkred") +
+#   geom_smooth(aes(y = spei), span = 0.2, se = TRUE,col="black") +
+#   ggtitle("6 Month Standardized Precipitation Index (SPI)") +
+#   ylab("Standardized Precipitation Index (SPI)")+
+#   xlab("Date") +
+#   facet_wrap(~station,ncol=1)+
+#       coord_equal(ratio = 100)+
+#   theme_minimal()  -> p_spi
+#   
+#     #ggplotly(p_spi,layerData = 2)
+#      p_spi
+#   }
+
+
+# Plot with separate fill colors for positive and negative values
+ggplot(spi2, aes(x = date)) +
+  geom_hline(yintercept = 0, color = grey(0.6)) +
+  geom_line(aes(y = spei,col=station)) + 
+  geom_smooth(aes(y = spei), span = 0.3, se = TRUE,col="black") +
+  ggtitle("Standardized Precipitation Index (SPI with 6 Month window)") +
+  scale_color_viridis_d()+
+  ylab("Standardized Precipitation Index (SPI)")+
+  xlab("Date") +
+  theme_minimal()  -> p_spi
+
+    p_spi
     
-  }
-
-
+}
 ```
 
-```{r calc_spi_12, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+# Report Metadata
 
+This table summarizes the date this report was generated and the most recent observation for each data type.
 
-    if(ncol(focal_spi_data)>0){
-      plot(spi_12)+
-        ggtitle('12 Month SPI')
-    }
+```{r, echo=F, results='asis'}
+# build table of dates when products were last updated
 
+dates <- bind_rows(
+  data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
+  data.frame(Description = "NDVI", Date = format(most_recent_ndvi_date, "%Y-%b-%d")),
+  data.frame(Description = "Weather", Date = format(max(focal_weather$date_time), "%Y-%b-%d"))
+) |> 
+  select(Description, "Date last updated"=Date)
 
+knitr::kable(dates)
+ 
 ```
