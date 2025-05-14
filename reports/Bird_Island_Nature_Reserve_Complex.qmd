@@ -9,7 +9,7 @@ params:
 library(targets)
 library(tidyverse)
 library(doParallel)
-library(raster)
+#library(raster)
 library(lubridate)
 library(sf)
 library(xts)
@@ -28,20 +28,20 @@ library(SPEI)
 
 ```{r load_targets, echo=F, message=FALSE}
 tar_load(protected_areas)
-#tar_load(most_recent_fire_raster)
+#tar_load(most_recent_fire.tif)
 tar_load(park_fire_history)
 tar_load(temp_directory)
-tar_load(years_since_fire_raster)
+tar_load(years_since_fire.tif)
 tar_load(fires_wgs)
-tar_load(most_recent_ndvi_raster)
+tar_load(most_recent_ndvi.tif)
 tar_load(most_recent_ndvi_date)
-tar_load(monthly_mean_ndvi_raster)
-tar_load(monthly_delta_ndvi_raster)
+tar_load(monthly_mean_ndvi.tif)
+tar_load(monthly_delta_ndvi.tif)
 tar_load(weather_data)
-#tar_load(mean_ndvi_raster)
-#tar_load(delta_ndvi_raster)
+#tar_load(mean_ndvi.tif)
+#tar_load(delta_ndvi.tif)
 #tar_load(most_recent_quarter_ndvi_file)
-#tar_load(quarterly_delta_ndvi_raster)
+#tar_load(quarterly_delta_ndvi.tif)
 tar_load(stations)
 tar_load(inat_data)
 
@@ -227,15 +227,15 @@ addLegend_decreasing <- function (map, position = c("topright", "bottomright", "
   
   
   ndvi_pal <- colorNumeric(palette = c( "#FFFFCC", "#41B6C4","#0C2C84"),
-                           #domain =  values(most_recent_ndvi_raster),
+                           #domain =  values(most_recent_ndvi.tif),
                            domain =  c(-1,0,1),
                            na.color = "transparent")
   
-  #max_delta_ndvi <- max(abs(values(delta_ndvi_raster)),na.rm = TRUE)
-  max_delta_ndvi <- max(abs(values(monthly_delta_ndvi_raster)),na.rm = TRUE)
+  #max_delta_ndvi <- max(abs(values(delta_ndvi.tif)),na.rm = TRUE)
+  max_delta_ndvi <- max(abs(values(monthly_delta_ndvi.tif)),na.rm = TRUE)
   
   delta_ndvi_pal <- colorNumeric(palette = c( "brown", "white","forestgreen"),
-                                 #domain =  values(most_recent_ndvi_raster),
+                                 #domain =  values(most_recent_ndvi.tif),
                                  domain =  c(max_delta_ndvi*-1,max_delta_ndvi),
                                  na.color = "transparent")
 
@@ -547,16 +547,16 @@ if(nrow(focal_invasives) == 0){
               stroke = TRUE,
               fill = FALSE,
               group = "Park") %>%
-  addRasterImage(x = raster::raster(most_recent_ndvi_raster),
+  addRasterImage(x = raster::raster(most_recent_ndvi.tif),
                  group = "NDVI",
                  colors = ndvi_pal) %>%
-    # addRasterImage(x = raster::raster(delta_ndvi_raster),
+    # addRasterImage(x = raster::raster(delta_ndvi.tif),
     #              group = "delta NDVI<br/>(long-term)",
     #              colors = delta_ndvi_pal) %>%
-  # addRasterImage(x = raster::raster(quarterly_delta_ndvi_raster),
+  # addRasterImage(x = raster::raster(quarterly_delta_ndvi.tif),
   #              group = "delta NDVI<br/>(quarterly)",
   #              colors = delta_ndvi_pal) %>%
-  addRasterImage(x = raster::raster(monthly_delta_ndvi_raster),
+  addRasterImage(x = raster::raster(monthly_delta_ndvi.tif),
                  group = "delta NDVI<br/>(monthly)",
                  colors = delta_ndvi_pal) %>%
   hideGroup("delta NDVI<br/>(quarterly)") %>%
@@ -600,14 +600,14 @@ if(nrow(focal_invasives) == 0){
   
     leaflet::addLegend(position = "topright",
                      pal = delta_ndvi_pal,          
-                     values = ~values(monthly_delta_ndvi_raster),
+                     values = ~values(monthly_delta_ndvi.tif),
                      #values = ~c(-1,1),
                      opacity = 1,
                      title = "delta<br/>NDVI") %>%
   
     leaflet::addLegend(position = "topright",
             pal = ndvi_pal,          
-            values = ~values(raster::raster(most_recent_ndvi_raster)),
+            values = ~values(raster::raster(most_recent_ndvi.tif)),
             #values = ~c(-1,1),
             opacity = 1,
             title = "NDVI") %>%
@@ -645,7 +645,7 @@ Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most r
 
   # use the ndvi raster as a template to get cells in park
 
-    most_recent_ndvi_raster %>%
+    most_recent_ndvi.tif %>%
       terra::extract(y = vect(focal_park),
                      cells = TRUE,
                      touches = TRUE) %>%
@@ -748,7 +748,7 @@ Figure 2. Top: Total area burned each year in the park.  Bottom: Ridgeplot histo
   # set NA values to 21 (we'll reset anything higher than 20 to 20+ for visualization)
   # mask years since fire raster to the park
 
-  ysf_masked <- years_since_fire_raster
+  ysf_masked <- years_since_fire.tif
   ysf_masked[is.na(ysf_masked)] <- 21
   ysf_masked %>%
   mask(focal_park) -> ysf_masked

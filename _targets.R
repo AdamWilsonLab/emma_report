@@ -85,12 +85,12 @@ list(
 #              command = get_report_files()
 #   ),
 
-   tar_terra_rast(years_since_fire_raster,
-              command = get_years_since_fire_raster(env_files,temp_directory, most_recent_fire_date,piggyback_push)
+   tar_terra_rast(years_since_fire.tif,
+              command = get_years_since_fire.tif(env_files,temp_directory, most_recent_fire_date,piggyback_push)
    ),
 
   tar_target(fires_wgs,
-             command = generate_fires_vector(years_since_fire_raster)
+             command = generate_fires_vector(years_since_fire.tif)
   ),
 
 
@@ -119,9 +119,9 @@ tar_age(stations,
            #age = as.difftime(1, units = "days") #daily updates
            # age = as.difftime(0, units = "hours") #will update whenever run
            ),
-  tar_terra_rast(name = most_recent_ndvi_raster,
-          command = get_most_recent_ndvi_raster(most_recent_ndvi_file, temp_directory),
-  ),
+  tar_terra_rast(name = most_recent_ndvi.tif,
+          command = get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory),
+          filetype="COG"),
 
    tar_age(name = current_month,
            command = lubridate::month(most_recent_ndvi_date),
@@ -129,12 +129,14 @@ tar_age(stations,
            #age = as.difftime(1, units = "days") #daily updates
            ),
 
-tar_terra_rast(name = monthly_mean_ndvi_raster,
-               command = get_monthly_mean_ndvi_raster(env_files,temp_directory,
-                                                      current_month = current_month)),
+tar_terra_rast(name = monthly_mean_ndvi.tif,
+               command = get_monthly_mean_ndvi.tif(env_files,temp_directory,
+                                                      current_month = current_month),
+               filetype="COG"),
 
-tar_terra_rast(name = monthly_delta_ndvi_raster,
-               command = get_monthly_delta_ndvi_raster(most_recent_ndvi_raster,monthly_mean_ndvi_raster)),
+tar_terra_rast(name = monthly_delta_ndvi.tif,
+               command = get_monthly_delta_ndvi.tif(most_recent_ndvi.tif,monthly_mean_ndvi.tif),
+               filetype="COG"),
 
 tar_age(name = inat_data,
               command = get_inat_data(inat_data_location = "data/manual_downloads/inat_project/observations-405358.csv",

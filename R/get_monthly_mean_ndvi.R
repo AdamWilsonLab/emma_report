@@ -2,7 +2,7 @@ library(terra)
 #current_month <- month(Sys.Date())
 
 #' This function calculates the mean ndvi for the current month from the NDVI releases
-get_monthly_mean_ndvi_raster <- function(env_files,
+get_monthly_mean_ndvi.tif <- function(env_files,
                                   temp_directory = "data/temp/",
                                   current_month = current_month){
 
