@@ -81,7 +81,7 @@ get_report_files <- function(repo = "AdamWilsonLab/emma_report",create_park_tag=
 
 
   #get most recent fire data
-get_years_since_fire_raster <- function(env_files, temp_directory, most_recent_fire_date,piggyback_push){
+get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire_date,piggyback_push){
     env_files %>%
       filter(tag == "processed_most_recent_burn_dates") %>%
       mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
@@ -95,15 +95,15 @@ get_years_since_fire_raster <- function(env_files, temp_directory, most_recent_f
                   max_attempts = max_attempts,
                   sleep_time = 10)
 
-    most_recent_fire_raster <- terra::rast(file.path(temp_directory,
+    most_recent_fire.tif <- terra::rast(file.path(temp_directory,
                                                      most_recent_fire_file$file_name))
 
-    most_recent_fire_raster[most_recent_fire_raster == 0] <- NA #toss NAs
+    most_recent_fire.tif[most_recent_fire.tif == 0] <- NA #toss NAs
 
   # convert from date of fire to years since fire
 
-    years_since_fire_raster <-
-      terra::app(x = most_recent_fire_raster,
+    years_since_fire.tif <-
+      terra::app(x = most_recent_fire.tif,
                  fun = function(x){
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
@@ -116,19 +116,19 @@ get_years_since_fire_raster <- function(env_files, temp_directory, most_recent_f
   #                    temp_directory = temp_directory,
   #                    overwrite = TRUE)
 
-    return(years_since_fire_raster)
+    return(years_since_fire.tif)
 }
 
   # crop years since fire raster to the remnants
-generate_fires_vector <- function(years_since_fire_raster){
+generate_fires_vector <- function(years_since_fire.tif){
     remnants <- terra::rast("data/misc/remnants.tif")
 
-    years_since_fire_raster %>%
-      terra::mask(remnants) -> years_since_fire_raster
+    years_since_fire.tif %>%
+      terra::mask(remnants) -> years_since_fire.tif
 
   # make a polygon version and convert to WGS84 (for plotting ease)
 
-    fires_wgs <- terra::as.polygons(x = years_since_fire_raster) %>%
+    fires_wgs <- terra::as.polygons(x = years_since_fire.tif) %>%
       st_as_sf() %>%
       rename(Years = lyr.1) %>%
       st_transform(crs = st_crs(4326))
@@ -149,7 +149,7 @@ get_most_recent_ndvi_file <- function(env_files){
   return(most_recent_ndvi_file)
 }
 
-get_most_recent_ndvi_raster <- function(most_recent_ndvi_file,temp_directory){
+get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
     robust_pb_download(file = most_recent_ndvi_file$file_name,
                 dest = file.path(temp_directory),
                 repo = "AdamWilsonLab/emma_envdata",
@@ -159,18 +159,22 @@ get_most_recent_ndvi_raster <- function(most_recent_ndvi_file,temp_directory){
 
   # Load the NDVI raster
 
-    most_recent_ndvi_raster <- terra::rast(file.path(temp_directory,
+    most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,
                                                      most_recent_ndvi_file$file_name))
 
+    #most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,"ndvi.tif"))
   # Fix the NDVI values
 
-    most_recent_ndvi_raster <- (most_recent_ndvi_raster/100)-1
+    most_recent_ndvi.tif <- (most_recent_ndvi.tif/100)-1
 
-    most_recent_ndvi_raster %>%
-      terra::mask(mask = most_recent_ndvi_raster,
-                  maskvalue = 0) -> most_recent_ndvi_raster
+    most_recent_ndvi.tif[most_recent_ndvi.tif > 1] <- 1
+    most_recent_ndvi.tif[most_recent_ndvi.tif < -1] <- -1
 
-    return(most_recent_ndvi_raster)
+    most_recent_ndvi.tif %>%
+      terra::mask(mask = most_recent_ndvi.tif,
+                  maskvalue = 0) -> most_recent_ndvi.tif
+
+    return(most_recent_ndvi.tif)
     }
 
   # Get NDVI date
@@ -200,42 +204,42 @@ get_most_recent_ndvi_date <- function(most_recent_ndvi_file){
 
     # Create delta NDVI raster
 
-get_monthly_delta_ndvi_raster <- function(most_recent_ndvi_raster,monthly_mean_ndvi_raster) {
-  monthly_delta_ndvi_raster <- (most_recent_ndvi_raster - monthly_mean_ndvi_raster)
+get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.tif) {
+  monthly_delta_ndvi.tif <- (most_recent_ndvi.tif - monthly_mean_ndvi.tif)
 
-    if(crs(most_recent_ndvi_raster,proj=TRUE) != crs(monthly_mean_ndvi_raster,proj=TRUE)){
+    if(crs(most_recent_ndvi.tif,proj=TRUE) != crs(monthly_mean_ndvi.tif,proj=TRUE)){
 
       stop("NDVI CRS mismatch")
 
     }
 
-    if(terra::ext(most_recent_ndvi_raster) != terra::ext(monthly_mean_ndvi_raster)){
+    if(terra::ext(most_recent_ndvi.tif) != terra::ext(monthly_mean_ndvi.tif)){
 
       stop("NDVI extent mismatch")
 
     }
 
 
-    if(crs(monthly_delta_ndvi_raster,proj=TRUE) != crs(most_recent_ndvi_raster,proj=TRUE)){
+    if(crs(monthly_delta_ndvi.tif,proj=TRUE) != crs(most_recent_ndvi.tif,proj=TRUE)){
 
-      crs(monthly_delta_ndvi_raster) <- crs(most_recent_ndvi_raster)
+      crs(monthly_delta_ndvi.tif) <- crs(most_recent_ndvi.tif)
     }
 
     # Double check projections
 
-    if(crs(most_recent_ndvi_raster, proj = TRUE) !=
-       crs(monthly_mean_ndvi_raster, proj = TRUE)){
+    if(crs(most_recent_ndvi.tif, proj = TRUE) !=
+       crs(monthly_mean_ndvi.tif, proj = TRUE)){
       stop("NDVI layers have different projections")
     }
 
-    if(crs(most_recent_ndvi_raster, proj = TRUE) !=
-       crs(monthly_delta_ndvi_raster, proj = TRUE)){
+    if(crs(most_recent_ndvi.tif, proj = TRUE) !=
+       crs(monthly_delta_ndvi.tif, proj = TRUE)){
       stop("NDVI layers have different projections")
     }
 
     # Write monthly delta NDVI layer
 
-    return(monthly_delta_ndvi_raster)
+    return(monthly_delta_ndvi.tif)
     # Upload delta NDVI in case anyone wants it
 
    # robust_pb_upload(file = file.path(temp_directory,"monthly_delta_NDVI.tif"),
@@ -245,7 +249,7 @@ get_monthly_delta_ndvi_raster <- function(most_recent_ndvi_raster,monthly_mean_n
    #                   sleep_time = 10,
    #                   temp_directory = temp_directory,
    #                   overwrite = TRUE)
-#return(monthly_delta_ndvi_raster)
+#return(monthly_delta_ndvi.tif)
 
         }
 

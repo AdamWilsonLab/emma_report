@@ -27,20 +27,24 @@ if(!dir.exists(file.path(output_directory))){
 #  quit()
 #}
 
-park_name="Table Mountain National Park"
-park_name="West Coast National Park"
 
 
-## filter to just a few for testing
+## filter to just a few for testing - set to T for interactive debugging
 if(F){
-protected_areas <- protected_areas |>
+    protected_areas <- protected_areas |>
   st_as_sf() |>
-  filter(name%in%c("Table Mountain National Park","West Coast National Park","Cederberg Nature Reserve Complex","Anysberg Nature Reserve","Addo-Elephant National Park"))
+  filter(name%in%c("Table Mountain National Park","West Coast National Park",
+                   "Cederberg Nature Reserve Complex","Anysberg Nature Reserve","Addo-Elephant National Park"))
+  # just set one park for testing
+  park_name="Table Mountain National Park"
+  park_name="West Coast National Park"
+
 }
 
-for (park_name in unique(protected_areas$name)){# remove [1] to process them all!
+for (park_name in unique(protected_areas$name)){
+  # read in the template qmd file
   templ <- readLines("report_prototype.qmd")
-
+  # udpate it with the park name - this is used in the template to generate different reports for each park
     writeLines(
       gsub("focal_park_name: \"Table Mountain National Park\"",paste0("focal_park_name: \"",park_name,"\"",sep=""),templ),
       file.path(output_directory,paste0(gsub(" ","_",park_name), ".qmd"))
@@ -50,51 +54,4 @@ for (park_name in unique(protected_areas$name)){# remove [1] to process them all
 
 return(output_directory)
 
-}#end fx
-
-    # debug <- tryCatch(expr =
-    #   render(input = report_location,
-    #            output_file = gsub(pattern = " ",replacement = "_",
-    #                                         x = paste0('report.', park_name, '.html')),
-    #            output_dir = output_directory
-    #     ),
-    #   error = function(e){message("Error processing ", park_name);e}
-    #   )
-    #
-    # if(inherits(debug,"error")){stop("Error processing ", park_name)}
-
-#  }# end for loop
-
-
-    # Generate the Cape Nature reports via a for loop
-      # park_name <- unique(parks$cape_nature$COMPLEX)[33]
-      # park_name <- unique(parks$cape_nature$COMPLEX)[18]
-
-#     for (park_name in unique(parks$cape_nature$COMPLEX)[1:3]){. # remove [1] to process them all!
-#
-#       gc()
-#
-#       focal_park <- parks$cape_nature %>%
-#         filter(COMPLEX == park_name)
-#
-#       debug <- tryCatch(expr =
-#                 render(input = report_location,
-#                        output_file = gsub(pattern = " ",replacement = "_",
-#                                           x = paste0('report.', park_name, '.html')),
-#                        output_dir = output_directory),
-#               error = function(e){message("Error processing ", park_name); e}
-#       )
-#
-#       #if(inherits(debug,"error")){stop()}
-#
-#     }# end for loop
-#
-#
-#     #clean up temp directory
-#       unlink(file.path(temp_directory), recursive = TRUE, force = TRUE)
-#       unlink(file.path(temp_directory_ndvi), recursive = TRUE, force = TRUE)
-#
-#
-#
-# }#end fx
-
+}

@@ -12,10 +12,12 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - href: model_summary.qmd
-        text: Model Summary
       - href: about.qmd
         text: About
+      - href: model_summary.qmd
+        text: Model Summary
+      - href: index.html#park-level-summaries
+        text: Park Reports
 
 format:
   html:

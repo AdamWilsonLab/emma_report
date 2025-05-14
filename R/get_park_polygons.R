@@ -92,7 +92,7 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
       dplyr::select(
         name=CUR_NME,
         type=SITE_TYPE) |>
-      group_by(name, type) |>
+      group_by(name) |> #and type?
       summarise(geometry = st_union(geometry), .groups = "drop") |>
       mutate(area_ha = drop_units(set_units(st_area(geometry), ha)))
 
