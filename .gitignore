@@ -48,6 +48,7 @@ _targets
 index.html
 index.md
 index_files
+*_files/*
 network.html
 reports/
 notes.md
