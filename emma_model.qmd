@@ -1,14 +1,7 @@
 ---
-title: "EMMA Prototype"
-description: Modeling vegetation postfire recovery data
-author:
-  - name: Adam Wilson & Glenn Moncrieff
-date: 10-13-2021
-editor_options: 
-  chunk_output_type: console
-output:
-  github_document:
-    html_preview: false
+title: "EMMA Model Overview"
+execute: 
+  cache: true
 ---
 
 ```{r, echo=F, eval=F}

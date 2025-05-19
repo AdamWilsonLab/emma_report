@@ -60,7 +60,7 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
     cn <- st_transform(x = cn,
                             crs = st_crs(domain))
 
-  # Filter to National Parks only
+# Filter to National Parks only
 
     all_pas %>%
       filter(grepl(pattern = "national park",
@@ -82,6 +82,21 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
     cn <- cn[which(as.logical(st_intersects(x = cn, y = domain))),]%>%
               st_make_valid()
 
+  # merge capenature and sanparks into single parks polygon layer
+    cn2 <-  cn |>
+      mutate(WMCM_TYPE = "Provincial") |>
+      rename(CUR_NME = COMPLEX,  # this merges across individual sub units - change if you want each little park separate.
+             SITE_TYPE=RESERVECON)
+
+    protected_areas <- bind_rows(all_pas, cn2) |>
+      dplyr::select(
+        name=CUR_NME,
+        type=SITE_TYPE) |>
+      group_by(name) |> #and type?
+      summarise(geometry = st_union(geometry), .groups = "drop") |>
+      mutate(area_ha = drop_units(set_units(st_area(geometry), ha)))
+
+
   # update projection
     robust_pb_download(file = "template.tif",
                 dest = file.path(temp_directory),
@@ -92,23 +107,13 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
 
     template <- terra::rast(file.path(temp_directory,"template.tif"))
 
-    all_pas <-
-    st_transform(x = all_pas,
+    protected_areas <-
+    st_transform(x = protected_areas,
                  crs = st_crs(template))
-
-    cn <-
-      st_transform(x = cn,
-                   crs = st_crs(template))
 
   # make output
 
-    out <-
-      list("cape_nature" = cn,
-         "national_parks" = all_pas)
-
-    # write to a gpkg
-
-    bind_rows(cn,all_pas)%>%
+    protected_areas %>%
       st_write(dsn = file.path(temp_directory, "protected_areas.gpkg"),
                append=FALSE,
                quiet = TRUE
@@ -127,8 +132,14 @@ get_park_polygons <- function(temp_directory = "data/temp/parks",
              recursive = TRUE,
              force = TRUE)
 
-  # return data product
-    return(out)
+ #convert to terra::vect
+
+      protected_areas_v <- terra::vect(protected_areas)
+      terra::crs(protected_areas_v) <- st_crs(protected_areas)$wkt  # restore projection
+
+      print(terra::crs(protected_areas_v))
+        # return data product
+      return(protected_areas_v)
 
 }
 ############################################

@@ -1,97 +1,90 @@
 ---
-title: "EMMA Report"
-description: Modeling vegetation postfire recovery data
-editor_options: 
-  chunk_output_type: console
-output:
-  html_document:
-    toc: true
-    toc_depth: 2
+title: "Ecosystem Monitoring & Management Application (EMMA)"
+subtitle: "Measuring change in a changing world"
+title-block-banner: img/banner.jpeg
+title-block-banner-color: "#FFFFFF"
 ---
 
+# Summary
 
-Page last updated at `r lubridate::now()`.
+The EMMA project is building new tools to monitor the health of shrubland ecosystems in near real-time. Focusing on the fire-prone Cape Floristic Region of South Africa—a biodiversity hotspot—our system combines satellite data, field observations, and modeling to track changes in vegetation, identify threats like fires or invasive species, and support better conservation decisions. In partnership with the South African Environmental Observation Network (SAEON), EMMA aims to provide reliable, up-to-date information that helps protect these critical landscapes.
 
-```{r, echo=F, message=F,include=F, results="hide"}
-library(targets)
-library(tidyverse)
-library(doParallel)
-library(raster)
-library(lubridate)
-library(sf)
-library(plotly)
-library(leaflet)
-library(gt)
+# Cape Floristic Region
+
+The EMMA project focuses on the Cape Floristic Region of South Africa — one of the most biologically diverse and ecologically important areas on Earth. Despite covering less than 0.5% of Africa’s land area, this region holds over 20% of the continent’s plant species, many of which are found nowhere else.
+
+This unique shrubland ecosystem, known locally as fynbos, is shaped by fire, climate, and human activity. It is a UNESCO World Heritage Site and a Global Biodiversity Hotspot, but faces growing threats from climate change, land use change, and invasive species.
+
+By combining Earth observations with ecological models, EMMA supports real-time monitoring and decision-making to help protect and manage this remarkable landscape.
+
+```{r, echo=F, message=F,include=F, results="hide", eval=T}
+#description: Modeling vegetation postfire recovery data
+
 
 # load data saved in the pipeline
 #tar_load(c(envdata, stan_data, model_results, spatial_outputs,model_prediction)) 
+library(targets)
+library(tidyverse)
+library(sf)
+library(terra)
+library(leaflet)
+library(forcats)
 
-
+# need to include all necessary targets here otherwise they aren't dependencies with tar_quarto()
+tar_load(protected_areas)
+tar_load(park_fire_history)
+tar_load(temp_directory)
+tar_load(years_since_fire.tif)
+tar_load(fires_wgs)
+tar_load(most_recent_ndvi.tif)
+tar_load(most_recent_ndvi_date)
+tar_load(monthly_mean_ndvi.tif)
+tar_load(monthly_delta_ndvi.tif)
+tar_load(weather_data)
+tar_load(report_qmd_dir) # forces park qmds to run first
+  
 ```
 
-# Model Overview
+# Park-level Summaries
 
-We estimate the age of a site by calculating the years since the last fire. We then fit a curve to model the recovery of vegetation (measured using NDVI) as a function of it's age. An additional level models the parameters of the negative exponential curve as a function of environmental variables. This means that sites with similar environmental conditions should have similar recovery curves. More details are available <a href=https://adamwilsonlab.github.io/emma_report/model_summary.html>here.</a>
-
-# Park Information
-
-```{r prep_parks,echo=FALSE,warning=FALSE,message=FALSE}
-
-  #tar_load(parks) #This apparently is no longer allowed per a new update of targets
-
-  parks <- read_rds("_targets/objects/parks")
-
-# need to merge each complex into a single geometry
-
-
-  cn <- parks$cape_nature%>%
-      group_by(COMPLEX)%>%
-      summarise() %>%
-  rename(Park = COMPLEX)
-
-  np <- parks$national_parks%>%
-    group_by(CUR_NME)%>%
-    summarise() %>%
-    rename(Park = CUR_NME)
-  
-  
-  parks_sf <- bind_rows(cn,np)
-  
-  rm(np,cn)
-  
-  
+```{r, echo=F}
   base_url <- "https://adamwilsonlab.github.io/emma_report/reports/"
+  base_url <- "reports/" #keep relative paths?
   
     reports <- 
-  data.frame(report = list.files("reports/")) %>%
-    mutate(url = paste(base_url,report,sep = ""),
+  data.frame(report = list.files("reports/",pattern = "*.qmd")) %>%
+    mutate(url = paste(base_url,gsub(pattern = ".qmd",replacement = ".html",x = report),sep = ""),
            park_name = gsub(pattern = "report.",replacement = "",x = report),
            park_name = gsub(pattern = ".html",replacement = "",x = park_name),
+           park_name = gsub(pattern = ".qmd",replacement = "",x = park_name),
            park_name = gsub(pattern = "_",replacement = " ",x = park_name)) %>%
       mutate(
           park = glue::glue("[{park_name}]({url})"),
           park = map(park, gt::md))
   
-  parks_sf <-
-  parks_sf %>%
+  protected_areas <-
+  protected_areas %>%
+    st_as_sf() |> 
     inner_join(y = reports,
-               by = c("Park"="park_name"))%>% 
+               by = c("name"="park_name"))%>% 
     st_transform(crs = st_crs(4326))%>% 
-   mutate(tag = paste0("Park: <a href=", url,">",Park , "</a>"))
+   mutate(tag = paste0("Park: <a href=", url,">",name , "</a>"))
 
-  bbox <- st_bbox(parks_sf) %>%
+  bbox <- st_bbox(protected_areas) %>%
   as.vector()
 
 
 ```
 
-```{r park_map,, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+Click on a park below to view park specific reports.
+
+```{r park_map, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
 
-  leaflet(data = parks_sf) %>%
-  addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
-    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
+  leaflet(data = protected_areas) %>%
     addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
+    addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
+    #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
   addPolygons(color = "black",
               stroke = TRUE,
               fill = TRUE,
@@ -102,20 +95,88 @@ We estimate the age of a site by calculating the years since the last fire. We t
     options = layersControlOptions(collapsed = FALSE),position = "topright") %>%
   fitBounds(bbox[1], bbox[2], bbox[3], bbox[4])
 
+```
+
+# Regional Overview
+
+```{r, echo=F, warning=F}
+
+protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi.tif,protected_areas,fun=quantile,na.rm=T) |> 
+  as_tibble() |> 
+  select(-1) |> #drop the index
+  rename("Q0"="NDVI","Q25"="NDVI.1","Q50"="NDVI.2","Q75"="NDVI.3","Q100"="NDVI.4") |> 
+  bind_cols(name=protected_areas$name)
+
+```
+
+```{r, echo=F, warning=F,fig.cap="Median value of the spatial vegetation anomalies of the past month compared to the mean values of the same month in prior years.  High values indicate higher than normal vegetation biomass while low values represent less vegetation than typical for this region. Parks are ordered from low to high. Click on the park in the map to see more detailed information."}
+
+protected_areas_monthly_delta_ndvi |> 
+  filter(!is.na(Q50)) |> 
+  mutate(name = fct_reorder(as.factor(name), Q50)) |> 
+  ggplot(aes(y = name)) +
+    # Full range (min to max)
+    geom_segment(aes(x = Q0, xend = Q100, yend = name), color = "grey70", linewidth = .5) +
+    # Interquartile range (Q25 to Q75)
+    geom_segment(aes(x = Q25, xend = Q75, yend = name), color = "grey40", linewidth = 1) +
+    # Median point
+    geom_point(aes(x = Q50), size = 2, color = "black") +
+    labs(
+      x = "Mean Vegetation Anomaly (NDVI)",
+      y = "Protected Area",
+      title = "Distribution of Vegetation Anomalies",
+      subtitle = "Showing full range (Q0–Q100), IQR (Q25–Q75), and median (Q50)"
+    ) 
 
 
 ```
 
 
+# Stand Age distributions
 
-```{r park_table,echo=FALSE,warning=FALSE,message=FALSE,fig.align = 'right'}
+```{r, echo=F, warning=F}
+years_since_fire <- extract(years_since_fire.tif,protected_areas,fun=quantile,na.rm=T) |> 
+  as_tibble() |> 
+  select(-1) |> #drop the index
+  rename("Q0"="lyr.1","Q25"="lyr.1.1","Q50"="lyr.1.2","Q75"="lyr.1.3","Q100"="lyr.1.4") |> 
+  bind_cols(name=protected_areas$name)
 
+```
 
-    reports%>%
-    dplyr::select(park)%>%
-    rename(Park = park)%>%
-    gt()%>%
-  cols_align(align = "left")
+```{r, echo=F}
+years_since_fire |> 
+  filter(!is.na(Q50)) |> 
+  mutate(name = fct_reorder(as.factor(name), Q50)) |> 
+  ggplot(aes(y = name)) +
+    # Full range (min to max)
+    geom_segment(aes(x = Q0, xend = Q100, yend = name), color = "grey70", linewidth = .5) +
+    # Interquartile range (Q25 to Q75)
+    geom_segment(aes(x = Q25, xend = Q75, yend = name), color = "grey40", linewidth = 1) +
+    # Median point
+    geom_point(aes(x = Q50), size = 2, color = "black") +
+    labs(
+      x = "Years Since Fire",
+      y = NULL,
+      title = "Distribution of Time Since Fire by Site",
+      subtitle = "Showing full range (Q0–Q100), IQR (Q25–Q75), and median (Q50)"
+    ) 
 
+```
 
+# Data Overview
+
+See table below for dates each dataset was last updated and download links.
+
+```{r, echo=F, results='asis'}
+# build table of dates when products were last updated
+
+dates <- bind_rows(
+  data.frame(Description = "Website", Date = format(now(), "%Y-%b-%d")),
+  data.frame(Description = "NDVI", Date = format(most_recent_ndvi_date, "%Y-%b-%d")),
+  data.frame(Description = "Weather", Date = format(max(weather_data$YEARMODA), "%Y-%b-%d"))
+) |> 
+  select(Description, "Date last updated"=Date)
+
+knitr::kable(dates)
+ 
 ```

@@ -1,0 +1,27 @@
+project:
+  type: website
+  render:
+    - "*.qmd"
+    - "!report_prototype.qmd" #just the template - the final ones are generated in /reports
+  execute-dir: "project"
+  output-dir: "docs"
+
+website:
+  title: "Ecosystem Monitoring for Management Application (EMMA)"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: about.qmd
+        text: About
+      - href: model_summary.qmd
+        text: Model Summary
+      - href: index.html#park-level-summaries
+        text: Park Reports
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+

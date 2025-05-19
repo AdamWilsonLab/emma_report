@@ -5,21 +5,21 @@
 get_fire_history <- function(temp_directory = "data/temp/fire_history",
                              max_attempts = 10,
                              sleep_time = 10,
-                             parks = parks){
+                             protected_areas = protected_areas){
 
   #ensure directories are empty
 
-    if(dir.exists(file.path(temp_directory))){
-
-      unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
-
-    }
-
-    if(!dir.exists(file.path(temp_directory))){
-
-      dir.create(file.path(temp_directory), recursive = TRUE)
-
-    }
+    # if(dir.exists(file.path(temp_directory))){
+    #
+    #   unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    #
+    # }
+    #
+    # if(!dir.exists(file.path(temp_directory))){
+    #
+    #   dir.create(file.path(temp_directory), recursive = TRUE)
+    #
+    # }
 
   # Grab fire data
 
@@ -51,10 +51,7 @@ get_fire_history <- function(temp_directory = "data/temp/fire_history",
 
   # Get pixels that are within parks
 
-    #tar_load(parks)
-
-    all_parks <- st_union(parks$cape_nature, parks$national_parks) %>%
-      st_combine()
+    all_parks <- st_as_sf(protected_areas)
 
 
     park_cells <-
@@ -79,7 +76,7 @@ get_fire_history <- function(temp_directory = "data/temp/fire_history",
 
   # Cleanup
 
-    unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
+    # unlink(file.path(temp_directory),recursive = TRUE,force = TRUE)
 
   # Return data
 
