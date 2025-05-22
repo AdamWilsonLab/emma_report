@@ -635,11 +635,13 @@ if(nrow(focal_invasives) == 0){
 
 ```
 
-Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20. The number of years since fire can be seen by hovering your cursor over the polygon of interest. Vegetation age polygons for the park are available at: `#r park_fires_file`. A raster layer of vegetation age (years since fire) is available at https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif .The mean current NDVI layer is available at https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif .
+Figure 1. Leaflet map showing delta NDVI, NDVI, number of years since the most recent fire, and recent invasive species records. NA values in the delta NDVI and NDVI layers indicate missing data (e.g. due to clouds, water, etc.). Delta NDVI is the difference between observed NDVI and expected NDVI (i.e., the long-term mean). Monthly delta NDVI is calculated relative to the mean NDVI of the current month across the MODIS record while long-term delta NDVI is calculated relative the mean NDVI across the entire MODIS record. NA values in the delta NDVI layer indicate missing data (e.g. due to clouds, water, etc.). NDVI data are from `r most_recent_ndvi_date`. NA values in the fire layer indicate that no fires have been recorded for that area. Note that the color scale for fires has been truncated, and any sites with more than 20 years since fire appear as 20. The number of years since fire can be seen by hovering your cursor over the polygon of interest. A raster layer of vegetation age (years since fire) is available [here](https://github.com/AdamWilsonLab/emma_report/releases/download/current/years_since_fire.tif). The mean current NDVI layer is available [here](https://github.com/AdamWilsonLab/emma_envdata/releases/download/current/mean_ndvi.tif).
 
 ## Area burned and vegetation ages
 
 ```{r vegetation ages over time, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
+#Vegetation age polygons for the park are available at: `r park_fires_file`.
 
 # Subset park_fire_history to only the focal park
 
@@ -808,20 +810,18 @@ Figure 3. Histogram of vegetation ages. For the purposes of this plot, any veget
 # Define a shared group name
 shared_group <- "weather_group"
 
-focal_precip_df <- as.data.frame(focal_precip) |> 
+focal_precip_df <- as.data.frame(focal_precip) |>  
    mutate(across(where(is.numeric) & !any_of("date_time"), function(x) log1p(ifelse(x<0.001,0,x))))
 
-focal_precip_trans <- ts(focal_precip_df,
-                         start = start(focal_precip),
-                         frequency = frequency(focal_precip))
+focal_precip_trans <-  xts::xts(focal_precip_df,order.by = as_date(rownames(focal_precip_df)))
 
 dygraph(focal_precip_trans,
-        main = "Precipitation (log1p-transformed)",
+        main = "Precipitation (log1p-transformed y-axis)",
         xlab = "Date",
         ylab = "log1p(Precip mm)",
        group = shared_group) %>%
       dyAxis("y",
-         label = "Precip. (mm)",
+         label = "Precip. (mm, log1p transform)",
          axisLabelFormatter = JS(
            "function(value, granularity, opts, dygraph) {
               return Math.round(Math.exp(value) - 1);
@@ -833,7 +833,7 @@ dygraph(focal_precip_trans,
      }"
   ))  |> 
   dySeries() %>%
-  dyRangeSelector() ->
+  dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) ->
   precip_graph
 
 
@@ -843,7 +843,8 @@ dygraph(focal_precip_trans,
           ylab = "Temp. (C)",
           group = shared_group) %>%
     dySeries() %>%
-    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> mean_temp_graph
+    dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> 
+        mean_temp_graph
 
 ```
 
@@ -870,9 +871,10 @@ dygraph(focal_precip_trans,
 
 ```
 
-## Drought Indices
+
 
 ```{r NDWI_plot, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE, eval=FALSE, include=FALSE}
+## Drought Indices
   leaflet(data = focal_wgs) %>%
   addProviderTiles("Esri.NatGeoWorldMap", group = "NatGeo") %>%
     #addProviderTiles("NASAGIBS.ModisTerraTrueColorCR", group = "True Colors") %>%
@@ -915,22 +917,25 @@ dygraph(focal_precip_trans,
 
 ```
 
+
+```{r calc_spi_1, eval = F, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
+
 ### SPI
 
-The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research/subseasonal/atlas/SPI-html/SPI-description.html#:~:text=The%20SPI%20is%20used%20for,from%20subseasonal%20to%20interannual%20scales.) is a drought index ranging from -3 (very dry) to +3 (very wet).
+#The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research/subseasonal/atlas/SPI-html/SPI-description.html#:~:text=The%20SPI%20is%20used%20for,from%20subseasonal%20to%20interannual%20scales.) is a drought index ranging from -3 (very dry) to +3 (very wet).
 
-```{r calc_spi_1, eval = TRUE, fig.width = 10, fig.height = 7, echo = FALSE, warning = FALSE, message = FALSE}
 
   #Make a dataset with only mostly complete data
 
   stations_to_keep <-
     bind_cols(date_time=time(focal_precip_monthly_xts),focal_precip_monthly_xts)%>%
+    filter(date_time>as_date(2023-01-1)) |> 
     pivot_longer(cols = !date_time,
                  names_to = "station_name",
                  values_to = "monthly_precip_mm") %>%
     group_by(station_name) %>% 
     summarize(fraction_na = sum(is.na(monthly_precip_mm))/length(monthly_precip_mm)) %>% 
-    filter(fraction_na < 0.05) %>%
+    filter(fraction_na < 0.20) %>%
     dplyr::select(station_name)
 
   
@@ -942,29 +947,39 @@ The Standardized Precipitation Index [(SPI)](https://gmao.gsfc.nasa.gov/research
   
   # Only use the mean estimates if those are the only complete ones
 
-    #focal_spi_data %>%
-    #dplyr::select(!mean) -> focal_spi_data
+    focal_spi_data %>%
+    dplyr::select(!mean) -> focal_spi_data
       
       
     if(ncol(focal_spi_data)>0){
   
       spi_window=6 # number of months of moving window
 
-spi <- spi(data = ts(focal_spi_data,
-                           frequency = 12,
-                           start = c(rownames(focal_spi_data)[1]%>%
-                                       substr(start = 0,stop = 4),
-                                     rownames(focal_spi_data)[1]%>%
-                                       substr(start = 6,stop = 7))),
-                 scale =  spi_window,
+# spi <- spi(data = ts(focal_spi_data,
+#                            frequency = 365,
+#                            start = c(rownames(focal_spi_data)[1]%>%
+#                                        substr(start = 0,stop = 4),
+#                                      rownames(focal_spi_data)[1]%>%
+#                                        substr(start = 6,stop = 7))),
+#                  scale =  spi_window,
+#                  verbose = FALSE,
+#                  na.rm = TRUE)
+
+spi <- spi(data = xts(focal_spi_data,order.by=as_date(rownames(focal_spi_data))),
+                 scale =  spi_window*30,
                  verbose = FALSE,
                  na.rm = TRUE)
 
+
+
+
 spi2 <- as_tibble(spi$fitted) %>%
-  mutate(date = as.Date(as.yearmon(time(spi$fitted)))) %>%
-  relocate(date) %>%
-  pivot_longer(-date, names_to = "station", values_to = "spei") #|> 
- # mutate(       # Create a new column to separate positive and negative SPEI
+  mutate(date = as.Date(as_date(rownames(focal_spi_data)))) %>%
+  relocate(date)# %>%
+#  pivot_longer(-date, names_to = "station", values_to = "spei") #|>
+
+spi2_xts= xts(select(spi2,-date),order.by=spi2$date)
+# mutate(       # Create a new column to separate positive and negative SPEI
 #    spei_pos = ifelse(spei > 0, spei, 0),
 #    spei_neg = ifelse(spei < 0, spei, 0)
 #  )
@@ -976,7 +991,7 @@ spi2 <- as_tibble(spi$fitted) %>%
       
 ```
 
-```{r spiplot, eval = TRUE, fig.width = 10, fig.height = 10, echo = FALSE, warning = FALSE, message = FALSE}
+```{r spiplot, eval = F, fig.width = 10, fig.height = 10, echo = FALSE, warning = FALSE, message = FALSE}
 
   if(ncol(focal_spi_data)>0){
 
@@ -1000,20 +1015,19 @@ spi2 <- as_tibble(spi$fitted) %>%
 
 
 # Plot with separate fill colors for positive and negative values
-ggplot(spi2, aes(x = date)) +
-  geom_hline(yintercept = 0, color = grey(0.6)) +
-  geom_line(aes(y = spei,col=station)) + 
-  geom_smooth(aes(y = spei), span = 0.3, se = TRUE,col="black") +
-  ggtitle(paste0("Standardized Precipitation Index (SPI with ",spi_window," Month window)")) +
-  scale_color_viridis_d()+
-  ylab("Standardized Precipitation Index (SPI)")+
-  xlab("Date") +
-  theme_minimal()  -> p_spi
-
-    p_spi
+# ggplot(spi2, aes(x = date)) +
+#   geom_hline(yintercept = 0, color = grey(0.6)) +
+#   geom_line(aes(y = spei,col=station)) + 
+#   geom_smooth(aes(y = spei), span = 0.3, se = TRUE,col="black") +
+#   ggtitle(paste0("Standardized Precipitation Index (SPI with ",spi_window," Month window)")) +
+#   scale_color_viridis_d()+
+#   ylab("Standardized Precipitation Index (SPI)")+
+#   xlab("Date") +
+#   theme_minimal()  -> p_spi
+# 
+#     p_spi
     
-    spi2 |> 
-      pivot_wider(names_from = station,values_from = spei) |> 
+    spi2 |>
       dygraph(
           main = "Standardized Precipitation Index (SPI with 6 Month window)",
           xlab = "Date",
@@ -1021,8 +1035,7 @@ ggplot(spi2, aes(x = date)) +
           group = shared_group) %>%
     dySeries() %>%
     dyRangeSelector(dateWindow = c( Sys.Date() - time_window_days, Sys.Date())) -> spi_graph
-    
-    
+  
   spi_graph
     
 }
