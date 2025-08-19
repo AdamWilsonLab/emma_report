@@ -56,10 +56,34 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 
 
   # Get list of available env data files
-get_env_files <- function(repo="AdamWilsonLab/emma_envdata"){
-    env_files <- pb_list(repo)
-    return(env_files)
-}
+# get_env_files <- function(repo="AdamWilsonLab/emma_envdata"){
+#     env_files <- pb_list(repo)
+#     return(env_files)
+# }
+# A proper get_env_files() that only returns file paths
+  get_env_files <- function(dir = "data/env") {
+    # Find all .tif files under the directory
+    paths <- list.files(
+      dir, pattern = "(?i)\\.tif$", full.names = TRUE, recursive = TRUE
+    )
+  
+    # Ensure character vector
+    paths <- as.character(paths)
+  
+    # Safety check: stop if no files
+    if (length(paths) == 0L) {
+      stop("No .tif files found in directory: ", dir)
+    }
+  
+    # Safety check: stop if any missing files
+    if (!all(file.exists(paths))) {
+      missing <- paths[!file.exists(paths)]
+      stop("Missing files: ", paste(missing, collapse = ", "))
+    }
+  
+    # Return vector of file paths
+    paths
+  }
 
   # Get list of available report files
 get_report_files <- function(repo = "AdamWilsonLab/emma_report",create_park_tag=T){
