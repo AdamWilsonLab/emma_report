@@ -164,43 +164,44 @@ jobs:
           mv .${{ steps.extract_branch.outputs.branch }}-runs/.git .
           rm -r .${{ steps.extract_branch.outputs.branch }}-runs
 
-      # - name: Upload latest run
-      #   run: |
-      #     git config --local user.name "GitHub Actions"
-      #     git config --local user.email "actions@github.com"
-      #     rm -r .github/workflows # .gitignore 
-      #     git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
-      #     # git lfs track "data/**"
-      #     git add --all -- ':!renv'
-      #     for file in $(git ls-files -mo --exclude=renv)
-      #     do
-      #       git add -f $file
-      #     done
-      #     git commit -am "Run pipeline"
-      #     git push origin ${{ steps.extract_branch.outputs.branch }}-runs
-      - name: Upload latest run (commit & push to <branch>-runs)
+      - name: Upload latest run
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-
-          rm -r .github/workflows
-
-          if [ -f .gitattributes ]; then
-            git add .gitattributes
-            git add --renormalize .
-          fi
-
+          rm -r .github/workflows # .gitignore 
+          git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
+          # git lfs track "data/**"
           git add --all -- ':!renv'
-
-          # for file in $(git ls-files -mo --exclude-standard -- ':!:renv/*'); do
-          #   git add -f "$file" || true
-          # done
-          for file in $(git ls-files -moi --exclude-standard -- _targets/ data/ ':!:renv/*'); do
-            git add -f "$file" || true
+          for file in $(git ls-files -mo --exclude=renv)
+          do
+            git add -f $file
           done
-
-          git commit -m "Run pipeline" || echo "Nothing to commit"
+          git commit -am "Run pipeline"
           git push origin ${{ steps.extract_branch.outputs.branch }}-runs
+      
+      # - name: Upload latest run (commit & push to <branch>-runs)
+      #   run: |
+      #     git config --local user.name "GitHub Actions"
+      #     git config --local user.email "actions@github.com"
+
+      #     rm -r .github/workflows
+
+      #     if [ -f .gitattributes ]; then
+      #       git add .gitattributes
+      #       git add --renormalize .
+      #     fi
+
+      #     git add --all -- ':!renv'
+
+      #     # for file in $(git ls-files -mo --exclude-standard -- ':!:renv/*'); do
+      #     #   git add -f "$file" || true
+      #     # done
+      #     for file in $(git ls-files -moi --exclude-standard -- _targets/ data/ ':!:renv/*'); do
+      #       git add -f "$file" || true
+      #     done
+
+      #     git commit -m "Run pipeline" || echo "Nothing to commit"
+      #     git push origin ${{ steps.extract_branch.outputs.branch }}-runs
 
 
       - name: Prepare failure artifact
