@@ -62,9 +62,10 @@ jobs:
 #           remove-dotnet: 'true'
 #           remove-android: 'true'
 #           remove-haskell: 'true'
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           lfs:  'true'
+          fetch-depth: 0 # added
       - name: Whitelist directory
         run: git config --global --add safe.directory /__w/emma_report/emma_report
       - name: Checkout LFS objects
@@ -163,20 +164,42 @@ jobs:
           mv .${{ steps.extract_branch.outputs.branch }}-runs/.git .
           rm -r .${{ steps.extract_branch.outputs.branch }}-runs
 
-      - name: Upload latest run
+      # - name: Upload latest run
+      #   run: |
+      #     git config --local user.name "GitHub Actions"
+      #     git config --local user.email "actions@github.com"
+      #     rm -r .github/workflows # .gitignore 
+      #     git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
+      #     # git lfs track "data/**"
+      #     git add --all -- ':!renv'
+      #     for file in $(git ls-files -mo --exclude=renv)
+      #     do
+      #       git add -f $file
+      #     done
+      #     git commit -am "Run pipeline"
+      #     git push origin ${{ steps.extract_branch.outputs.branch }}-runs
+      - name: Upload latest run (commit & push to <branch>-runs)
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-          rm -r .gitignore .github/workflows
-          git lfs track _targets/objects/* #use git LFS to track the targets output (larger files)
-          git lfs track "data/**"
+
+          rm -r .github/workflows
+
+          if [ -f .gitattributes ]; then
+            git add .gitattributes
+            git add --renormalize .
+          fi
+
+          # 기본 추가 (renv 제외 정책 유지)
           git add --all -- ':!renv'
-          for file in $(git ls-files -mo --exclude=renv)
-          do
-            git add -f $file
+
+          for file in $(git ls-files -mo --exclude-standard -- ':!:renv/*'); do
+            git add -f "$file" || true
           done
-          git commit -am "Run pipeline"
+
+          git commit -m "Run pipeline" || echo "Nothing to commit"
           git push origin ${{ steps.extract_branch.outputs.branch }}-runs
+
 
       - name: Prepare failure artifact
         if: failure()
