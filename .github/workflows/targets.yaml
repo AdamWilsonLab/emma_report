@@ -190,10 +190,12 @@ jobs:
             git add --renormalize .
           fi
 
-          # 기본 추가 (renv 제외 정책 유지)
           git add --all -- ':!renv'
 
-          for file in $(git ls-files -mo --exclude-standard -- ':!:renv/*'); do
+          # for file in $(git ls-files -mo --exclude-standard -- ':!:renv/*'); do
+          #   git add -f "$file" || true
+          # done
+          for file in $(git ls-files -moi --exclude-standard -- _targets/ data/ ':!:renv/*'); do
             git add -f "$file" || true
           done
 
