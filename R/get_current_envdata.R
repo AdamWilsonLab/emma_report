@@ -162,8 +162,8 @@ generate_fires_vector <- function(years_since_fire.tif){
 }
 
   # get most recent NDVI data
-get_most_recent_ndvi_file <- function(env_files){
-    env_files %>%
+get_most_recent_ndvi_file <- function(temp_directory){ #env_files
+    temp_directory %>%
       filter(tag == "clean_ndvi_modis") %>%
       filter(grepl(pattern = ".tif",x = file_name)) %>%
       mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
