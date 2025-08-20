@@ -161,16 +161,31 @@ generate_fires_vector <- function(years_since_fire.tif){
 
 }
 
-  # get most recent NDVI data
-get_most_recent_ndvi_file <- function(temp_directory){ #env_files
-    temp_directory %>%
-      filter(tag == "clean_ndvi_modis") %>%
-      filter(grepl(pattern = ".tif",x = file_name)) %>%
-      mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
-      mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
-      slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
+#   # get most recent NDVI data
+# get_most_recent_ndvi_file <- function(env_files){
+#     env_files %>%
+#       filter(tag == "clean_ndvi_modis") %>%
+#       filter(grepl(pattern = ".tif",x = file_name)) %>%
+#       mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
+#       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
+#       slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
 
-  return(most_recent_ndvi_file)
+#   return(most_recent_ndvi_file)
+# }
+
+get_most_recent_ndvi_file <- function(env_files) {
+  stopifnot(is.data.frame(env_files), all(c("tag","file_name") %in% names(env_files)))
+
+  env_files %>%
+    filter(tag == "clean_ndvi_modis") %>%
+    filter(str_detect(file_name, "(?i)\\.tif$")) %>%
+    mutate(
+      date_str = str_match(file_name, "(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")[,1],
+      file_date = suppressWarnings(ymd(gsub("[-_]", "", date_str)))
+    ) %>%
+    filter(!is.na(file_date)) %>%
+    arrange(desc(file_date), desc(file_name)) %>% 
+    slice(1)
 }
 
 get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
