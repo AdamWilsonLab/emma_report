@@ -84,7 +84,7 @@ list(
     tar_target(
     env_files,
     # command = get_env_files(), 
-    command = get_env_files(dir = file.path(temp_directory, "pb_cache"))
+    command = get_env_files(dir = file.path(temp_directory, "pb_cache")),
     format  = "file",           
     cue     = tar_cue(mode = "thorough")
   ),
