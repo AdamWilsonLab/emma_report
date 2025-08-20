@@ -61,7 +61,7 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 #     return(env_files)
 # }
 # A proper get_env_files() that only returns file paths
-  get_env_files <- function(dir = "data/env") {
+  get_env_files <- function(repo="AdamWilsonLab/emma_envdata") {
     # Find all .tif files under the directory
     paths <- list.files(
       dir, pattern = "(?i)\\.tif$", full.names = TRUE, recursive = TRUE
