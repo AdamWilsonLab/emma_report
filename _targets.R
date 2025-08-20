@@ -156,7 +156,7 @@ tar_age(stations,
       out
     },
     format = "file"
-  )
+  ),
 
 
    tar_age(name = current_month,
