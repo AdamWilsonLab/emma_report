@@ -143,21 +143,21 @@ tar_age(stations,
            # age = as.difftime(0, units = "hours") #will update whenever run
            ),
   
-  # tar_terra_rast(name = most_recent_ndvi.tif,
-  #         command = get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory),
-  #         filetype="COG"),
+  tar_terra_rast(name = most_recent_ndvi.tif,
+          command = get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory),
+          filetype="COG"),
 
     tar_target(
-    most_recent_ndvi_tif,
+    ndvi_export,
     {
       out <- file.path("data/ndvi", "most_recent_ndvi.tif")
       dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-      r <- get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory)
-      terra::writeRaster(r, out, overwrite = TRUE, filetype = "COG")
+      terra::writeRaster(most_recent_ndvi.tif, out, overwrite = TRUE, filetype = "COG")
       out
     },
     format = "file"
-  ),
+  )
+
 
    tar_age(name = current_month,
            command = lubridate::month(most_recent_ndvi_date),
