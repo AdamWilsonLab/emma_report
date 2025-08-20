@@ -56,10 +56,10 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
 
 
 #   # Get list of available env data files
-# get_env_files <- function(repo="AdamWilsonLab/emma_envdata"){
-#     env_files <- pb_list(repo)
-#     return(env_files)
-# }
+get_env_files <- function(repo="AdamWilsonLab/emma_envdata"){
+    env_files <- pb_list(repo)
+    return(env_files)
+}
 # # A proper get_env_files() that only returns file paths
 #   get_env_files <- function(repo="AdamWilsonLab/emma_envdata") {
 #     # Find all .tif files under the directory
