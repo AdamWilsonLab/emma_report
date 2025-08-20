@@ -78,16 +78,16 @@ list(
               ),
 
 
-  # tar_target(env_files,
-  #             command = get_env_files(),
-  #             ),
-    tar_target(
-    env_files,
-    # command = get_env_files(), 
-    command = get_env_files(dir = file.path(temp_directory, "pb_cache")),
-    format  = "file",           
-    cue     = tar_cue(mode = "thorough")
-  ),
+  tar_target(env_files,
+              command = get_env_files(),
+              ),
+  #   tar_target(
+  #   env_files,
+  #   # command = get_env_files(), 
+  #   command = get_env_files(dir = file.path(temp_directory, "pb_cache")),
+  #   format  = "file",           
+  #   cue     = tar_cue(mode = "thorough")
+  # ),
 #  tar_target(report_files,
 #              command = get_report_files()
 #   ),
@@ -115,17 +115,27 @@ tar_age(stations,
 ),
 
 
-#   tar_age(name = most_recent_ndvi_file,
-#           command = get_most_recent_ndvi_file(env_files),
-#           age = as.difftime(7, units = "days"), #weekly updates
-# #          age = as.difftime(1, units = "days") #daily updates
-#   ),
-    tar_age(
-    name    = most_recent_ndvi_file,
-    command = get_most_recent_ndvi_file(env_files),
-    age     = as.difftime(7, units = "days"),
-    format  = "file"     
+  tar_age(name = most_recent_ndvi_file,
+          command = get_most_recent_ndvi_file(env_files),
+          age = as.difftime(7, units = "days"), #weekly updates
+#          age = as.difftime(1, units = "days") #daily updates
   ),
+
+    tar_target(
+    check_ndvi_file,
+    {
+      f <- most_recent_ndvi_file
+      message("[CHECK] NDVI file: ", f, "  exists? ", file.exists(f))
+      f
+    }
+  ),
+  
+  #   tar_age(
+  #   name    = most_recent_ndvi_file,
+  #   command = get_most_recent_ndvi_file(env_files),
+  #   age     = as.difftime(7, units = "days"),
+  #   format  = "file"     
+  # ),
   tar_age(name = most_recent_ndvi_date,
            command = get_most_recent_ndvi_date(most_recent_ndvi_file),
            age = as.difftime(7, units = "days") #weekly updates
