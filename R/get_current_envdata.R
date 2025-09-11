@@ -218,6 +218,7 @@ get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
                 tag = most_recent_ndvi_file$tag,
                 max_attempts = max_attempts,
                 sleep_time = 10)
+  }
 
 
   # # Load the NDVI raster
