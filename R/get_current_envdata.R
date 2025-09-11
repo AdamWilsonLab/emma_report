@@ -173,90 +173,52 @@ generate_fires_vector <- function(years_since_fire.tif){
 #   return(most_recent_ndvi_file)
 # }
 
-# get_most_recent_ndvi_file <- function(env_files) {
-#   stopifnot(is.data.frame(env_files), all(c("tag","file_name") %in% names(env_files)))
-
-#   env_files %>%
-#     filter(tag == "clean_ndvi_modis") %>%
-#     filter(str_detect(file_name, "(?i)\\.tif$")) %>%
-#     mutate(
-#       date_str = str_match(file_name, "(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")[,1],
-#       file_date = suppressWarnings(ymd(gsub("[-_]", "", date_str)))
-#     ) %>%
-#     filter(!is.na(file_date)) %>%
-#     arrange(desc(file_date), desc(file_name)) %>% 
-#     slice(1)
-# }
-
 get_most_recent_ndvi_file <- function(env_files) {
   stopifnot(is.data.frame(env_files), all(c("tag","file_name") %in% names(env_files)))
 
-  out <- env_files %>%
-    dplyr::filter(.data$tag == "clean_ndvi_modis") %>%
-    dplyr::filter(stringr::str_detect(.data$file_name, "(?i)\\.tif$")) %>%
-    dplyr::mutate(
-      date_str  = stringr::str_match(.data$file_name, "(\\d{4})[-_]?([0-1]\\d)[-_]?([0-3]\\d)")[, 1],
-      file_date = suppressWarnings(lubridate::ymd(date_str))
+  env_files %>%
+    filter(tag == "clean_ndvi_modis") %>%
+    filter(str_detect(file_name, "(?i)\\.tif$")) %>%
+    mutate(
+      date_str = str_match(file_name, "(\\d{4})[-_]?(\\d{2})[-_]?(\\d{2})")[,1],
+      file_date = suppressWarnings(ymd(gsub("[-_]", "", date_str)))
     ) %>%
-    dplyr::filter(!is.na(.data$file_date)) %>%
-    dplyr::arrange(dplyr::desc(.data$file_date), dplyr::desc(.data$file_name)) %>%
-    dplyr::slice(1)
-
-  if (nrow(out) != 1L) {
-    stop("NDVI .tif을 찾지 못했습니다. tag == 'clean_ndvi_modis'를 확인하세요.")
-  }
-  if (!nzchar(out$file_name[[1]])) {
-    stop("most_recent_ndvi_file$file_name 이 비어 있습니다.")
-  }
-  out
+    filter(!is.na(file_date)) %>%
+    arrange(desc(file_date), desc(file_name)) %>% 
+    slice(1)
 }
 
-# get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
-#     robust_pb_download(file = most_recent_ndvi_file$file_name,
-#                 dest = file.path(temp_directory),
-#                 repo = "AdamWilsonLab/emma_envdata",
-#                 tag = most_recent_ndvi_file$tag,
-#                 max_attempts = max_attempts,
-#                 sleep_time = 10)
+# get_most_recent_ndvi_file <- function(env_files) {
+#   stopifnot(is.data.frame(env_files), all(c("tag","file_name") %in% names(env_files)))
 
-get_most_recent_ndvi.tif <- function(most_recent_ndvi_file, temp_directory){
-  # 0) 폴더 보장
-  dir.create(temp_directory, recursive = TRUE, showWarnings = FALSE)
+#   out <- env_files %>%
+#     dplyr::filter(.data$tag == "clean_ndvi_modis") %>%
+#     dplyr::filter(stringr::str_detect(.data$file_name, "(?i)\\.tif$")) %>%
+#     dplyr::mutate(
+#       date_str  = stringr::str_match(.data$file_name, "(\\d{4})[-_]?([0-1]\\d)[-_]?([0-3]\\d)")[, 1],
+#       file_date = suppressWarnings(lubridate::ymd(date_str))
+#     ) %>%
+#     dplyr::filter(!is.na(.data$file_date)) %>%
+#     dplyr::arrange(dplyr::desc(.data$file_date), dplyr::desc(.data$file_name)) %>%
+#     dplyr::slice(1)
 
-  # 1) 입력 검증
-  stopifnot(is.data.frame(most_recent_ndvi_file))
-  stopifnot(all(c("file_name","tag") %in% names(most_recent_ndvi_file)))
-  fn <- as.character(most_recent_ndvi_file$file_name[[1]])
-  tg <- as.character(most_recent_ndvi_file$tag[[1]])
-  if (is.na(fn) || fn == "") stop("빈 file_name 입니다.")
-  if (is.na(tg) || tg == "") stop("빈 tag 입니다.")
+#   if (nrow(out) != 1L) {
+#     stop("NDVI .tif을 찾지 못했습니다. tag == 'clean_ndvi_modis'를 확인하세요.")
+#   }
+#   if (!nzchar(out$file_name[[1]])) {
+#     stop("most_recent_ndvi_file$file_name 이 비어 있습니다.")
+#   }
+#   out
+# }
 
-  # 2) 다운로드
-  robust_pb_download(
-    file         = fn,
-    dest         = temp_directory,
-    repo         = "AdamWilsonLab/emma_envdata",
-    tag          = tg,
-    max_attempts = get0("max_attempts", ifnotfound = 10),  # 전역 없을 때 기본값
-    sleep_time   = 10
-  )
+get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
+    robust_pb_download(file = most_recent_ndvi_file$file_name,
+                dest = file.path(temp_directory),
+                repo = "AdamWilsonLab/emma_envdata",
+                tag = most_recent_ndvi_file$tag,
+                max_attempts = max_attempts,
+                sleep_time = 10)
 
-  # 3) 경로 확인
-  local_path <- file.path(temp_directory, fn)
-  if (!file.exists(local_path)) {
-    stop("다운로드 후 파일이 없습니다: ", local_path,
-         "\n(tag=", tg, ", file=", fn, ")")
-  }
-
-  # 4) 읽기 + 값 보정
-  r <- terra::rast(local_path)
-  r <- (r/100) - 1
-  r[r >  1] <-  1
-  r[r < -1] <- -1
-  r <- terra::mask(r, mask = r, maskvalue = 0)
-
-  r
-}
 
   # # Load the NDVI raster
 
