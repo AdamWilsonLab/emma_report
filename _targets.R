@@ -86,7 +86,7 @@ list(
         name    = env_files,
         command = get_env_files(),
         age     = as.difftime(1, units = "days")   # 하루마다 목록 새로 가져오기
-      )
+      ),
   #   tar_target(
   #   env_files,
   #   # command = get_env_files(), 
