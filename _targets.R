@@ -130,12 +130,13 @@ tar_age(stations,
     }
   ),
   
-  #   tar_age(
-  #   name    = most_recent_ndvi_file,
-  #   command = get_most_recent_ndvi_file(env_files),
-  #   age     = as.difftime(7, units = "days"),
-  #   format  = "file"     
-  # ),
+    tar_age(
+    name    = most_recent_ndvi_file,
+    command = get_most_recent_ndvi_file(env_files),
+    age     = as.difftime(7, units = "days"),
+    format  = "file"     
+  ),
+  
   tar_age(name = most_recent_ndvi_date,
            command = get_most_recent_ndvi_date(most_recent_ndvi_file),
            age = as.difftime(7, units = "days") #weekly updates
