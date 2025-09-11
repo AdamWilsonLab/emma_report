@@ -258,25 +258,25 @@ get_most_recent_ndvi.tif <- function(most_recent_ndvi_file, temp_directory){
   r
 }
 
-  # Load the NDVI raster
+  # # Load the NDVI raster
 
-    most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,
-                                                     most_recent_ndvi_file$file_name))
+  #   most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,
+  #                                                    most_recent_ndvi_file$file_name))
 
-    #most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,"ndvi.tif"))
-  # Fix the NDVI values
+  #   #most_recent_ndvi.tif <- terra::rast(file.path(temp_directory,"ndvi.tif"))
+  # # Fix the NDVI values
 
-    most_recent_ndvi.tif <- (most_recent_ndvi.tif/100)-1
+  #   most_recent_ndvi.tif <- (most_recent_ndvi.tif/100)-1
 
-    most_recent_ndvi.tif[most_recent_ndvi.tif > 1] <- 1
-    most_recent_ndvi.tif[most_recent_ndvi.tif < -1] <- -1
+  #   most_recent_ndvi.tif[most_recent_ndvi.tif > 1] <- 1
+  #   most_recent_ndvi.tif[most_recent_ndvi.tif < -1] <- -1
 
-    most_recent_ndvi.tif %>%
-      terra::mask(mask = most_recent_ndvi.tif,
-                  maskvalue = 0) -> most_recent_ndvi.tif
+  #   most_recent_ndvi.tif %>%
+  #     terra::mask(mask = most_recent_ndvi.tif,
+  #                 maskvalue = 0) -> most_recent_ndvi.tif
 
-    return(most_recent_ndvi.tif)
-    }
+  #   return(most_recent_ndvi.tif)
+  #   }
 
   # Get NDVI date
 get_most_recent_ndvi_date <- function(most_recent_ndvi_file){
