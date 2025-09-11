@@ -80,6 +80,7 @@ list(
 
   tar_target(env_files,
               command = get_env_files(),
+              age     = as.difftime(1, units = "days") # check
               ),
   #   tar_target(
   #   env_files,
