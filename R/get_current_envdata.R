@@ -192,20 +192,20 @@ get_most_recent_ndvi_file <- function(env_files) {
   stopifnot(is.data.frame(env_files), all(c("tag","file_name") %in% names(env_files)))
 
   out <- env_files %>%
-    dplyr::filter(tag == "clean_ndvi_modis") %>%
-    dplyr::filter(stringr::str_detect(file_name, "(?i)\\.tif$")) %>%
+    dplyr::filter(.data$tag == "clean_ndvi_modis") %>%
+    dplyr::filter(stringr::str_detect(.data$file_name, "(?i)\\.tif$")) %>%
     dplyr::mutate(
-      date_str  = stringr::str_match(file_name, "(\\d{4})[-_]?([0-1]\\d)[-_]?([0-3]\\d)")[,1],
-      file_date = suppressWarnings(lubridate::ymd(gsub("[-_]", "", date_str)))
+      date_str  = stringr::str_match(.data$file_name, "(\\d{4})[-_]?([0-1]\\d)[-_]?([0-3]\\d)")[, 1],
+      file_date = suppressWarnings(lubridate::ymd(date_str))
     ) %>%
-    dplyr::filter(!is.na(file_date)) %>%
-    dplyr::arrange(dplyr::desc(file_date), dplyr::desc(file_name)) %>%
+    dplyr::filter(!is.na(.data$file_date)) %>%
+    dplyr::arrange(dplyr::desc(.data$file_date), dplyr::desc(.data$file_name)) %>%
     dplyr::slice(1)
 
   if (nrow(out) != 1L) {
-    stop("NDVI 파일을 찾지 못했습니다. env_files에서 tag=='clean_ndvi_modis'와 .tif 존재 여부를 확인하세요.")
+    stop("NDVI .tif을 찾지 못했습니다. tag == 'clean_ndvi_modis'를 확인하세요.")
   }
-  if (is.na(out$file_name) || out$file_name == "") {
+  if (!nzchar(out$file_name[[1]])) {
     stop("most_recent_ndvi_file$file_name 이 비어 있습니다.")
   }
   out
