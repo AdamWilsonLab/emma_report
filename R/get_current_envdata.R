@@ -327,43 +327,43 @@ get_monthly_delta_ndvi_raster <- function(most_recent_ndvi_raster,monthly_mean_n
 
 
 #   #get most recent fire data
-# get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire_date,piggyback_push){
-#     env_files %>%
-#       filter(tag == "processed_most_recent_burn_dates") %>%
-#       mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
-#       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
-#       slice(which.max(as_date(file_date))) -> most_recent_fire_file
+get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire_date,piggyback_push){
+    env_files %>%
+      filter(tag == "processed_most_recent_burn_dates") %>%
+      mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
+      mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
+      slice(which.max(as_date(file_date))) -> most_recent_fire_file
 
-#     robust_pb_download(file = most_recent_fire_file$file_name,
-#                   dest = file.path(temp_directory),
-#                   repo = "AdamWilsonLab/emma_envdata",
-#                   tag = most_recent_fire_file$tag,
-#                   max_attempts = max_attempts,
-#                   sleep_time = 10)
+    robust_pb_download(file = most_recent_fire_file$file_name,
+                  dest = file.path(temp_directory),
+                  repo = "AdamWilsonLab/emma_envdata",
+                  tag = most_recent_fire_file$tag,
+                  max_attempts = max_attempts,
+                  sleep_time = 10)
 
-#     most_recent_fire.tif <- terra::rast(file.path(temp_directory,
-#                                                      most_recent_fire_file$file_name))
+    most_recent_fire.tif <- terra::rast(file.path(temp_directory,
+                                                     most_recent_fire_file$file_name))
 
-#     most_recent_fire.tif[most_recent_fire.tif == 0] <- NA #toss NAs
+    most_recent_fire.tif[most_recent_fire.tif == 0] <- NA #toss NAs
 
-#   # convert from date of fire to years since fire
+  # convert from date of fire to years since fire
 
-#     years_since_fire.tif <-
-#       terra::app(x = most_recent_fire.tif,
-#                  fun = function(x){
-#                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
-#                  })
+    years_since_fire.tif <-
+      terra::app(x = most_recent_fire.tif,
+                 fun = function(x){
+                   return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
+                 })
 
-#   # if(piggyback_push)  robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
-#   #                    repo = "AdamWilsonLab/emma_report",
-#   #                    tag = tag,
-#   #                    max_attempts = 10,
-#   #                    sleep_time = 10,
-#   #                    temp_directory = temp_directory,
-#   #                    overwrite = TRUE)
+  # if(piggyback_push)  robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
+  #                    repo = "AdamWilsonLab/emma_report",
+  #                    tag = tag,
+  #                    max_attempts = 10,
+  #                    sleep_time = 10,
+  #                    temp_directory = temp_directory,
+  #                    overwrite = TRUE)
 
-#     return(years_since_fire.tif)
-# }
+    return(years_since_fire.tif)
+}
 
 #   # crop years since fire raster to the remnants
 # generate_fires_vector <- function(years_since_fire.tif){
