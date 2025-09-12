@@ -144,18 +144,18 @@ tar_age(stations,
           command = get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory),
           filetype="COG"),
 
-    tar_target(
-    ndvi_export,
-    {
-      in_path <- most_recent_ndvi.tif      # ← 경로(문자열)
-      r <- terra::rast(in_path)            # ← SpatRaster로 읽기
-      out <- file.path("data/ndvi", "most_recent_ndvi.tif")
-      dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-      terra::writeRaster(r, out, overwrite = TRUE, filetype = "COG")
-      out
-    },
-    format = "file"
-  ),
+tar_target(
+  ndvi_export,
+  {
+    in_path <- most_recent_ndvi.tif             # tar_terra_rast 출력 경로(문자열)
+    out <- file.path("data/ndvi", "most_recent_ndvi.tif")
+    dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
+    ok <- file.copy(in_path, out, overwrite = TRUE)  # ← 재인코딩 없이 복사
+    stopifnot(ok, file.exists(out), file.info(out)$size > 0)
+    out
+  },
+  format = "file"
+),
 
 
    tar_age(name = current_month,
