@@ -114,7 +114,7 @@ get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire
                      max_attempts = 10,
                      sleep_time = 10,
                      temp_directory = temp_directory,
-                     overwrite = TRUE)
+                     overwrite = TRUE)}
 
     return(years_since_fire.tif)
 }
