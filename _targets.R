@@ -147,11 +147,20 @@ tar_age(stations,
 tar_target(
   ndvi_export,
   {
-    in_path <- most_recent_ndvi.tif             # tar_terra_rast 출력 경로(문자열)
+    r <- most_recent_ndvi.tif                      # SpatRaster 객체
     out <- file.path("data/ndvi", "most_recent_ndvi.tif")
     dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-    ok <- file.copy(in_path, out, overwrite = TRUE)  # ← 재인코딩 없이 복사
-    stopifnot(ok, file.exists(out), file.info(out)$size > 0)
+
+    terra::writeRaster(
+      r,
+      filename = out,
+      overwrite = TRUE,
+      filetype = "COG",               # COG으로 저장 (terra >= 1.7 필요)
+    )
+
+    stopifnot(file.exists(out), file.info(out)$size > 0)
+    message("Files under data/ndvi:")
+    print(list.files("data/ndvi", full.names = TRUE))
     out
   },
   format = "file"
