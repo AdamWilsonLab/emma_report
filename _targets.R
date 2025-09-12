@@ -160,7 +160,7 @@ tar_age(stations,
       r <- terra::rast(in_path)            # ← SpatRaster로 읽기
       out <- file.path("data/ndvi", "most_recent_ndvi.tif")
       dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
-      terra::writeRaster(most_recent_ndvi.tif, out, overwrite = TRUE, filetype = "COG")
+      terra::writeRaster(r, out, overwrite = TRUE, filetype = "COG")
       out
     },
     format = "file"
