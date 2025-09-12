@@ -108,13 +108,13 @@ get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
 
-  # if(piggyback_push)  robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
-  #                    repo = "AdamWilsonLab/emma_report",
-  #                    tag = tag,
-  #                    max_attempts = 10,
-  #                    sleep_time = 10,
-  #                    temp_directory = temp_directory,
-  #                    overwrite = TRUE)
+  if(piggyback_push)  {robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
+                     repo = "AdamWilsonLab/emma_report",
+                     tag = tag,
+                     max_attempts = 10,
+                     sleep_time = 10,
+                     temp_directory = temp_directory,
+                     overwrite = TRUE)
 
     return(years_since_fire.tif)
 }
@@ -432,13 +432,13 @@ get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
 
-  # if(piggyback_push)  robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
-  #                    repo = "AdamWilsonLab/emma_report",
-  #                    tag = tag,
-  #                    max_attempts = 10,
-  #                    sleep_time = 10,
-  #                    temp_directory = temp_directory,
-  #                    overwrite = TRUE)
+  if(piggyback_push)  robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
+                     repo = "AdamWilsonLab/emma_report",
+                     tag = tag,
+                     max_attempts = 10,
+                     sleep_time = 10,
+                     temp_directory = temp_directory,
+                     overwrite = TRUE)
 
     return(years_since_fire.tif)
 }
