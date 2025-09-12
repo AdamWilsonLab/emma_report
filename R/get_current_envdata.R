@@ -211,14 +211,29 @@ get_most_recent_ndvi_file <- function(env_files) {
 #   out
 # }
 
-get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
-    robust_pb_download(file = most_recent_ndvi_file$file_name,
-                dest = file.path(temp_directory),
-                repo = "AdamWilsonLab/emma_envdata",
-                tag = most_recent_ndvi_file$tag,
-                max_attempts = max_attempts,
-                sleep_time = 10)
-  }
+get_most_recent_ndvi.tif <- function(most_recent_ndvi_file, temp_directory) {
+  # 1) 파일 다운로드
+  robust_pb_download(
+    file = most_recent_ndvi_file$file_name,
+    dest = file.path(temp_directory),
+    repo = "AdamWilsonLab/emma_envdata",
+    tag  = most_recent_ndvi_file$tag,
+    max_attempts = max_attempts,
+    sleep_time   = 10
+  )
+
+  # 2) 래스터 로드
+  r <- terra::rast(file.path(temp_directory, most_recent_ndvi_file$file_name))
+
+  # 3) 스케일/클리닝(주석에 있던 내용 복원)
+  r <- (r / 100) - 1
+  r[r >  1] <-  1
+  r[r < -1] <- -1
+  r <- terra::mask(r, mask = r, maskvalue = 0)
+
+  # 4) SpatRaster 반환 (중요!)
+  return(r)
+}
 
 
   # # Load the NDVI raster
