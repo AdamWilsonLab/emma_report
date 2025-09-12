@@ -428,10 +428,10 @@
 --quarto-scss-export-nested-kbd-font-weight: #{$nested-kbd-font-weight};
 --quarto-scss-export-pre-bg: #{$pre-bg};
 --quarto-scss-export-pre-color: #{$pre-color};
---quarto-scss-export-bslib-page-sidebar-title-bg: #{$bslib-page-sidebar-title-bg};
---quarto-scss-export-bslib-page-sidebar-title-color: #{$bslib-page-sidebar-title-color};
 --quarto-scss-export-bslib-sidebar-bg: #{$bslib-sidebar-bg};
 --quarto-scss-export-bslib-sidebar-toggle-bg: #{$bslib-sidebar-toggle-bg};
+--quarto-scss-export-bslib-page-sidebar-title-bg: #{$bslib-page-sidebar-title-bg};
+--quarto-scss-export-bslib-page-sidebar-title-color: #{$bslib-page-sidebar-title-color};
 --quarto-scss-export-sidebar-color: #{$sidebar-color};
 --quarto-scss-export-sidebar-hover-color: #{$sidebar-hover-color};
 --quarto-scss-export-sidebar-disabled-color: #{$sidebar-disabled-color};

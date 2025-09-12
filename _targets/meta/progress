@@ -35,6 +35,8 @@ fires_wgs|stem|fires_wgs|0|dispatched
 fires_wgs|stem|fires_wgs|0|completed
 current_month|stem|current_month|0|dispatched
 current_month|stem|current_month|0|completed
+ndvi_export|stem|ndvi_export|0|dispatched
+ndvi_export|stem|ndvi_export|0|completed
 monthly_mean_ndvi.tif|stem|monthly_mean_ndvi.tif|0|dispatched
 monthly_mean_ndvi.tif|stem|monthly_mean_ndvi.tif|0|completed
 monthly_delta_ndvi.tif|stem|monthly_delta_ndvi.tif|0|dispatched

@@ -78,9 +78,22 @@ list(
               ),
 
 
-  tar_target(env_files,
-              command = get_env_files()
-              ),
+  # tar_target(env_files,
+  #             command = get_env_files()
+  #             ),
+
+  tar_age(
+        name    = env_files,
+        command = get_env_files(),
+        age     = as.difftime(1, units = "days")   # 하루마다 목록 새로 가져오기
+      ),
+  #   tar_target(
+  #   env_files,
+  #   # command = get_env_files(), 
+  #   command = get_env_files(dir = file.path(temp_directory, "pb_cache")),
+  #   format  = "file",           
+  #   cue     = tar_cue(mode = "thorough")
+  # ),
 #  tar_target(report_files,
 #              command = get_report_files()
 #   ),
@@ -108,20 +121,56 @@ tar_age(stations,
 ),
 
 
-  tar_age(name = most_recent_ndvi_file,
-          command = get_most_recent_ndvi_file(env_files),
-          age = as.difftime(7, units = "days") #weekly updates
-#          age = as.difftime(1, units = "days") #daily updates
+#   tar_age(name = most_recent_ndvi_file,
+#           command = get_most_recent_ndvi_file(env_files),
+#           age = as.difftime(7, units = "days"), #weekly updates
+# #          age = as.difftime(1, units = "days") #daily updates
+#   ),
+  
+    tar_age(
+    name    = most_recent_ndvi_file,
+    command = get_most_recent_ndvi_file(env_files),
+    age     = as.difftime(7, units = "days"),
   ),
+  
   tar_age(name = most_recent_ndvi_date,
            command = get_most_recent_ndvi_date(most_recent_ndvi_file),
            age = as.difftime(7, units = "days") #weekly updates
            #age = as.difftime(1, units = "days") #daily updates
            # age = as.difftime(0, units = "hours") #will update whenever run
            ),
+  
   tar_terra_rast(name = most_recent_ndvi.tif,
           command = get_most_recent_ndvi.tif(most_recent_ndvi_file, temp_directory),
           filetype="COG"),
+
+tar_target(
+  ndvi_export,
+  {
+    # 안전장치: SpatRaster인지 확인
+    stopifnot(inherits(most_recent_ndvi.tif, "SpatRaster"))
+
+    out <- file.path("data/ndvi", "most_recent_ndvi.tif")
+    dir.create(dirname(out), showWarnings = FALSE, recursive = TRUE)
+
+    terra::writeRaster(
+      most_recent_ndvi.tif,
+      filename = out,
+      overwrite = TRUE,
+      filetype = "COG",
+      gdal = c("COMPRESS=LZW")
+    )
+
+    stopifnot(file.exists(out), file.info(out)$size > 0)
+
+    message("Files under data/ndvi:")
+    print(list.files("data/ndvi", full.names = TRUE, recursive = TRUE))
+
+    out
+  },
+  format = "file"
+),
+
 
    tar_age(name = current_month,
            command = lubridate::month(most_recent_ndvi_date),
