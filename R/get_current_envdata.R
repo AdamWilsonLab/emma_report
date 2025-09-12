@@ -123,8 +123,7 @@ get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire
 generate_fires_vector <- function(years_since_fire.tif){
     remnants <- terra::rast("data/misc/remnants.tif")
 
-    years_since_fire.tif %>%
-      terra::mask(remnants) -> years_since_fire.tif
+years_since_fire.tif <- terra::mask(years_since_fire.tif, remnants)
 
   # make a polygon version and convert to WGS84 (for plotting ease)
 
@@ -447,8 +446,8 @@ get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.ti
 # generate_fires_vector <- function(years_since_fire.tif){
 #     remnants <- terra::rast("data/misc/remnants.tif")
 
-    years_since_fire.tif %>%
-      terra::mask(remnants) -> years_since_fire.tif
+    # years_since_fire.tif %>%
+    #   terra::mask(remnants) -> years_since_fire.tif
 
 #   # make a polygon version and convert to WGS84 (for plotting ease)
 
