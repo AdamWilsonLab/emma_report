@@ -39,7 +39,21 @@ tar_load(fires_wgs)
 tar_load(most_recent_ndvi.tif)
 tar_load(most_recent_ndvi_date)
 tar_load(monthly_mean_ndvi.tif)
-tar_load(monthly_delta_ndvi.tif)
+
+# Load monthly_delta_ndvi.tif with error handling
+tryCatch({
+  tar_load(monthly_delta_ndvi.tif)
+  # Verify it loaded correctly
+  if(!inherits(monthly_delta_ndvi.tif, "SpatRaster")) {
+    stop("monthly_delta_ndvi.tif is not a SpatRaster object")
+  }
+  # Check number of layers
+  message(sprintf("monthly_delta_ndvi.tif has %d layer(s)", nlyr(monthly_delta_ndvi.tif)))
+}, error = function(e) {
+  message("Error loading monthly_delta_ndvi.tif: ", e$message)
+  stop(e)
+})
+
 tar_load(weather_data)
 tar_load(report_qmd_dir) # forces park qmds to run first
   
@@ -101,11 +115,34 @@ Click on a park below to view park specific reports.
 
 ```{r, echo=F, warning=F}
 
-protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi.tif, protected_areas, fun=function(x) quantile(x, probs=c(0, 0.25, 0.5, 0.75, 1.0), na.rm=TRUE), na.rm=T) |> 
-  as_tibble() |> 
-  select(-1) |> #drop the index
-  rename("Q0"="NDVI","Q25"="NDVI.1","Q50"="NDVI.2","Q75"="NDVI.3","Q100"="NDVI.4") |> 
-  bind_cols(name=protected_areas$name)
+# Extract NDVI values with simpler approach
+protected_areas_monthly_delta_ndvi <- tryCatch({
+  # Use exact function to avoid quantile issues
+  ext_result <- extract(monthly_delta_ndvi.tif, protected_areas, 
+                        fun = function(x) {
+                          if(length(x) == 0 || all(is.na(x))) {
+                            return(c(NA, NA, NA, NA, NA))
+                          }
+                          quantile(x, probs = c(0, 0.25, 0.5, 0.75, 1.0), na.rm = TRUE)
+                        })
+  
+  ext_result |>
+    as_tibble() |>
+    select(-ID) |> #drop the ID column
+    setNames(c("Q0", "Q25", "Q50", "Q75", "Q100")) |>
+    bind_cols(name = protected_areas$name)
+}, error = function(e) {
+  message("Error in extract: ", e$message)
+  # Return empty data frame with expected structure
+  data.frame(
+    Q0 = numeric(0),
+    Q25 = numeric(0),
+    Q50 = numeric(0),
+    Q75 = numeric(0),
+    Q100 = numeric(0),
+    name = character(0)
+  )
+})
 
 ```
 

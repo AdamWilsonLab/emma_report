@@ -219,6 +219,18 @@ get_most_recent_ndvi_date <- function(most_recent_ndvi_file){
     # Create delta NDVI raster
 
 get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.tif) {
+  
+  # Validate inputs
+  if(!inherits(most_recent_ndvi.tif, "SpatRaster")) {
+    stop("most_recent_ndvi.tif is not a SpatRaster object")
+  }
+  if(!inherits(monthly_mean_ndvi.tif, "SpatRaster")) {
+    stop("monthly_mean_ndvi.tif is not a SpatRaster object")
+  }
+  
+  message(sprintf("most_recent_ndvi.tif: %d layers", nlyr(most_recent_ndvi.tif)))
+  message(sprintf("monthly_mean_ndvi.tif: %d layers", nlyr(monthly_mean_ndvi.tif)))
+  
   monthly_delta_ndvi.tif <- (most_recent_ndvi.tif - monthly_mean_ndvi.tif)
 
     if(crs(most_recent_ndvi.tif,proj=TRUE) != crs(monthly_mean_ndvi.tif,proj=TRUE)){
@@ -250,6 +262,12 @@ get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.ti
        crs(monthly_delta_ndvi.tif, proj = TRUE)){
       stop("NDVI layers have different projections")
     }
+    
+    # Validate output
+    if(!inherits(monthly_delta_ndvi.tif, "SpatRaster")) {
+      stop("monthly_delta_ndvi.tif is not a SpatRaster object")
+    }
+    message(sprintf("monthly_delta_ndvi.tif created with %d layer(s)", nlyr(monthly_delta_ndvi.tif)))
 
     # Write monthly delta NDVI layer
 

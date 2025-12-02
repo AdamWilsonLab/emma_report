@@ -74,7 +74,7 @@ get_monthly_mean_ndvi.tif <- function(env_files,
       template %>%
         terra::mask(mask = template,
                     maskvalue = 0,datatype="INT4S") -> template
-      plot(template)
+      #plot(template)  # Commented out - causes issues in non-interactive mode
 
           # write file
 
