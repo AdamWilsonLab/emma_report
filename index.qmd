@@ -172,11 +172,32 @@ protected_areas_monthly_delta_ndvi |>
 # Stand Age distributions
 
 ```{r, echo=F, warning=F}
-years_since_fire <- extract(years_since_fire.tif,protected_areas,fun=quantile,na.rm=T) |> 
-  as_tibble() |> 
-  select(-1) |> #drop the index
-  rename("Q0"="lyr.1","Q25"="lyr.1.1","Q50"="lyr.1.2","Q75"="lyr.1.3","Q100"="lyr.1.4") |> 
-  bind_cols(name=protected_areas$name)
+years_since_fire <- tryCatch({
+  ext_result <- extract(years_since_fire.tif, protected_areas, 
+                        fun = function(x) {
+                          if(length(x) == 0 || all(is.na(x))) {
+                            return(c(NA, NA, NA, NA, NA))
+                          }
+                          quantile(x, probs = c(0, 0.25, 0.5, 0.75, 1.0), na.rm = TRUE)
+                        })
+  
+  ext_result |>
+    as_tibble() |>
+    select(-ID) |> #drop the ID column
+    setNames(c("Q0", "Q25", "Q50", "Q75", "Q100")) |>
+    bind_cols(name = protected_areas$name)
+}, error = function(e) {
+  message("Error in extract: ", e$message)
+  # Return empty data frame with expected structure
+  data.frame(
+    Q0 = numeric(0),
+    Q25 = numeric(0),
+    Q50 = numeric(0),
+    Q75 = numeric(0),
+    Q100 = numeric(0),
+    name = character(0)
+  )
+})
 
 ```
 
