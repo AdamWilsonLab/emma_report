@@ -36,10 +36,10 @@ tar_load(park_fire_history)
 tar_load(temp_directory)
 # tar_load(years_since_fire.tif)  # Testing - temporarily disabled
 tar_load(fires_wgs)
-tar_load(most_recent_ndvi.tif)
+# tar_load(most_recent_ndvi.tif)  # Testing - temporarily disabled
 tar_load(most_recent_ndvi_date)
-tar_load(monthly_mean_ndvi.tif)
-tar_load(monthly_delta_ndvi.tif)
+# tar_load(monthly_mean_ndvi.tif)  # Testing - temporarily disabled
+# tar_load(monthly_delta_ndvi.tif)  # Testing - temporarily disabled
 tar_load(weather_data)
 tar_load(report_qmd_dir) # forces park qmds to run first
   
