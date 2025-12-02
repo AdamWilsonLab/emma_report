@@ -234,12 +234,8 @@ get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.ti
   # Perform subtraction
   monthly_delta_ndvi.tif <- (most_recent_ndvi.tif - monthly_mean_ndvi.tif)
   
-  # Clean metadata by creating a fresh raster object
-  # This removes any corrupted metadata that causes "branches not in metadata" errors
-  monthly_delta_ndvi.tif <- rast(monthly_delta_ndvi.tif)
+  # Set clean layer names to avoid metadata issues
   names(monthly_delta_ndvi.tif) <- "delta_ndvi"
-  
-  message("Metadata cleaned")
 
     if(crs(most_recent_ndvi.tif,proj=TRUE) != crs(monthly_mean_ndvi.tif,proj=TRUE)){
 
