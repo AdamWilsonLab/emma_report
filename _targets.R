@@ -85,7 +85,7 @@ list(
   tar_age(
         name    = env_files,
         command = get_env_files(),
-        age     = as.difftime(1, units = "days")   # 하루마다 목록 새로 가져오기
+        age     = as.difftime(0, units = "hours")   # Force update every time - change to 1 day later if needed
       ),
   #   tar_target(
   #   env_files,
@@ -130,12 +130,13 @@ tar_age(stations,
     tar_age(
     name    = most_recent_ndvi_file,
     command = get_most_recent_ndvi_file(env_files),
-    age     = as.difftime(7, units = "days"),
+    age     = as.difftime(0, units = "hours"),  # Force update every time - change to 7 days later if needed
   ),
   
   tar_age(name = most_recent_ndvi_date,
            command = get_most_recent_ndvi_date(most_recent_ndvi_file),
-           age = as.difftime(7, units = "days") #weekly updates
+           age = as.difftime(0, units = "hours") # Force update every time
+           #age = as.difftime(7, units = "days") #weekly updates (uncomment later)
            #age = as.difftime(1, units = "days") #daily updates
            # age = as.difftime(0, units = "hours") #will update whenever run
            ),

@@ -58,6 +58,11 @@ source("https://raw.githubusercontent.com/AdamWilsonLab/emma_envdata/main/R/robu
   # Get list of available env data files
 get_env_files <- function(repo="AdamWilsonLab/emma_envdata"){
     env_files <- pb_list(repo)
+    
+    # Debug output
+    ndvi_count <- sum(env_files$tag == "clean_ndvi_modis" & grepl("\\.tif$", env_files$file_name))
+    message(sprintf("Found %d NDVI .tif files in repo %s", ndvi_count, repo))
+    
     return(env_files)
 }
 
@@ -140,11 +145,21 @@ years_since_fire.tif <- terra::mask(years_since_fire.tif, remnants)
 get_most_recent_ndvi_file <- function(env_files){
     env_files %>%
       filter(tag == "clean_ndvi_modis") %>%
-      filter(grepl(pattern = ".tif",x = file_name)) %>%
-      mutate(file_date = gsub(pattern = ".tif",replacement = "",x = file_name)) %>%
+      filter(grepl(pattern = "\\.tif$",x = file_name)) %>%  # Fixed: escaped dot and anchor to end
+      mutate(file_date = gsub(pattern = "\\.tif$",replacement = "",x = file_name)) %>%  # Fixed: escaped dot
       mutate(file_date = gsub(pattern = "_",replacement = "-",x = file_date)) %>%
-      slice(which.max(as_date(file_date))) -> most_recent_ndvi_file
+      arrange(desc(as_date(file_date))) %>%  # Changed: use arrange for clarity
+      slice(1) -> most_recent_ndvi_file  # Changed: get first row after sorting
 
+  # Debug output
+  if(nrow(most_recent_ndvi_file) == 0){
+    warning("No NDVI files found with tag 'clean_ndvi_modis'")
+  } else {
+    message(sprintf("Found most recent NDVI file: %s (date: %s)", 
+                    most_recent_ndvi_file$file_name, 
+                    most_recent_ndvi_file$file_date))
+  }
+  
   return(most_recent_ndvi_file)
 }
 

@@ -101,7 +101,7 @@ Click on a park below to view park specific reports.
 
 ```{r, echo=F, warning=F}
 
-protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi.tif,protected_areas,fun=quantile,na.rm=T) |> 
+protected_areas_monthly_delta_ndvi <- extract(monthly_delta_ndvi.tif, protected_areas, fun=function(x) quantile(x, probs=c(0, 0.25, 0.5, 0.75, 1.0), na.rm=TRUE), na.rm=T) |> 
   as_tibble() |> 
   select(-1) |> #drop the index
   rename("Q0"="NDVI","Q25"="NDVI.1","Q50"="NDVI.2","Q75"="NDVI.3","Q100"="NDVI.4") |> 
