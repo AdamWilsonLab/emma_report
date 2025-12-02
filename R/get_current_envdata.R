@@ -231,7 +231,17 @@ get_monthly_delta_ndvi.tif <- function(most_recent_ndvi.tif,monthly_mean_ndvi.ti
   message(sprintf("most_recent_ndvi.tif: %d layers", nlyr(most_recent_ndvi.tif)))
   message(sprintf("monthly_mean_ndvi.tif: %d layers", nlyr(monthly_mean_ndvi.tif)))
   
+  # Perform subtraction
   monthly_delta_ndvi.tif <- (most_recent_ndvi.tif - monthly_mean_ndvi.tif)
+  
+  # Clean metadata by writing to memory and reading back
+  # This completely removes any corrupted metadata that causes "branches not in metadata" errors
+  temp_file <- tempfile(fileext = ".tif")
+  writeRaster(monthly_delta_ndvi.tif, temp_file, overwrite = TRUE, names = "delta_ndvi")
+  monthly_delta_ndvi.tif <- rast(temp_file)
+  unlink(temp_file)
+  
+  message("Metadata cleaned by write/read cycle")
 
     if(crs(most_recent_ndvi.tif,proj=TRUE) != crs(monthly_mean_ndvi.tif,proj=TRUE)){
 

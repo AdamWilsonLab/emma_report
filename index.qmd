@@ -39,21 +39,7 @@ tar_load(fires_wgs)
 tar_load(most_recent_ndvi.tif)
 tar_load(most_recent_ndvi_date)
 tar_load(monthly_mean_ndvi.tif)
-
-# Load monthly_delta_ndvi.tif with error handling
-tryCatch({
-  tar_load(monthly_delta_ndvi.tif)
-  # Verify it loaded correctly
-  if(!inherits(monthly_delta_ndvi.tif, "SpatRaster")) {
-    stop("monthly_delta_ndvi.tif is not a SpatRaster object")
-  }
-  # Check number of layers
-  message(sprintf("monthly_delta_ndvi.tif has %d layer(s)", nlyr(monthly_delta_ndvi.tif)))
-}, error = function(e) {
-  message("Error loading monthly_delta_ndvi.tif: ", e$message)
-  stop(e)
-})
-
+tar_load(monthly_delta_ndvi.tif)
 tar_load(weather_data)
 tar_load(report_qmd_dir) # forces park qmds to run first
   
