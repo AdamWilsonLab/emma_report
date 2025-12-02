@@ -34,12 +34,44 @@ library(forcats)
 tar_load(protected_areas)
 tar_load(park_fire_history)
 tar_load(temp_directory)
-tar_load(years_since_fire.tif)
+
+# Load raster targets with error handling to identify which one causes the metadata error
+tryCatch({
+  tar_load(years_since_fire.tif)
+  message("✓ years_since_fire.tif loaded")
+}, error = function(e) {
+  message("✗ Error loading years_since_fire.tif: ", e$message)
+  stop(e)
+})
+
 tar_load(fires_wgs)
-tar_load(most_recent_ndvi.tif)
+
+tryCatch({
+  tar_load(most_recent_ndvi.tif)
+  message("✓ most_recent_ndvi.tif loaded")
+}, error = function(e) {
+  message("✗ Error loading most_recent_ndvi.tif: ", e$message)
+  stop(e)
+})
+
 tar_load(most_recent_ndvi_date)
-tar_load(monthly_mean_ndvi.tif)
-tar_load(monthly_delta_ndvi.tif)
+
+tryCatch({
+  tar_load(monthly_mean_ndvi.tif)
+  message("✓ monthly_mean_ndvi.tif loaded")
+}, error = function(e) {
+  message("✗ Error loading monthly_mean_ndvi.tif: ", e$message)
+  stop(e)
+})
+
+tryCatch({
+  tar_load(monthly_delta_ndvi.tif)
+  message("✓ monthly_delta_ndvi.tif loaded")
+}, error = function(e) {
+  message("✗ Error loading monthly_delta_ndvi.tif: ", e$message)
+  stop(e)
+})
+
 tar_load(weather_data)
 tar_load(report_qmd_dir) # forces park qmds to run first
   
