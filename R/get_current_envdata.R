@@ -112,6 +112,9 @@ get_years_since_fire.tif <- function(env_files, temp_directory, most_recent_fire
                  fun = function(x){
                    return( time_length(Sys.Date() - as_date(x,origin = lubridate::origin),unit = "years"))
                  })
+    
+    # Set clean layer name to avoid metadata issues
+    names(years_since_fire.tif) <- "years_since_fire"
 
   if(piggyback_push)  {robust_pb_upload(file = file.path(temp_directory,"years_since_fire.tif"),
                      repo = "AdamWilsonLab/emma_report",
@@ -187,6 +190,9 @@ get_most_recent_ndvi.tif <- function(most_recent_ndvi_file,temp_directory){
     most_recent_ndvi.tif %>%
       terra::mask(mask = most_recent_ndvi.tif,
                   maskvalue = 0) -> most_recent_ndvi.tif
+
+    # Set clean layer name to avoid metadata issues
+    names(most_recent_ndvi.tif) <- "ndvi"
 
     return(most_recent_ndvi.tif)
     }

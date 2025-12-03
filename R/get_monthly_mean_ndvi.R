@@ -76,6 +76,9 @@ get_monthly_mean_ndvi.tif <- function(env_files,
                     maskvalue = 0,datatype="INT4S") -> template
       #plot(template)  # Commented out - causes issues in non-interactive mode
 
+      # Set clean layer name to avoid metadata issues
+      names(template) <- "monthly_mean_ndvi"
+
           # write file
 
       return(template) #%>%
