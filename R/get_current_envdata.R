@@ -137,7 +137,7 @@ years_since_fire.tif <- terra::mask(years_since_fire.tif, remnants)
 
     fires_wgs <- terra::as.polygons(x = years_since_fire.tif) %>%
       st_as_sf() %>%
-      rename(Years = lyr.1) %>%
+      rename(Years = years_since_fire) %>%
       st_transform(crs = st_crs(4326))
 
     return(fires_wgs)
